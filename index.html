@@ -4,81 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMC Agreement Generator - Eye Tech Securities</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .container {
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 2rem;
         }
-        form {
-            display: flex;
-            flex-direction: column;
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        label {
-            margin-top: 10px;
+        .form-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
         }
-        input, select {
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-        #particulars-container {
-            margin-bottom: 20px;
+        .input-field {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem;
+            width: 100%;
+            margin-bottom: 1rem;
         }
         .particular-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
         }
         .particular-row input {
             flex: 1;
         }
-        button {
-            padding: 10px;
-            background-color: #007bff;
+        .btn-primary {
+            background-color: #2563eb;
             color: white;
-            border: none;
-            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #0056b3;
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        .logo-placeholder {
+            text-align: center;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
-    <h1>AMC Agreement Generator</h1>
-    <form id="amc-form">
-        <h2>Customer Details</h2>
-        <label for="customer-name">Customer Name:</label>
-        <input type="text" id="customer-name" required>
+    <div class="container">
+        <div class="logo-placeholder">
+            <img src="https://via.placeholder.com/150x50?text=Eye+Tech+Securities+Logo" alt="Eye Tech Securities Logo">
+        </div>
+        <div class="form-section">
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">AMC Agreement Generator</h1>
+            <form id="amc-form">
+                <div class="form-section">
+                    <h2>Customer Details</h2>
+                    <label for="customer-name" class="block text-sm font-medium text-gray-700">Customer Name</label>
+                    <input type="text" id="customer-name" class="input-field" required>
 
-        <label for="customer-address">Customer Address:</label>
-        <input type="text" id="customer-address" required>
+                    <label for="customer-address" class="block text-sm font-medium text-gray-700">Customer Address</label>
+                    <input type="text" id="customer-address" class="input-field" required>
 
-        <label for="customer-contact">Customer Contact Number:</label>
-        <input type="text" id="customer-contact" required>
+                    <label for="customer-contact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
+                    <input type="text" id="customer-contact" class="input-field" required>
 
-        <label for="customer-email">Customer Email:</label>
-        <input type="email" id="customer-email" required>
+                    <label for="customer-email" class="block text-sm font-medium text-gray-700">Customer Email</label>
+                    <input type="email" id="customer-email" class="input-field" required>
+                </div>
 
-        <h2>Contract Details</h2>
-        <label for="contract-period">Contract Period (Years):</label>
-        <select id="contract-period" required>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
+                <div class="form-section mt-6">
+                    <h2>Contract Details</h2>
+                    <label for="contract-period" class="block text-sm font-medium text-gray-700">Contract Period (Years)</label>
+                    <select id="contract-period" class="input-field" required>
+                        <option value="1">1 Year</option>
+                        <option value="2">2 Years</option>
+                        <option value="3">3 Years</option>
+                        <option value="4">4 Years</option>
+                        <option value="5">5 Years</option>
+                    </select>
+                </div>
 
-        <h2>Particulars</h2>
-        <div id="particulars-container"></div>
-        <button type="button" onclick="addParticularRow()">Add Particular</button>
+                <div class="form-section mt-6">
+                    <h2>Particulars</h2>
+                    <div id="particulars-container"></div>
+                    <button type="button" onclick="addParticularRow()" class="btn-secondary mt-4">Add Particular</button>
+                </div>
 
-        <button type="button" onclick="generatePDF()" style="margin-top: 20px;">Generate PDF</button>
-    </form>
+                <button type="button" onclick="generatePDF()" class="btn-primary mt-6 w-full">Generate PDF</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         function addParticularRow() {
@@ -86,10 +122,10 @@
             const row = document.createElement('div');
             row.className = 'particular-row';
             row.innerHTML = `
-                <input type="text" placeholder="Particular (e.g., CCTV)" required>
-                <input type="number" placeholder="Maintenance Visits" min="0" required>
-                <input type="number" placeholder="Breakdown Visits" min="0" required>
-                <button type="button" onclick="this.parentNode.remove()">Remove</button>
+                <input type="text" placeholder="Particular (e.g., CCTV, Biometrics)" class="input-field" required>
+                <input type="number" placeholder="Maintenance Visits" min="0" class="input-field" required>
+                <input type="number" placeholder="Breakdown Visits" min="0" class="input-field" required>
+                <button type="button" onclick="this.parentNode.remove()" class="btn-secondary">Remove</button>
             `;
             container.appendChild(row);
         }
@@ -98,21 +134,58 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Collect data
-            const customerName = document.getElementById('customer-name').value;
-            const customerAddress = document.getElementById('customer-address').value;
-            const customerContact = document.getElementById('customer-contact').value;
-            const customerEmail = document.getElementById('customer-email').value;
-            const contractPeriod = parseInt(document.getElementById('contract-period').value);
+            // Header
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(31, 41, 55); // Gray-800
+            doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
+            doc.setFontSize(16);
+            doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
+            doc.setDrawColor(37, 99, 235); // Blue-600
+            doc.setLineWidth(0.5);
+            doc.line(20, 35, 190, 35); // Horizontal line
 
-            // Generate AMC Number and Date
+            // AMC Number and Date
             const today = new Date();
             const year = today.getFullYear();
             const randomSuffix = Math.floor(Math.random() * 900) + 100;
             const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
             const amcDate = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-            // Particulars
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(55, 65, 81); // Gray-700
+            doc.text(`AMC Number: ${amcNumber}`, 20, 50);
+            doc.text(`AMC Date: ${amcDate}`, 20, 58);
+
+            // Customer Details
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Customer Details', 20, 75);
+            doc.setLineWidth(0.2);
+            doc.line(20, 77, 60, 77); // Underline
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            const customerName = document.getElementById('customer-name').value;
+            const customerAddress = document.getElementById('customer-address').value;
+            const customerContact = document.getElementById('customer-contact').value;
+            const customerEmail = document.getElementById('customer-email').value;
+            doc.text(`Name: ${customerName}`, 20, 85);
+            doc.text(`Address: ${customerAddress}`, 20, 93);
+            doc.text(`Contact: ${customerContact}`, 20, 101);
+            doc.text(`Email: ${customerEmail}`, 20, 109);
+
+            // Contract Period
+            const contractPeriod = parseInt(document.getElementById('contract-period').value);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Contract Details', 20, 125);
+            doc.line(20, 127, 60, 127); // Underline
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 135);
+
+            // Particulars Table
             const particulars = [];
             const rows = document.querySelectorAll('.particular-row');
             rows.forEach(row => {
@@ -126,53 +199,33 @@
                 }
             });
 
-            // Header
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
-            doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
-
-            // AMC Number and Date
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`AMC Number: ${amcNumber}`, 20, 50);
-            doc.text(`AMC Date: ${amcDate}`, 20, 60);
-
-            // Customer Details
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Customer Details:', 20, 80);
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Name: ${customerName}`, 20, 90);
-            doc.text(`Address: ${customerAddress}`, 20, 100);
-            doc.text(`Contact: ${customerContact}`, 20, 110);
-            doc.text(`Email: ${customerEmail}`, 20, 120);
-
-            // Contract Period
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 140);
-
-            // Particulars Table
             if (particulars.length > 0) {
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Particulars:', 20, 160);
+                doc.text('Particulars', 20, 150);
+                doc.line(20, 152, 50, 152); // Underline
                 doc.autoTable({
-                    startY: 170,
+                    startY: 160,
                     head: [['Item', 'Maintenance Visits', 'Breakdown Visits']],
                     body: particulars,
-                    theme: 'striped'
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 4 },
+                    headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255] },
+                    columnStyles: {
+                        0: { cellWidth: 80 },
+                        1: { cellWidth: 50 },
+                        2: { cellWidth: 50 }
+                    }
                 });
             }
 
             // Terms and Conditions
-            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 160;
+            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 150;
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Terms and Conditions:', 20, startY);
-            doc.setFontSize(12);
+            doc.text('Terms and Conditions', 20, startY);
+            doc.line(20, startY + 2, 70, startY + 2); // Underline
+            doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
             const terms = [
                 `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
@@ -192,13 +245,19 @@
                 '15. Connector replacement (Rs.500/camera) included in first visit.'
             ];
             terms.forEach((term, index) => {
-                doc.text(term, 20, startY + 10 + (index * 10));
+                doc.text(term, 20, startY + 10 + (index * 8));
             });
 
             // Signatures
-            const sigY = startY + 10 + (terms.length * 10) + 20;
+            const sigY = startY + 10 + (terms.length * 8) + 20;
+            doc.setFontSize(12);
             doc.text('Customer Signature: _______________________', 20, sigY);
             doc.text('Eye Tech Securities Signature: _______________________', 110, sigY);
+
+            // Footer
+            doc.setFontSize(10);
+            doc.setTextColor(107, 114, 128); // Gray-500
+            doc.text('Eye Tech Securities | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 280, { align: 'center' });
 
             // Save PDF
             doc.save(`AMC_Agreement_${amcNumber}.pdf`);
