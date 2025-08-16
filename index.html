@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMC Agreement Generator - Eye Tech Securities</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input, select {
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        #particulars-container {
+            margin-bottom: 20px;
+        }
+        .particular-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .particular-row input {
+            flex: 1;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>AMC Agreement Generator</h1>
+    <form id="amc-form">
+        <h2>Customer Details</h2>
+        <label for="customer-name">Customer Name:</label>
+        <input type="text" id="customer-name" required>
+
+        <label for="customer-address">Customer Address:</label>
+        <input type="text" id="customer-address" required>
+
+        <label for="customer-contact">Customer Contact Number:</label>
+        <input type="text" id="customer-contact" required>
+
+        <label for="customer-email">Customer Email:</label>
+        <input type="email" id="customer-email" required>
+
+        <h2>Contract Details</h2>
+        <label for="contract-period">Contract Period (Years):</label>
+        <select id="contract-period" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+
+        <h2>Particulars</h2>
+        <div id="particulars-container"></div>
+        <button type="button" onclick="addParticularRow()">Add Particular</button>
+
+        <button type="button" onclick="generatePDF()" style="margin-top: 20px;">Generate PDF</button>
+    </form>
+
+    <script>
+        function addParticularRow() {
+            const container = document.getElementById('particulars-container');
+            const row = document.createElement('div');
+            row.className = 'particular-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Particular (e.g., CCTV)" required>
+                <input type="number" placeholder="Maintenance Visits" min="0" required>
+                <input type="number" placeholder="Breakdown Visits" min="0" required>
+                <button type="button" onclick="this.parentNode.remove()">Remove</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Collect data
+            const customerName = document.getElementById('customer-name').value;
+            const customerAddress = document.getElementById('customer-address').value;
+            const customerContact = document.getElementById('customer-contact').value;
+            const customerEmail = document.getElementById('customer-email').value;
+            const contractPeriod = parseInt(document.getElementById('contract-period').value);
+
+            // Generate AMC Number and Date
+            const today = new Date();
+            const year = today.getFullYear();
+            const randomSuffix = Math.floor(Math.random() * 900) + 100;
+            const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
+            const amcDate = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+            // Particulars
+            const particulars = [];
+            const rows = document.querySelectorAll('.particular-row');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length === 3) {
+                    particulars.push([
+                        inputs[0].value,
+                        inputs[1].value,
+                        inputs[2].value
+                    ]);
+                }
+            });
+
+            // Header
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
+            doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
+
+            // AMC Number and Date
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`AMC Number: ${amcNumber}`, 20, 50);
+            doc.text(`AMC Date: ${amcDate}`, 20, 60);
+
+            // Customer Details
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Customer Details:', 20, 80);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Name: ${customerName}`, 20, 90);
+            doc.text(`Address: ${customerAddress}`, 20, 100);
+            doc.text(`Contact: ${customerContact}`, 20, 110);
+            doc.text(`Email: ${customerEmail}`, 20, 120);
+
+            // Contract Period
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 140);
+
+            // Particulars Table
+            if (particulars.length > 0) {
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Particulars:', 20, 160);
+                doc.autoTable({
+                    startY: 170,
+                    head: [['Item', 'Maintenance Visits', 'Breakdown Visits']],
+                    body: particulars,
+                    theme: 'striped'
+                });
+            }
+
+            // Terms and Conditions
+            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 160;
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Terms and Conditions:', 20, startY);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            const terms = [
+                `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
+                '2. Contract does not cover damages due to natural disasters, misuse, etc.',
+                '3. Offer valid for 30 days from issue date.',
+                '4. Equipment must be in working condition; customer to bear initial repair cost.',
+                '5. Customer must provide ladder, water, power, and civil support.',
+                '6. Missing/stolen items are customer’s liability.',
+                '7. Customer must allow access during maintenance. No refund if missed.',
+                '8. Breakdown visits only during working hours (Mon–Sat).',
+                '9. Contract is non-transferable and non-terminable.',
+                '10. Payment due within 30 days, else 2% monthly penalty applies.',
+                '11. Maintenance visits include cleaning, adjustments, checks.',
+                '12. Only registered complaints are addressed in breakdown visits.',
+                '13. Warranty covered items only will be processed.',
+                '14. Material replacements are chargeable unless under warranty.',
+                '15. Connector replacement (Rs.500/camera) included in first visit.'
+            ];
+            terms.forEach((term, index) => {
+                doc.text(term, 20, startY + 10 + (index * 10));
+            });
+
+            // Signatures
+            const sigY = startY + 10 + (terms.length * 10) + 20;
+            doc.text('Customer Signature: _______________________', 20, sigY);
+            doc.text('Eye Tech Securities Signature: _______________________', 110, sigY);
+
+            // Save PDF
+            doc.save(`AMC_Agreement_${amcNumber}.pdf`);
+        }
+
+        // Add one particular row by default
+        addParticularRow();
+    </script>
+</body>
+</html>
