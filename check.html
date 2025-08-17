@@ -450,15 +450,17 @@
 
                     const leftSignatureX = 55;
                     const rightSignatureX = 135;
-                    const signatureBoxY = signatureStartY + 15;
+                    const signatureBoxY = signatureStartY + 35;
 
                     doc.setFontSize(11);
                     doc.setFont('helvetica', 'normal');
                     doc.text('Customer', leftSignatureX, signatureBoxY, { align: 'center' });
+                    doc.text('Service Provider', rightSignatureX, signatureBoxY, { align: 'center' });
+
                     const imgWidth = 40;
                     const imgHeight = 20;
                     const imgX = rightSignatureX - (imgWidth / 2);
-                    const imgY = signatureBoxY - 25; // Position above the signature line
+                    const imgY = signatureBoxY + 5; // Position below "Service Provider" text but above signature line
                     
                     if (signatureImageData) {
                         try {
@@ -468,7 +470,7 @@
                         }
                     }
 
-                    const lineY = signatureBoxY + 15;
+                    const lineY = signatureBoxY + 30;
                     doc.setDrawColor(0, 0, 0);
                     doc.setLineWidth(0.3);
                     doc.line(leftSignatureX - 25, lineY, leftSignatureX + 25, lineY);
