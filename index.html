@@ -4,8 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMC Agreement Generator - Eye Tech Securities</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <!-- Updated to more reliable CDN sources with fallbacks -->
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable@3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        if (!window.jspdf) {
+            const script1 = document.createElement('script');
+            script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            document.head.appendChild(script1);
+            
+            script1.onload = function() {
+                const script2 = document.createElement('script');
+                script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js';
+                document.head.appendChild(script2);
+            };
+        }
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
@@ -427,12 +441,15 @@
             input.addEventListener('input', updateTotalAmount);
         });
 
-        // Verify script loading
         window.onload = function() {
-            if (!window.jspdf || !window.jspdf.jsPDF.prototype.autoTable) {
-                document.getElementById('error-message').textContent = 'Required libraries (jsPDF or autoTable) failed to load. Please check your internet connection or try a different browser.';
-                document.getElementById('error-message').style.display = 'block';
-            }
+            setTimeout(function() {
+                if (!window.jspdf || !window.jspdf.jsPDF) {
+                    document.getElementById('error-message').textContent = 'Required libraries (jsPDF or autoTable) failed to load. Please check your internet connection or try a different browser.';
+                    document.getElementById('error-message').style.display = 'block';
+                } else {
+                    document.getElementById('error-message').style.display = 'none';
+                }
+            }, 2000); // Wait 2 seconds for libraries to load
         };
     </script>
 </body>
