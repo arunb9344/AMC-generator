@@ -185,7 +185,7 @@
 
                 // AMC Number and Date
                 const today = new Date(2025, 7, 17); // August 17, 2025
-                today.setHours(13, 18, 0, 0); // Set to 01:18 PM IST
+                today.setHours(13, 26, 0, 0); // Set to 01:26 PM IST
                 const year = today.getFullYear();
                 const randomSuffix = Math.floor(Math.random() * 900) + 100;
                 const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
@@ -284,43 +284,43 @@
                 }
 
                 // Terms and Conditions
-                let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : gstY + 35;
-                doc.setFontSize(14);
+                let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : gstY + 35; // Increased spacing to avoid overlap
+                doc.setFontSize(10); // Reduced font size for better fit
                 doc.setFont('helvetica', 'bold');
                 doc.text('Terms and Conditions', 20, startY);
                 doc.line(20, startY + 2, 70, startY + 2);
-                doc.setFontSize(10); // Reduced to 10pt to fit more content
+                doc.setFontSize(9); // Further reduced to ensure 2-page limit
                 doc.setFont('helvetica', 'normal');
                 const terms = [
                     `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
                     '2. Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or any act of God.',
                     '3. Offer valid for 30 days from issue date.',
-                    '4. Equipment must be in working condition at the time of contract signing; customer to bear initial repair cost if equipment is faulty.',
-                    '5. Customer must provide ladder, water, power supply, and civil support as required for maintenance work.',
-                    '6. Missing/stolen items during the contract period are customer\'s liability and not covered under AMC.',
-                    '7. Customer must allow technician access during scheduled maintenance visits. No refund will be provided for missed appointments due to customer unavailability.',
-                    '8. Breakdown visits are only during working hours (Monday to Saturday, 9 AM to 6 PM). Emergency visits may be charged separately.',
-                    '9. Contract is non-transferable and non-terminable before the completion of the contract period.',
-                    '10. Payment is due within 30 days of invoice date, failing which 2% monthly penalty will be applicable on the outstanding amount.',
-                    '11. Maintenance visits include cleaning, adjustments, calibration, software updates, and general health checks of the equipment.',
-                    '12. Only registered complaints through proper channels will be addressed during breakdown visits.',
-                    '13. Only warranty-covered items will be processed for free replacement. Out-of-warranty items will be chargeable.',
-                    '14. Material replacements, spare parts, and consumables are chargeable unless specifically covered under manufacturer warranty.',
-                    '15. Connector replacement charges (Rs. 500 per camera) are included in the first maintenance visit only.',
-                    '16. Any modification or tampering of equipment by unauthorized personnel will void the AMC contract.',
-                    '17. Service visits will be scheduled with 24-48 hours advance notice to the customer.',
-                    '18. Customer is responsible for data backup before any maintenance work. Eye Tech Securities is not liable for any data loss.',
-                    '19. Any additional work beyond the scope of AMC will be charged separately as per prevailing rates.',
-                    '20. Disputes, if any, will be subject to the jurisdiction of local courts only.',
-                    '21. This contract supersedes all previous agreements and can only be modified in writing with mutual consent.',
-                    '22. Force majeure conditions (strikes, lockouts, natural disasters, government restrictions) may suspend service obligations temporarily.',
-                    '23. Scheduled maintenance visits are non-transferable to alternative products and shall not be carried forward to subsequent contract years.',
-                    '24. An additional 18% GST shall be applicable on the total contract amount as per prevailing tax regulations.'
+                    '4. Equipment must be in working condition at contract signing; customer to bear initial repair cost if faulty.',
+                    '5. Customer must provide ladder, water, power supply, and civil support for maintenance.',
+                    '6. Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
+                    '7. Technician access is required during scheduled visits; no refund for missed appointments due to unavailability.',
+                    '8. Breakdown visits are during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
+                    '9. Contract is non-transferable and non-terminable before completion.',
+                    '10. Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
+                    '11. Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
+                    '12. Only registered complaints via proper channels are addressed during breakdown visits.',
+                    '13. Warranty-covered items are replaced free; out-of-warranty items are chargeable.',
+                    '14. Material replacements, spare parts, and consumables are chargeable unless under warranty.',
+                    '15. Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
+                    '16. Unauthorized equipment modification voids the AMC contract.',
+                    '17. Service visits scheduled with 24-48 hours notice to the customer.',
+                    '18. Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
+                    '19. Additional work beyond AMC scope is chargeable per prevailing rates.',
+                    '20. Disputes subject to local court jurisdiction.',
+                    '21. This contract supersedes prior agreements; modifications require mutual written consent.',
+                    '22. Force majeure conditions may temporarily suspend service obligations.',
+                    '23. Maintenance visits are non-transferable and not carried forward.',
+                    '24. 18% GST applies on the total contract amount per tax regulations.'
                 ];
                 let currentY = startY + 10;
                 terms.forEach((term, index) => {
                     const lines = doc.splitTextToSize(term, 170);
-                    if (currentY + lines.length * 7 > 280 - 50) {
+                    if (currentY + lines.length * 6 > 280 - 50) { // Adjusted to 6mm spacing for 2-page fit
                         doc.addPage();
                         currentY = 50;
                         // Add header to new page
@@ -339,7 +339,7 @@
                         doc.line(20, 50, 190, 50);
                     }
                     doc.text(lines, 20, currentY);
-                    currentY += lines.length * 7;
+                    currentY += lines.length * 6; // Reduced spacing to fit
                 });
 
                 // Signatures
@@ -365,8 +365,8 @@
                 doc.text('Customer', 20, currentY);
                 doc.text('Service Provider', 120, currentY);
                 currentY += 10;
-                doc.text('"Space for Signature"', 20, currentY);
-                doc.text('"Space for Signature"', 120, currentY);
+                doc.line(20, currentY, 70, currentY); // Signature line
+                doc.line(120, currentY, 170, currentY); // Signature line
                 currentY += 15;
                 doc.text(`${contactPerson || '_______________________'}`, 20, currentY);
                 doc.text('Authorized Signatory', 120, currentY);
@@ -374,8 +374,9 @@
                 doc.text(`${customerName || '_______________________'}`, 20, currentY);
                 doc.text('Eye Tech Securities', 120, currentY);
                 currentY += 10;
-                doc.text(`${amcDate.split(', ')[1]}`, 20, currentY);
-                doc.text(`${amcDate.split(', ')[1]}`, 120, currentY);
+                const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/');
+                doc.text(dateStr, 20, currentY);
+                doc.text(dateStr, 120, currentY);
 
                 // Footer
                 doc.setFontSize(9);
