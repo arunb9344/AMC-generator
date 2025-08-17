@@ -452,14 +452,14 @@
 
                     checklistItems.forEach(item => {
                         const checkbox = document.getElementById(item.id);
-                        const status = checkbox && checkbox.checked ? '\u2713' : '\u2717'; // ✓ and ✗
+                        const status = checkbox && checkbox.checked ? 'Pass' : 'Fail'; // Changed from Unicode symbols to Pass/Fail text for better PDF compatibility
                         const statusColor = checkbox && checkbox.checked ? [34, 197, 94] : [239, 68, 68]; // Green and Red
                         
                         doc.setTextColor(55, 65, 81);
                         doc.text(`${item.label}:`, 25, currentY);
                         doc.setTextColor(...statusColor);
                         doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(16);
+                        doc.setFontSize(12); // Reduced font size back to 12 for Pass/Fail text
                         doc.text(status, 120, currentY);
                         doc.setFont('helvetica', 'normal');
                         doc.setFontSize(12);
