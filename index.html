@@ -164,10 +164,11 @@
             doc.line(20, 35, 190, 35);
             doc.setFontSize(10);
             doc.setTextColor(107, 114, 128); // Gray-500
-            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
+            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
+            doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
 
             // AMC Number and Date
-            const today = new Date();
+            const today = new Date(2025, 7, 17); // August 17, 2025
             today.setHours(12, 48, 0, 0); // Set to 12:48 PM IST
             const year = today.getFullYear();
             const randomSuffix = Math.floor(Math.random() * 900) + 100;
@@ -192,22 +193,26 @@
             const customerAddress = document.getElementById('customer-address').value;
             const customerContact = document.getElementById('customer-contact').value;
             const customerEmail = document.getElementById('customer-email').value;
-            const customerGST = document.getElementById('customer-gst').value || 'Not Provided';
+            const customerGST = document.getElementById('customer-gst').value;
             doc.text(`Name: ${customerName}`, 20, 95);
             doc.text(`Address: ${customerAddress}`, 20, 103);
             doc.text(`Contact: ${customerContact}`, 20, 111);
             doc.text(`Email: ${customerEmail}`, 20, 119);
-            doc.text(`GST: ${customerGST}`, 20, 127);
+            let gstY = 127;
+            if (customerGST) {
+                doc.text(`GST: ${customerGST}`, 20, gstY);
+                gstY += 8;
+            }
 
             // Contract Period
             const contractPeriod = parseInt(document.getElementById('contract-period').value);
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Contract Details', 20, 145);
-            doc.line(20, 147, 60, 147);
+            doc.text('Contract Details', 20, gstY + 10);
+            doc.line(20, gstY + 12, 60, gstY + 12);
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 155);
+            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, gstY + 20);
 
             // Particulars Table
             const particulars = [];
@@ -230,10 +235,10 @@
             if (particulars.length > 0) {
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Particulars', 20, 170);
-                doc.line(20, 172, 50, 172);
+                doc.text('Particulars', 20, gstY + 35);
+                doc.line(20, gstY + 37, 50, gstY + 37);
                 doc.autoTable({
-                    startY: 180,
+                    startY: gstY + 45,
                     head: [['Item', 'Maintenance Visits', 'Breakdown Visits', 'Amount (Rs.)']],
                     body: [...particulars, ['', '', 'Total:', `Rs.${totalAmount.toFixed(2)}`]],
                     theme: 'grid',
@@ -255,12 +260,12 @@
             }
 
             // Terms and Conditions
-            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 170;
+            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : gstY + 35;
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.text('Terms and Conditions', 20, startY);
             doc.line(20, startY + 2, 70, startY + 2);
-            doc.setFontSize(11);
+            doc.setFontSize(10); // Reduced to 10pt to fit more content
             doc.setFont('helvetica', 'normal');
             const terms = [
                 `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
@@ -291,7 +296,7 @@
             let currentY = startY + 10;
             terms.forEach((term, index) => {
                 const lines = doc.splitTextToSize(term, 170);
-                if (currentY + lines.length * 8 > 280 - 50) { // 50mm margin from bottom for signatures
+                if (currentY + lines.length * 7 > 280 - 50) { // Adjusted spacing to 7mm per line to fit
                     doc.addPage();
                     currentY = 50;
                     // Add header to new page
@@ -306,13 +311,14 @@
                     doc.line(20, 35, 190, 35);
                     doc.setFontSize(10);
                     doc.setTextColor(107, 114, 128);
-                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
+                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
+                    doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
                 }
                 doc.text(lines, 20, currentY);
-                currentY += lines.length * 8;
+                currentY += lines.length * 7; // Reduced line spacing to fit in 2 pages
             });
 
-            // Signatures (reformatted for professionalism)
+            // Signatures (customized as per PDF)
             if (currentY + 50 > 280 - 20) {
                 doc.addPage();
                 currentY = 50;
@@ -328,25 +334,18 @@
                 doc.line(20, 35, 190, 35);
                 doc.setFontSize(10);
                 doc.setTextColor(107, 114, 128);
-                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
+                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
+                doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
             }
-            doc.setFontSize(14);
-            doc.text('Authorization', 20, currentY);
-            doc.line(20, currentY + 2, 60, currentY + 2);
-            currentY += 10;
             doc.setFontSize(12);
-            doc.text('For the Customer:', 20, currentY);
-            doc.line(20, currentY + 5, 70, currentY + 5);
-            doc.text(`Name: ${customerName || '_______________________'}`, 20, currentY + 15);
-            doc.text('Signature: _______________________', 20, currentY + 25);
-            doc.text('Date: _______________________', 20, currentY + 35);
-            doc.text('GSTIN: _______________________', 20, currentY + 45);
-            doc.text('For Eye Tech Securities:', 120, currentY);
-            doc.line(120, currentY + 5, 170, currentY + 5);
-            doc.text('Name: _______________________', 120, currentY + 15);
-            doc.text('Signature: _______________________', 120, currentY + 25);
-            doc.text('Date: _______________________', 120, currentY + 35);
-            doc.text('GSTIN: 33BCMPA5207N1ZN', 120, currentY + 45);
+            doc.text('Customer Signature', 20, currentY);
+            doc.text('Eye Tech Securities', 120, currentY);
+            currentY += 15;
+            doc.text(`Name: ${customerName || '_______________________'}`, 20, currentY);
+            doc.text('Authorized Signatory', 120, currentY);
+            currentY += 15;
+            doc.text('Date: _______________________', 20, currentY);
+            doc.text(`Date: ${amcDate.split(', ')[1]}`, 120, currentY);
 
             // Footer (adjusted to avoid overlap)
             doc.setFontSize(9); // Reduced font size to prevent overlap
