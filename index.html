@@ -68,6 +68,11 @@
             text-align: center;
             margin-bottom: 1rem;
         }
+        #total-amount {
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +114,7 @@
                     <h2>Particulars</h2>
                     <div id="particulars-container"></div>
                     <button type="button" onclick="addParticularRow()" class="btn-secondary mt-4">Add Particular</button>
+                    <div id="total-amount">Total Amount: ₹0</div>
                 </div>
 
                 <button type="button" onclick="generatePDF()" class="btn-primary mt-6 w-full">Generate PDF</button>
@@ -125,18 +131,34 @@
                 <input type="text" placeholder="Particular (e.g., CCTV, Biometrics)" class="input-field" required>
                 <input type="number" placeholder="Maintenance Visits" min="0" class="input-field" required>
                 <input type="number" placeholder="Breakdown Visits" min="0" class="input-field" required>
-                <button type="button" onclick="this.parentNode.remove()" class="btn-secondary">Remove</button>
+                <input type="number" placeholder="Amount (₹)" min="0" step="0.01" class="input-field" required>
+                <button type="button" onclick="this.parentNode.remove(); updateTotalAmount()" class="btn-secondary">Remove</button>
             `;
             container.appendChild(row);
+            row.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('input', updateTotalAmount);
+            });
+        }
+
+        function updateTotalAmount() {
+            const rows = document.querySelectorAll('.particular-row');
+            let total = 0;
+            rows.forEach(row => {
+                const amountInput = row.querySelector('input[placeholder="Amount (₹)"]');
+                if (amountInput && amountInput.value) {
+                    total += parseFloat(amountInput.value) || 0;
+                }
+            });
+            document.getElementById('total-amount').textContent = `Total Amount: ₹${total.toFixed(2)}`;
         }
 
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Header
-            doc.setFontSize(20);
+            // Header on every page
             doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
             doc.setTextColor(31, 41, 55); // Gray-800
             doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
             doc.setFontSize(16);
@@ -144,6 +166,35 @@
             doc.setDrawColor(37, 99, 235); // Blue-600
             doc.setLineWidth(0.5);
             doc.line(20, 35, 190, 35); // Horizontal line
+            doc.setFontSize(10);
+            doc.setTextColor(107, 114, 128); // Gray-500
+            doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
+
+            // Footer on every page
+            doc.setFontSize(10);
+            doc.setTextColor(107, 114, 128); // Gray-500
+            doc.addPage = function() {
+                const pageCount = doc.internal.getNumberOfPages();
+                PDFDocument.prototype.addPage.apply(this, arguments);
+                doc.setPage(pageCount + 1);
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber}`, 190, 280, { align: 'right' });
+                doc.text('Eye Tech Securities | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 280, { align: 'center' });
+                // Repeat header on new pages
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(20);
+                doc.setTextColor(31, 41, 55);
+                doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
+                doc.setFontSize(16);
+                doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
+                doc.setDrawColor(37, 99, 235);
+                doc.setLineWidth(0.5);
+                doc.line(20, 35, 190, 35);
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
+            };
 
             // AMC Number and Date
             const today = new Date();
@@ -155,46 +206,50 @@
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(55, 65, 81); // Gray-700
-            doc.text(`AMC Number: ${amcNumber}`, 20, 50);
-            doc.text(`AMC Date: ${amcDate}`, 20, 58);
+            doc.text(`AMC Number: ${amcNumber}`, 20, 55);
+            doc.text(`AMC Date: ${amcDate}`, 20, 63);
 
             // Customer Details
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Customer Details', 20, 75);
+            doc.text('Customer Details', 20, 80);
             doc.setLineWidth(0.2);
-            doc.line(20, 77, 60, 77); // Underline
+            doc.line(20, 82, 60, 82); // Underline
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             const customerName = document.getElementById('customer-name').value;
             const customerAddress = document.getElementById('customer-address').value;
             const customerContact = document.getElementById('customer-contact').value;
             const customerEmail = document.getElementById('customer-email').value;
-            doc.text(`Name: ${customerName}`, 20, 85);
-            doc.text(`Address: ${customerAddress}`, 20, 93);
-            doc.text(`Contact: ${customerContact}`, 20, 101);
-            doc.text(`Email: ${customerEmail}`, 20, 109);
+            doc.text(`Name: ${customerName}`, 20, 90);
+            doc.text(`Address: ${customerAddress}`, 20, 98);
+            doc.text(`Contact: ${customerContact}`, 20, 106);
+            doc.text(`Email: ${customerEmail}`, 20, 114);
 
             // Contract Period
             const contractPeriod = parseInt(document.getElementById('contract-period').value);
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Contract Details', 20, 125);
-            doc.line(20, 127, 60, 127); // Underline
+            doc.text('Contract Details', 20, 130);
+            doc.line(20, 132, 60, 132); // Underline
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 135);
+            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 140);
 
             // Particulars Table
             const particulars = [];
+            let totalAmount = 0;
             const rows = document.querySelectorAll('.particular-row');
             rows.forEach(row => {
                 const inputs = row.querySelectorAll('input');
-                if (inputs.length === 3) {
+                if (inputs.length === 4) {
+                    const amount = parseFloat(inputs[3].value) || 0;
+                    totalAmount += amount;
                     particulars.push([
                         inputs[0].value,
                         inputs[1].value,
-                        inputs[2].value
+                        inputs[2].value,
+                        `₹${amount.toFixed(2)}`
                     ]);
                 }
             });
@@ -202,25 +257,32 @@
             if (particulars.length > 0) {
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Particulars', 20, 150);
-                doc.line(20, 152, 50, 152); // Underline
+                doc.text('Particulars', 20, 155);
+                doc.line(20, 157, 50, 157); // Underline
                 doc.autoTable({
-                    startY: 160,
-                    head: [['Item', 'Maintenance Visits', 'Breakdown Visits']],
-                    body: particulars,
+                    startY: 165,
+                    head: [['Item', 'Maintenance Visits', 'Breakdown Visits', 'Amount (₹)']],
+                    body: [...particulars, ['', '', 'Total:', `₹${totalAmount.toFixed(2)}`]],
                     theme: 'grid',
-                    styles: { fontSize: 10, cellPadding: 4 },
-                    headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255] },
+                    styles: { fontSize: 10, cellPadding: 4, textColor: [55, 65, 81] },
+                    headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
                     columnStyles: {
-                        0: { cellWidth: 80 },
-                        1: { cellWidth: 50 },
-                        2: { cellWidth: 50 }
+                        0: { cellWidth: 60 },
+                        1: { cellWidth: 40 },
+                        2: { cellWidth: 40 },
+                        3: { cellWidth: 40 }
+                    },
+                    footStyles: { fillColor: [241, 245, 249], textColor: [31, 41, 55], fontStyle: 'bold' },
+                    didParseCell: (data) => {
+                        if (data.row.index === particulars.length && data.column.index === 2) {
+                            data.cell.text = ['Total:'];
+                        }
                     }
                 });
             }
 
             // Terms and Conditions
-            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 150;
+            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 155;
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.text('Terms and Conditions', 20, startY);
@@ -244,20 +306,25 @@
                 '14. Material replacements are chargeable unless under warranty.',
                 '15. Connector replacement (Rs.500/camera) included in first visit.'
             ];
-            terms.forEach((term, index) => {
-                doc.text(term, 20, startY + 10 + (index * 8));
+            let currentY = startY + 10;
+            terms.forEach((term) => {
+                const lines = doc.splitTextToSize(term, 170);
+                if (currentY + lines.length * 8 > 260) {
+                    doc.addPage();
+                    currentY = 50;
+                }
+                doc.text(lines, 20, currentY);
+                currentY += lines.length * 8;
             });
 
             // Signatures
-            const sigY = startY + 10 + (terms.length * 8) + 20;
+            if (currentY + 30 > 260) {
+                doc.addPage();
+                currentY = 50;
+            }
             doc.setFontSize(12);
-            doc.text('Customer Signature: _______________________', 20, sigY);
-            doc.text('Eye Tech Securities Signature: _______________________', 110, sigY);
-
-            // Footer
-            doc.setFontSize(10);
-            doc.setTextColor(107, 114, 128); // Gray-500
-            doc.text('Eye Tech Securities | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 280, { align: 'center' });
+            doc.text('Customer Signature: _______________________', 20, currentY);
+            doc.text('Eye Tech Securities Signature: _______________________', 110, currentY);
 
             // Save PDF
             doc.save(`AMC_Agreement_${amcNumber}.pdf`);
@@ -265,6 +332,11 @@
 
         // Add one particular row by default
         addParticularRow();
+
+        // Update total amount on page load
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', updateTotalAmount);
+        });
     </script>
 </body>
 </html>
