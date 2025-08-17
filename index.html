@@ -188,7 +188,7 @@
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(55, 65, 81); // Gray-700
                 const today = new Date(2025, 7, 17); // August 17, 2025
-                today.setHours(13, 48, 0, 0); // Set to 01:48 PM IST
+                today.setHours(14, 37, 0, 0); // Set to 02:37 PM IST
                 const year = today.getFullYear();
                 const randomSuffix = Math.floor(Math.random() * 900) + 100;
                 const amcNumber = `ETS-AMC-${year}${randomSuffix.toString().padStart(3, '0')}`;
@@ -302,7 +302,7 @@
                 let currentY = startY + 10;
                 terms.forEach((term, index) => {
                     const lines = doc.splitTextToSize(term, 170);
-                    if (currentY + lines.length * 5 > 260) { // Adjusted for signature at bottom
+                    if (currentY + lines.length * 5 > 240) { // Adjusted for signature at bottom
                         doc.addPage();
                         currentY = 50;
                         doc.setFont('helvetica', 'bold');
@@ -327,30 +327,31 @@
                     currentY += lines.length * 5;
                 });
 
-                // Signatures at bottom
-                currentY = 265; // Fixed bottom position
+                // Redesigned Signature Section at Bottom
+                currentY = 250; // Fixed bottom position
                 doc.setFontSize(12);
-                doc.text('Customer', 20, currentY);
-                doc.text('Service Provider', 120, currentY);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Authorized Signatures', 105, currentY, { align: 'center' });
                 currentY += 10;
-                doc.setDrawColor(37, 99, 235); // Blue line near Contact Person
-                doc.line(20, currentY, 70, currentY); // Customer signature line
-                doc.line(120, currentY, 170, currentY); // Service Provider signature line
+                doc.setFont('helvetica', 'normal');
+                doc.text('Customer', 50, currentY);
+                doc.text('Service Provider', 140, currentY);
                 currentY += 10;
-                doc.setFontSize(12);
-                doc.setTextColor(0, 0, 0); // Dark black color
-                doc.text(`${contactPerson || '_______________________'}`, 105, currentY, { align: 'center' });
+                doc.setDrawColor(0); // Black line
+                doc.line(30, currentY, 70, currentY); // Customer signature line
+                doc.line(120, currentY, 160, currentY); // Service Provider signature line
                 currentY += 10;
-                doc.text(`${customerName || '_______________________'}`, 105, currentY, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0); // Dark black
+                doc.text(`${contactPerson || '_______________________'}`, 50, currentY, { align: 'center' });
+                doc.text('Authorized Signatory', 140, currentY, { align: 'center' });
+                currentY += 10;
+                doc.text(`${customerName || '_______________________'}`, 50, currentY, { align: 'center' });
+                doc.text('Eye Tech Securities', 140, currentY, { align: 'center' });
                 currentY += 10;
                 const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/');
-                doc.text(dateStr, 105, currentY, { align: 'center' });
-                currentY += 5;
-                doc.text('Authorized Signatory', 120, currentY);
-                currentY += 10;
-                doc.text('Eye Tech Securities', 120, currentY);
-                currentY += 10;
-                doc.text(dateStr, 120, currentY);
+                doc.text(dateStr, 50, currentY, { align: 'center' });
+                doc.text(dateStr, 140, currentY, { align: 'center' });
 
                 // Footer (no page number on last page)
                 const totalPages = doc.internal.getNumberOfPages();
