@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Report Generator - Eye Tech Securities</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        .input-field {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .work-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .work-row input, .work-row select {
+            flex: 1;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        .btn-success {
+            background-color: #059669;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+        .btn-success:hover {
+            background-color: #047857;
+        }
+        #error-message {
+            color: #dc2626;
+            margin-top: 1rem;
+            display: none;
+        }
+        .textarea-field {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem;
+            width: 100%;
+            margin-bottom: 1rem;
+            min-height: 80px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-section">
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Service Report Generator</h1>
+            
+            <!-- Updated navigation to match AMC Agreement Generator style -->
+            <div class="flex justify-center gap-4 mb-6">
+                <a href="amc-agreement-generator.html" class="btn-secondary text-center">AMC Agreement</a>
+                <a href="service-report-generator.html" class="btn-primary text-center">Service Report</a>
+            </div>
+            
+            <form id="service-form">
+                <div class="form-section">
+                    <h2>Customer Details</h2>
+                    <label for="customer-name" class="block text-sm font-medium text-gray-700">Customer Name</label>
+                    <input type="text" id="customer-name" class="input-field" required>
+
+                    <label for="customer-address" class="block text-sm font-medium text-gray-700">Customer Address</label>
+                    <input type="text" id="customer-address" class="input-field" required>
+
+                    <label for="contact-person" class="block text-sm font-medium text-gray-700">Contact Person</label>
+                    <input type="text" id="contact-person" class="input-field" required>
+
+                    <label for="customer-contact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
+                    <input type="text" id="customer-contact" class="input-field" required>
+
+                    <label for="customer-email" class="block text-sm font-medium text-gray-700">Customer Email</label>
+                    <input type="email" id="customer-email" class="input-field" required>
+                </div>
+
+                <!-- Added Service Details section -->
+                <div class="form-section mt-6">
+                    <h2>Service Details</h2>
+                    <label for="service-type" class="block text-sm font-medium text-gray-700">Service Type</label>
+                    <select id="service-type" class="input-field" required>
+                        <option value="">Select Service Type</option>
+                        <option value="Preventive Maintenance">Preventive Maintenance</option>
+                        <option value="Breakdown Service">Breakdown Service</option>
+                        <option value="Installation">Installation</option>
+                        <option value="Repair">Repair</option>
+                        <option value="Inspection">Inspection</option>
+                        <option value="Upgrade">Upgrade</option>
+                    </select>
+
+                    <label for="service-date" class="block text-sm font-medium text-gray-700">Service Date</label>
+                    <input type="date" id="service-date" class="input-field" required>
+
+                    <label for="technician-name" class="block text-sm font-medium text-gray-700">Technician Name</label>
+                    <input type="text" id="technician-name" class="input-field" required>
+
+                    <label for="service-time-start" class="block text-sm font-medium text-gray-700">Service Start Time</label>
+                    <input type="time" id="service-time-start" class="input-field" required>
+
+                    <label for="service-time-end" class="block text-sm font-medium text-gray-700">Service End Time</label>
+                    <input type="time" id="service-time-end" class="input-field" required>
+                </div>
+
+                <!-- Added Work Performed section -->
+                <div class="form-section mt-6">
+                    <h2>Work Performed</h2>
+                    <div id="work-container"></div>
+                    <button type="button" onclick="addWorkRow()" class="btn-secondary mt-4">Add Work Item</button>
+                </div>
+
+                <!-- Added Equipment Status section -->
+                <div class="form-section mt-6">
+                    <h2>Equipment Status & Observations</h2>
+                    <label for="equipment-condition" class="block text-sm font-medium text-gray-700">Overall Equipment Condition</label>
+                    <select id="equipment-condition" class="input-field" required>
+                        <option value="">Select Condition</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                        <option value="Needs Attention">Needs Attention</option>
+                    </select>
+
+                    <label for="observations" class="block text-sm font-medium text-gray-700">Observations & Notes</label>
+                    <textarea id="observations" class="textarea-field" placeholder="Enter any observations, issues found, or recommendations..."></textarea>
+
+                    <label for="recommendations" class="block text-sm font-medium text-gray-700">Recommendations</label>
+                    <textarea id="recommendations" class="textarea-field" placeholder="Enter recommendations for future maintenance or improvements..."></textarea>
+                </div>
+
+                <!-- Added Customer Satisfaction section -->
+                <div class="form-section mt-6">
+                    <h2>Customer Satisfaction</h2>
+                    <label for="customer-satisfaction" class="block text-sm font-medium text-gray-700">Customer Satisfaction Rating</label>
+                    <select id="customer-satisfaction" class="input-field">
+                        <option value="">Select Rating</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Very Good">Very Good</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                    </select>
+
+                    <label for="customer-feedback" class="block text-sm font-medium text-gray-700">Customer Feedback</label>
+                    <textarea id="customer-feedback" class="textarea-field" placeholder="Enter customer feedback or comments..."></textarea>
+                </div>
+
+                <button type="button" onclick="generateServiceReport()" class="btn-primary mt-6 w-full">Generate Service Report PDF</button>
+                <div id="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function addWorkRow() {
+            const container = document.getElementById('work-container');
+            const row = document.createElement('div');
+            row.className = 'work-row';
+            row.innerHTML = `
+                <select class="input-field" required>
+                    <option value="">Select Work Type</option>
+                    <option value="Cleaning">Cleaning</option>
+                    <option value="Calibration">Calibration</option>
+                    <option value="Replacement">Replacement</option>
+                    <option value="Repair">Repair</option>
+                    <option value="Testing">Testing</option>
+                    <option value="Configuration">Configuration</option>
+                    <option value="Inspection">Inspection</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" placeholder="Equipment/Component" class="input-field" required>
+                <input type="text" placeholder="Description of work performed" class="input-field" required>
+                <select class="input-field" required>
+                    <option value="">Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Partially Completed">Partially Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Not Required">Not Required</option>
+                </select>
+                <button type="button" onclick="this.parentNode.remove()" class="btn-secondary">Remove</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function generateServiceReport() {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none';
+
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    throw new Error('jsPDF library failed to load. Check your internet connection or script source.');
+                }
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                // Header
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(20);
+                doc.setTextColor(31, 41, 55);
+                doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text('SERVICE REPORT', 105, 25, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
+                doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
+                doc.setDrawColor(37, 99, 235);
+                doc.setLineWidth(0.5);
+                doc.line(20, 45, 190, 45);
+
+                // Service Report Details
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(55, 65, 81);
+                const today = new Date();
+                const reportNumber = `ETS-SR-${today.getFullYear()}${(Math.floor(Math.random() * 900) + 100).toString().padStart(3, '0')}`;
+                const reportDate = today.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                doc.text('REPORT DETAILS', 20, 55);
+                doc.line(20, 57, 60, 57);
+                doc.text(`Report No: ${reportNumber}`, 20, 65);
+                doc.text(`Generated: ${reportDate}`, 20, 70);
+                doc.text(`Service Date: ${document.getElementById('service-date').value}`, 20, 75);
+                doc.text(`Service Type: ${document.getElementById('service-type').value}`, 20, 80);
+                doc.text(`Technician: ${document.getElementById('technician-name').value}`, 20, 85);
+                doc.text(`Service Time: ${document.getElementById('service-time-start').value} - ${document.getElementById('service-time-end').value}`, 20, 90);
+
+                // Customer Details
+                doc.setFont('helvetica', 'bold');
+                doc.text('CUSTOMER DETAILS', 20, 105);
+                doc.line(20, 107, 60, 107);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Customer: ${document.getElementById('customer-name').value}`, 20, 115);
+                doc.text(`Contact Person: ${document.getElementById('contact-person').value}`, 20, 120);
+                doc.text(`Phone: ${document.getElementById('customer-contact').value}`, 20, 125);
+                doc.text(`Email: ${document.getElementById('customer-email').value}`, 20, 130);
+                doc.text(`Address: ${document.getElementById('customer-address').value}`, 20, 135);
+
+                // Work Performed
+                doc.setFont('helvetica', 'bold');
+                doc.text('WORK PERFORMED', 20, 150);
+                doc.line(20, 152, 60, 152);
+                
+                const workRows = document.querySelectorAll('.work-row');
+                const workData = [];
+                workRows.forEach((row, index) => {
+                    const selects = row.querySelectorAll('select');
+                    const inputs = row.querySelectorAll('input');
+                    if (selects.length >= 2 && inputs.length >= 2) {
+                        workData.push([
+                            index + 1,
+                            selects[0].value,
+                            inputs[0].value,
+                            inputs[1].value,
+                            selects[1].value
+                        ]);
+                    }
+                });
+
+                if (workData.length > 0) {
+                    doc.autoTable({
+                        startY: 160,
+                        head: [['S.No', 'Work Type', 'Equipment/Component', 'Description', 'Status']],
+                        body: workData,
+                        theme: 'grid',
+                        styles: { fontSize: 9, cellPadding: 2, textColor: [55, 65, 81] },
+                        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
+                        columnStyles: {
+                            0: { cellWidth: 12 },
+                            1: { cellWidth: 25 },
+                            2: { cellWidth: 35 },
+                            3: { cellWidth: 60 },
+                            4: { cellWidth: 22 }
+                        }
+                    });
+                }
+
+                // Equipment Status & Observations
+                let currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 180;
+                doc.setFont('helvetica', 'bold');
+                doc.text('EQUIPMENT STATUS & OBSERVATIONS', 20, currentY);
+                doc.line(20, currentY + 2, 90, currentY + 2);
+                doc.setFont('helvetica', 'normal');
+                currentY += 10;
+                doc.text(`Overall Condition: ${document.getElementById('equipment-condition').value}`, 20, currentY);
+                currentY += 10;
+
+                const observations = document.getElementById('observations').value;
+                if (observations) {
+                    doc.text('Observations:', 20, currentY);
+                    currentY += 5;
+                    const obsLines = doc.splitTextToSize(observations, 170);
+                    doc.text(obsLines, 20, currentY);
+                    currentY += obsLines.length * 5 + 5;
+                }
+
+                const recommendations = document.getElementById('recommendations').value;
+                if (recommendations) {
+                    doc.text('Recommendations:', 20, currentY);
+                    currentY += 5;
+                    const recLines = doc.splitTextToSize(recommendations, 170);
+                    doc.text(recLines, 20, currentY);
+                    currentY += recLines.length * 5 + 5;
+                }
+
+                // Customer Satisfaction
+                if (document.getElementById('customer-satisfaction').value || document.getElementById('customer-feedback').value) {
+                    currentY += 10;
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('CUSTOMER SATISFACTION', 20, currentY);
+                    doc.line(20, currentY + 2, 70, currentY + 2);
+                    doc.setFont('helvetica', 'normal');
+                    currentY += 10;
+                    
+                    if (document.getElementById('customer-satisfaction').value) {
+                        doc.text(`Rating: ${document.getElementById('customer-satisfaction').value}`, 20, currentY);
+                        currentY += 8;
+                    }
+                    
+                    const feedback = document.getElementById('customer-feedback').value;
+                    if (feedback) {
+                        doc.text('Feedback:', 20, currentY);
+                        currentY += 5;
+                        const feedbackLines = doc.splitTextToSize(feedback, 170);
+                        doc.text(feedbackLines, 20, currentY);
+                        currentY += feedbackLines.length * 5;
+                    }
+                }
+
+                // Signature Section
+                currentY += 20;
+                if (currentY > 240) {
+                    doc.addPage();
+                    currentY = 50;
+                }
+
+                doc.setFont('helvetica', 'bold');
+                doc.text('SIGNATURES', 105, currentY, { align: 'center' });
+                currentY += 15;
+
+                const leftX = 55;
+                const rightX = 135;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text('Customer', leftX, currentY, { align: 'center' });
+                doc.text('Technician', rightX, currentY, { align: 'center' });
+
+                currentY += 15;
+                doc.line(leftX - 25, currentY, leftX + 25, currentY);
+                doc.line(rightX - 25, currentY, rightX + 25, currentY);
+
+                currentY += 8;
+                doc.text(document.getElementById('contact-person').value || 'Name: ___________________', leftX, currentY, { align: 'center' });
+                doc.text(document.getElementById('technician-name').value || 'Name: ___________________', rightX, currentY, { align: 'center' });
+
+                currentY += 8;
+                doc.text(`Date: ${reportDate}`, leftX, currentY, { align: 'center' });
+                doc.text(`Date: ${reportDate}`, rightX, currentY, { align: 'center' });
+
+                // Footer
+                doc.setFontSize(8);
+                doc.setTextColor(107, 114, 128);
+                doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 290, { align: 'center' });
+
+                // Save PDF
+                doc.save(`Service_Report_${reportNumber}.pdf`);
+            } catch (error) {
+                errorMessage.textContent = `Error generating PDF: ${error.message}. Please check your browser console for details.`;
+                errorMessage.style.display = 'block';
+                console.error(error);
+            }
+        }
+
+        // Initialize with one work row
+        addWorkRow();
+
+        // Set current date as default
+        document.getElementById('service-date').valueAsDate = new Date();
+
+        // Verify script loading
+        window.onload = function() {
+            if (!window.jspdf || !window.jspdf.jsPDF.prototype.autoTable) {
+                document.getElementById('error-message').textContent = 'Required libraries (jsPDF or autoTable) failed to load. Please check your internet connection.';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
