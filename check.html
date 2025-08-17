@@ -207,11 +207,13 @@
                     canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
                     
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
                     // Draw resized image
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     
-                    // Convert back to data URL
-                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    resolve(canvas.toDataURL('image/png', 1.0));
                 };
                 img.src = imageData;
             });
@@ -273,6 +275,11 @@
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = function() {
+                    if (img.width <= maxWidthPx && img.height <= maxHeightPx) {
+                        resolve(imageData);
+                        return;
+                    }
+                    
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
@@ -285,12 +292,14 @@
                     canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
                     
-                    // Draw resized image with high quality
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
+                    ctx.globalCompositeOperation = 'source-over';
+                    
+                    // Draw resized image with high quality
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     
-                    resolve(canvas.toDataURL('image/jpeg', 0.9));
+                    resolve(canvas.toDataURL('image/png', 1.0));
                 };
                 img.src = imageData;
             });
@@ -515,15 +524,15 @@
                     doc.text('Customer', leftSignatureX, signatureBoxY, { align: 'center' });
                     doc.text('Service Provider', rightSignatureX, signatureBoxY, { align: 'center' });
 
-                    const maxSignatureWidth = 40; // mm
-                    const maxSignatureHeight = 20; // mm
+                    const maxSignatureWidth = 50; // mm (increased from 40)
+                    const maxSignatureHeight = 25; // mm (increased from 20)
                     const imgX = rightSignatureX - (maxSignatureWidth / 2);
                     const imgY = signatureBoxY + 5;
                     
                     if (signatureImageData) {
                         try {
-                            const pdfImage = await resizeImageForPDF(signatureImageData, maxSignatureWidth * 3.78, maxSignatureHeight * 3.78); // Convert mm to pixels (1mm ≈ 3.78px)
-                            doc.addImage(pdfImage, 'JPEG', imgX, imgY, maxSignatureWidth, maxSignatureHeight);
+                            const pdfImage = await resizeImageForPDF(signatureImageData, maxSignatureWidth * 4, maxSignatureHeight * 4);
+                            doc.addImage(pdfImage, 'PNG', imgX, imgY, maxSignatureWidth, maxSignatureHeight);
                         } catch (error) {
                             console.warn('Could not add signature image:', error);
                         }
