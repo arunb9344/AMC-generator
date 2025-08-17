@@ -274,35 +274,35 @@
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
                 const terms = [
-                    '1 The contract is applicable for ' + (contractPeriod * 12) + ' months from the agreement date.',
-                    '2 Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.',
-                    '3 Offer valid for 30 days from issue date.',
-                    '4 Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.',
-                    '5 Customer must provide ladder, water, power supply, and civil support for maintenance.',
-                    '6 Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
-                    '7 Technician access required during scheduled visits; no refund for missed appointments due to unavailability.',
-                    '8 Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
-                    '9 Contract is non-transferable and non-terminable before completion.',
-                    '10 Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
-                    '11 Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
-                    '12 Only registered complaints via proper channels are addressed during breakdown visits.',
-                    '13 Warranty-covered items replaced free; out-of-warranty items chargeable.',
-                    '14 Material replacements, spare parts, and consumables chargeable unless under warranty.',
-                    '15 Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
-                    '16 Unauthorized equipment modification voids the AMC contract.',
-                    '17 Service visits scheduled with 24-48 hours notice to customer.',
-                    '18 Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
-                    '19 Additional work beyond AMC scope chargeable per prevailing rates.',
-                    '20 Disputes subject to local court jurisdiction.',
-                    '21 This contract supersedes prior agreements; modifications require mutual written consent.',
-                    '22 Force majeure conditions may temporarily suspend service obligations.',
-                    '23 Maintenance visits non-transferable and not carried forward.',
-                    '24 18% GST applies on total contract amount per tax regulations.'
+                    '1) The contract is applicable for ' + (contractPeriod * 12) + ' months from the agreement date.',
+                    '2) Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.',
+                    '3) Offer valid for 30 days from issue date.',
+                    '4) Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.',
+                    '5) Customer must provide ladder, water, power supply, and civil support for maintenance.',
+                    '6) Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
+                    '7) Technician access required during scheduled visits; no refund for missed appointments due to unavailability.',
+                    '8) Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
+                    '9) Contract is non-transferable and non-terminable before completion.',
+                    '10) Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
+                    '11) Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
+                    '12) Only registered complaints via proper channels are addressed during breakdown visits.',
+                    '13) Warranty-covered items replaced free; out-of-warranty items chargeable.',
+                    '14) Material replacements, spare parts, and consumables chargeable unless under warranty.',
+                    '15) Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
+                    '16) Unauthorized equipment modification voids the AMC contract.',
+                    '17) Service visits scheduled with 24-48 hours notice to customer.',
+                    '18) Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
+                    '19) Additional work beyond AMC scope chargeable per prevailing rates.',
+                    '20) Disputes subject to local court jurisdiction.',
+                    '21) This contract supersedes prior agreements; modifications require mutual written consent.',
+                    '22) Force majeure conditions may temporarily suspend service obligations.',
+                    '23) Maintenance visits non-transferable and not carried forward.',
+                    '24) 18% GST applies on total contract amount per tax regulations.'
                 ];
                 let currentY = startY + 10;
                 terms.forEach((term, index) => {
                     const lines = doc.splitTextToSize(term, 170);
-                    // <CHANGE> Improved page break logic to ensure signature section fits properly
+                    //  Improved page break logic to ensure signature section fits properly
                     if (currentY + lines.length * 5 > 230) { // Reserve more space for signature section
                         doc.addPage();
                         currentY = 50;
@@ -333,7 +333,7 @@
                     currentY += lines.length * 5;
                 });
 
-                // <CHANGE> Dynamic signature section positioning based on content length
+                //  Dynamic signature section positioning based on content length
                 // Ensure signature section starts with adequate spacing from terms
                 let signatureStartY = currentY + 15;
                 
@@ -357,7 +357,7 @@
                     doc.line(20, 45, 190, 45);
                 }
 
-                // <CHANGE> Improved signature section with better alignment and spacing
+                //  Improved signature section with better alignment and spacing
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(31, 41, 55);
@@ -398,7 +398,7 @@
                 doc.text(`Date: ${dateStr}`, leftSignatureX, dateY, { align: 'center' });
                 doc.text(`Date: ${dateStr}`, rightSignatureX, dateY, { align: 'center' });
 
-                // <CHANGE> Improved footer positioning to avoid overlap with signature section
+                //  Improved footer positioning to avoid overlap with signature section
                 const totalPages = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= totalPages; i++) {
                     doc.setPage(i);
