@@ -73,6 +73,11 @@
             color: #1f2937;
             margin-top: 1rem;
         }
+        .signature-section {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #d1d5db;
+        }
     </style>
 </head>
 <body>
@@ -114,10 +119,27 @@
                     <h2>Particulars</h2>
                     <div id="particulars-container"></div>
                     <button type="button" onclick="addParticularRow()" class="btn-secondary mt-4">Add Particular</button>
-                    <div id="total-amount">Total Amount: Rs.0</div>
+                    <div id="total-amount">Total Amount: ₹0</div>
                 </div>
 
                 <button type="button" onclick="generatePDF()" class="btn-primary mt-6 w-full">Generate PDF</button>
+                <div class="signature-section">
+                    <h2 class="text-lg font-semibold text-gray-700">Signatures</h2>
+                    <div class="flex justify-between mt-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Customer Signature:</p>
+                            <div class="border-b-2 border-gray-300 w-40 mt-1"></div>
+                            <p class="text-xs text-gray-500 mt-1">Name: _______________________</p>
+                            <p class="text-xs text-gray-500">Date: _______________________</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Eye Tech Securities Signature:</p>
+                            <div class="border-b-2 border-gray-300 w-40 mt-1"></div>
+                            <p class="text-xs text-gray-500 mt-1">Name: _______________________</p>
+                            <p class="text-xs text-gray-500">Date: _______________________</p>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -131,7 +153,7 @@
                 <input type="text" placeholder="Particular (e.g., CCTV, Biometrics)" class="input-field" required>
                 <input type="number" placeholder="Maintenance Visits" min="0" class="input-field" required>
                 <input type="number" placeholder="Breakdown Visits" min="0" class="input-field" required>
-                <input type="number" placeholder="Amount (Rs.)" min="0" step="0.01" class="input-field" required>
+                <input type="number" placeholder="Amount (₹)" min="0" step="0.01" class="input-field" required>
                 <button type="button" onclick="this.parentNode.remove(); updateTotalAmount()" class="btn-secondary">Remove</button>
             `;
             container.appendChild(row);
@@ -144,12 +166,12 @@
             const rows = document.querySelectorAll('.particular-row');
             let total = 0;
             rows.forEach(row => {
-                const amountInput = row.querySelector('input[placeholder="Amount (Rs.)"]');
+                const amountInput = row.querySelector('input[placeholder="Amount (₹)"]');
                 if (amountInput && amountInput.value) {
                     total += parseFloat(amountInput.value) || 0;
                 }
             });
-            document.getElementById('total-amount').textContent = `Total Amount: Rs.${total.toFixed(2)}`;
+            document.getElementById('total-amount').textContent = `Total Amount: ₹${total.toFixed(2)}`;
         }
 
         function generatePDF() {
@@ -168,7 +190,7 @@
             doc.line(20, 35, 190, 35);
             doc.setFontSize(10);
             doc.setTextColor(107, 114, 128); // Gray-500
-            doc.text('No.56/80, Medavakkam Main Road, Keelkattali, Chennai-600117. | support@eyetechsecurities.com | +919962835944', 105, 40, { align: 'center' });
+            doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
 
             // AMC Number and Date
             const today = new Date();
@@ -223,7 +245,7 @@
                         inputs[0].value,
                         inputs[1].value,
                         inputs[2].value,
-                        `Rs.${amount.toFixed(2)}`
+                        `₹${amount.toFixed(2)}`
                     ]);
                 }
             });
@@ -235,8 +257,8 @@
                 doc.line(20, 157, 50, 157);
                 doc.autoTable({
                     startY: 165,
-                    head: [['Item', 'Maintenance Visits', 'Breakdown Visits', 'Amount (Rs.)']],
-                    body: [...particulars, ['', '', 'Total:', `Rs.${totalAmount.toFixed(2)}`]],
+                    head: [['Item', 'Maintenance Visits', 'Breakdown Visits', 'Amount (₹)']],
+                    body: [...particulars, ['', '', 'Total:', `₹${totalAmount.toFixed(2)}`]],
                     theme: 'grid',
                     styles: { fontSize: 10, cellPadding: 4, textColor: [55, 65, 81] },
                     headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
@@ -265,25 +287,32 @@
             doc.setFont('helvetica', 'normal');
             const terms = [
                 `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
-                '2. Contract does not cover damages due to natural disasters, misuse, etc.',
+                '2. Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or any act of God.',
                 '3. Offer valid for 30 days from issue date.',
-                '4. Equipment must be in working condition; customer to bear initial repair cost.',
-                '5. Customer must provide ladder, water, power, and civil support.',
-                '6. Missing/stolen items are customer’s liability.',
-                '7. Customer must allow access during maintenance. No refund if missed.',
-                '8. Breakdown visits only during working hours (Mon–Sat).',
-                '9. Contract is non-transferable and non-terminable.',
-                '10. Payment due within 30 days, else 2% monthly penalty applies.',
-                '11. Maintenance visits include cleaning, adjustments, checks.',
-                '12. Only registered complaints are addressed in breakdown visits.',
-                '13. Warranty covered items only will be processed.',
-                '14. Material replacements are chargeable unless under warranty.',
-                '15. Connector replacement (Rs.500/camera) included in first visit.'
+                '4. Equipment must be in working condition at the time of contract signing; customer to bear initial repair cost if equipment is faulty.',
+                '5. Customer must provide ladder, water, power supply, and civil support as required for maintenance work.',
+                '6. Missing/stolen items during the contract period are customer\'s liability and not covered under AMC.',
+                '7. Customer must allow technician access during scheduled maintenance visits. No refund will be provided for missed appointments due to customer unavailability.',
+                '8. Breakdown visits are only during working hours (Monday to Saturday, 9 AM to 6 PM). Emergency visits may be charged separately.',
+                '9. Contract is non-transferable and non-terminable before the completion of the contract period.',
+                '10. Payment is due within 30 days of invoice date, failing which 2% monthly penalty will be applicable on the outstanding amount.',
+                '11. Maintenance visits include cleaning, adjustments, calibration, software updates, and general health checks of the equipment.',
+                '12. Only registered complaints through proper channels will be addressed during breakdown visits.',
+                '13. Only warranty-covered items will be processed for free replacement. Out-of-warranty items will be chargeable.',
+                '14. Material replacements, spare parts, and consumables are chargeable unless specifically covered under manufacturer warranty.',
+                '15. Connector replacement charges (Rs. 500 per camera) are included in the first maintenance visit only.',
+                '16. Any modification or tampering of equipment by unauthorized personnel will void the AMC contract.',
+                '17. Service visits will be scheduled with 24-48 hours advance notice to the customer.',
+                '18. Customer is responsible for data backup before any maintenance work. Eye Tech Securities is not liable for any data loss.',
+                '19. Any additional work beyond the scope of AMC will be charged separately as per prevailing rates.',
+                '20. Disputes, if any, will be subject to the jurisdiction of local courts only.',
+                '21. This contract supersedes all previous agreements and can only be modified in writing with mutual consent.',
+                '22. Force majeure conditions (strikes, lockouts, natural disasters, government restrictions) may suspend service obligations temporarily.'
             ];
             let currentY = startY + 10;
             terms.forEach((term, index) => {
                 const lines = doc.splitTextToSize(term, 170);
-                if (currentY + lines.length * 8 > 280 - 20) { // 20mm margin from bottom
+                if (currentY + lines.length * 8 > 280 - 40) { // 40mm margin from bottom for signatures
                     doc.addPage();
                     currentY = 50;
                     // Add header to new page
@@ -298,14 +327,14 @@
                     doc.line(20, 35, 190, 35);
                     doc.setFontSize(10);
                     doc.setTextColor(107, 114, 128);
-                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117. | support@eyetechsecurities.com | +919962835944', 105, 40, { align: 'center' });
+                    doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
                 }
                 doc.text(lines, 20, currentY);
                 currentY += lines.length * 8;
             });
 
-            // Signatures
-            if (currentY + 30 > 280 - 20) {
+            // Signatures (moved to bottom with professional spacing)
+            if (currentY + 40 > 280 - 20) {
                 doc.addPage();
                 currentY = 50;
                 // Add header to new page
@@ -320,11 +349,20 @@
                 doc.line(20, 35, 190, 35);
                 doc.setFontSize(10);
                 doc.setTextColor(107, 114, 128);
-                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117. | support@eyetechsecurities.com | +919962835944', 105, 40, { align: 'center' });
+                doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
             }
             doc.setFontSize(12);
-            doc.text('Customer Signature: _______________________', 20, currentY);
-            doc.text('Eye Tech Securities Signature: _______________________', 110, currentY);
+            doc.text('Signatures', 20, currentY);
+            doc.line(20, currentY + 2, 70, currentY + 2);
+            currentY += 10;
+            doc.text('Customer Signature:', 20, currentY);
+            doc.line(20, currentY + 5, 60, currentY + 5);
+            doc.text('Name: _______________________', 20, currentY + 10);
+            doc.text('Date: _______________________', 20, currentY + 20);
+            doc.text('Eye Tech Securities Signature:', 120, currentY);
+            doc.line(120, currentY + 5, 160, currentY + 5);
+            doc.text('Name: _______________________', 120, currentY + 10);
+            doc.text('Date: _______________________', 120, currentY + 20);
 
             // Footer
             doc.setFontSize(10);
