@@ -64,10 +64,6 @@
         .btn-secondary:hover {
             background-color: #4b5563;
         }
-        .logo-placeholder {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
         #total-amount {
             font-weight: 600;
             color: #1f2937;
@@ -77,9 +73,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="logo-placeholder">
-            <img src="https://via.placeholder.com/150x50?text=Eye+Tech+Securities+Logo" alt="Eye Tech Securities Logo" onerror="this.src='https://via.placeholder.com/150x50?text=Logo+Not+Found';">
-        </div>
         <div class="form-section">
             <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">AMC Agreement Generator</h1>
             <form id="amc-form">
@@ -171,12 +164,11 @@
             doc.line(20, 35, 190, 35);
             doc.setFontSize(10);
             doc.setTextColor(107, 114, 128); // Gray-500
-            doc.text('No.56/80, Medavakkam Main Road, 'Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
-            doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
+            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
 
             // AMC Number and Date
             const today = new Date();
-            today.setHours(12, 28, 0, 0); // Set to 12:28 PM IST
+            today.setHours(12, 48, 0, 0); // Set to 12:48 PM IST
             const year = today.getFullYear();
             const randomSuffix = Math.floor(Math.random() * 900) + 100;
             const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
@@ -314,8 +306,7 @@
                     doc.line(20, 35, 190, 35);
                     doc.setFontSize(10);
                     doc.setTextColor(107, 114, 128);
-                    doc.text('No.56/80, Medavakkam Main Road,Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
-                    doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
+                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
                 }
                 doc.text(lines, 20, currentY);
                 currentY += lines.length * 8;
@@ -337,8 +328,7 @@
                 doc.line(20, 35, 190, 35);
                 doc.setFontSize(10);
                 doc.setTextColor(107, 114, 128);
-                doc.text('No.56/80, Medavakkam Main Road,Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
-                doc.text('Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
+                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
             }
             doc.setFontSize(14);
             doc.text('Authorization', 20, currentY);
