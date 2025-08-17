@@ -96,6 +96,9 @@
 
                     <label for="customer-email" class="block text-sm font-medium text-gray-700">Customer Email</label>
                     <input type="email" id="customer-email" class="input-field" required>
+
+                    <label for="customer-gst" class="block text-sm font-medium text-gray-700">Customer GST (Optional)</label>
+                    <input type="text" id="customer-gst" class="input-field">
                 </div>
 
                 <div class="form-section mt-6">
@@ -114,7 +117,7 @@
                     <h2>Particulars</h2>
                     <div id="particulars-container"></div>
                     <button type="button" onclick="addParticularRow()" class="btn-secondary mt-4">Add Particular</button>
-                    <div id="total-amount">Total Amount: ₹0</div>
+                    <div id="total-amount">Total Amount: Rs.0</div>
                 </div>
 
                 <button type="button" onclick="generatePDF()" class="btn-primary mt-6 w-full">Generate PDF</button>
@@ -131,7 +134,7 @@
                 <input type="text" placeholder="Particular (e.g., CCTV, Biometrics)" class="input-field" required>
                 <input type="number" placeholder="Maintenance Visits" min="0" class="input-field" required>
                 <input type="number" placeholder="Breakdown Visits" min="0" class="input-field" required>
-                <input type="number" placeholder="Amount (₹)" min="0" step="0.01" class="input-field" required>
+                <input type="number" placeholder="Amount (Rs.)" min="0" step="0.01" class="input-field" required>
                 <button type="button" onclick="this.parentNode.remove(); updateTotalAmount()" class="btn-secondary">Remove</button>
             `;
             container.appendChild(row);
@@ -144,12 +147,12 @@
             const rows = document.querySelectorAll('.particular-row');
             let total = 0;
             rows.forEach(row => {
-                const amountInput = row.querySelector('input[placeholder="Amount (₹)"]');
+                const amountInput = row.querySelector('input[placeholder="Amount (Rs.)"]');
                 if (amountInput && amountInput.value) {
                     total += parseFloat(amountInput.value) || 0;
                 }
             });
-            document.getElementById('total-amount').textContent = `Total Amount: ₹${total.toFixed(2)}`;
+            document.getElementById('total-amount').textContent = `Total Amount: Rs.${total.toFixed(2)}`;
         }
 
         function generatePDF() {
@@ -168,11 +171,12 @@
             doc.line(20, 35, 190, 35);
             doc.setFontSize(10);
             doc.setTextColor(107, 114, 128); // Gray-500
-            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
+            doc.text('No.56/80, Medavakkam Main Road,', 105, 40, { align: 'center' });
+            doc.text('Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
 
             // AMC Number and Date
             const today = new Date();
-            today.setHours(12, 13, 0, 0); // Set to 12:13 PM IST
+            today.setHours(12, 28, 0, 0); // Set to 12:28 PM IST
             const year = today.getFullYear();
             const randomSuffix = Math.floor(Math.random() * 900) + 100;
             const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
@@ -181,35 +185,37 @@
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(55, 65, 81); // Gray-700
-            doc.text(`AMC Number: ${amcNumber}`, 20, 55);
-            doc.text(`AMC Date: ${amcDate} IST`, 20, 63);
+            doc.text(`AMC Number: ${amcNumber}`, 20, 60);
+            doc.text(`AMC Date: ${amcDate} IST`, 20, 68);
 
             // Customer Details
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Customer Details', 20, 80);
+            doc.text('Customer Details', 20, 85);
             doc.setLineWidth(0.2);
-            doc.line(20, 82, 60, 82);
+            doc.line(20, 87, 60, 87);
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             const customerName = document.getElementById('customer-name').value;
             const customerAddress = document.getElementById('customer-address').value;
             const customerContact = document.getElementById('customer-contact').value;
             const customerEmail = document.getElementById('customer-email').value;
-            doc.text(`Name: ${customerName}`, 20, 90);
-            doc.text(`Address: ${customerAddress}`, 20, 98);
-            doc.text(`Contact: ${customerContact}`, 20, 106);
-            doc.text(`Email: ${customerEmail}`, 20, 114);
+            const customerGST = document.getElementById('customer-gst').value || 'Not Provided';
+            doc.text(`Name: ${customerName}`, 20, 95);
+            doc.text(`Address: ${customerAddress}`, 20, 103);
+            doc.text(`Contact: ${customerContact}`, 20, 111);
+            doc.text(`Email: ${customerEmail}`, 20, 119);
+            doc.text(`GST: ${customerGST}`, 20, 127);
 
             // Contract Period
             const contractPeriod = parseInt(document.getElementById('contract-period').value);
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('Contract Details', 20, 130);
-            doc.line(20, 132, 60, 132);
+            doc.text('Contract Details', 20, 145);
+            doc.line(20, 147, 60, 147);
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 140);
+            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 155);
 
             // Particulars Table
             const particulars = [];
@@ -224,7 +230,7 @@
                         inputs[0].value,
                         inputs[1].value,
                         inputs[2].value,
-                        `₹${amount.toFixed(2)}`
+                        `Rs.${amount.toFixed(2)}`
                     ]);
                 }
             });
@@ -232,12 +238,12 @@
             if (particulars.length > 0) {
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Particulars', 20, 155);
-                doc.line(20, 157, 50, 157);
+                doc.text('Particulars', 20, 170);
+                doc.line(20, 172, 50, 172);
                 doc.autoTable({
-                    startY: 165,
-                    head: [['Item', 'Maintenance Visits', 'Breakdown Visits', 'Amount (₹)']],
-                    body: [...particulars, ['', '', 'Total:', `₹${totalAmount.toFixed(2)}`]],
+                    startY: 180,
+                    head: [['Item', 'Maintenance Visits', 'Breakdown Visits', 'Amount (Rs.)']],
+                    body: [...particulars, ['', '', 'Total:', `Rs.${totalAmount.toFixed(2)}`]],
                     theme: 'grid',
                     styles: { fontSize: 10, cellPadding: 4, textColor: [55, 65, 81] },
                     headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
@@ -257,7 +263,7 @@
             }
 
             // Terms and Conditions
-            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 155;
+            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 170;
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.text('Terms and Conditions', 20, startY);
@@ -287,12 +293,13 @@
                 '20. Disputes, if any, will be subject to the jurisdiction of local courts only.',
                 '21. This contract supersedes all previous agreements and can only be modified in writing with mutual consent.',
                 '22. Force majeure conditions (strikes, lockouts, natural disasters, government restrictions) may suspend service obligations temporarily.',
-                '23. Scheduled maintenance visits are non-transferable to alternative products and shall not be carried forward to subsequent contract years.'
+                '23. Scheduled maintenance visits are non-transferable to alternative products and shall not be carried forward to subsequent contract years.',
+                '24. An additional 18% GST shall be applicable on the total contract amount as per prevailing tax regulations.'
             ];
             let currentY = startY + 10;
             terms.forEach((term, index) => {
                 const lines = doc.splitTextToSize(term, 170);
-                if (currentY + lines.length * 8 > 280 - 40) { // 40mm margin from bottom for signatures
+                if (currentY + lines.length * 8 > 280 - 50) { // 50mm margin from bottom for signatures
                     doc.addPage();
                     currentY = 50;
                     // Add header to new page
@@ -307,14 +314,15 @@
                     doc.line(20, 35, 190, 35);
                     doc.setFontSize(10);
                     doc.setTextColor(107, 114, 128);
-                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
+                    doc.text('No.56/80, Medavakkam Main Road,', 105, 40, { align: 'center' });
+                    doc.text('Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
                 }
                 doc.text(lines, 20, currentY);
                 currentY += lines.length * 8;
             });
 
-            // Signatures (moved to bottom with professional layout)
-            if (currentY + 40 > 280 - 20) {
+            // Signatures (reformatted for professionalism)
+            if (currentY + 50 > 280 - 20) {
                 doc.addPage();
                 currentY = 50;
                 // Add header to new page
@@ -329,26 +337,32 @@
                 doc.line(20, 35, 190, 35);
                 doc.setFontSize(10);
                 doc.setTextColor(107, 114, 128);
-                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
+                doc.text('No.56/80, Medavakkam Main Road,', 105, 40, { align: 'center' });
+                doc.text('Keelkattalai, Chennai-600117 | GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
             }
-            doc.setFontSize(12);
-            doc.text('Signatures', 20, currentY);
-            doc.line(20, currentY + 2, 70, currentY + 2);
+            doc.setFontSize(14);
+            doc.text('Authorization', 20, currentY);
+            doc.line(20, currentY + 2, 60, currentY + 2);
             currentY += 10;
-            doc.text('Customer Signature:', 20, currentY);
-            doc.line(20, currentY + 5, 60, currentY + 5);
-            doc.text(`Name: ${customerName || '_______________________'}`, 20, currentY + 10);
-            doc.text('Date: _______________________', 20, currentY + 20);
-            doc.text('Eye Tech Securities Authorized Signatory:', 120, currentY);
-            doc.line(120, currentY + 5, 160, currentY + 5);
-            doc.text('Name: _______________________', 120, currentY + 10);
-            doc.text('Date: _______________________', 120, currentY + 20);
+            doc.setFontSize(12);
+            doc.text('For the Customer:', 20, currentY);
+            doc.line(20, currentY + 5, 70, currentY + 5);
+            doc.text(`Name: ${customerName || '_______________________'}`, 20, currentY + 15);
+            doc.text('Signature: _______________________', 20, currentY + 25);
+            doc.text('Date: _______________________', 20, currentY + 35);
+            doc.text('GSTIN: _______________________', 20, currentY + 45);
+            doc.text('For Eye Tech Securities:', 120, currentY);
+            doc.line(120, currentY + 5, 170, currentY + 5);
+            doc.text('Name: _______________________', 120, currentY + 15);
+            doc.text('Signature: _______________________', 120, currentY + 25);
+            doc.text('Date: _______________________', 120, currentY + 35);
+            doc.text('GSTIN: 33BCMPA5207N1ZN', 120, currentY + 45);
 
-            // Footer
-            doc.setFontSize(10);
+            // Footer (adjusted to avoid overlap)
+            doc.setFontSize(9); // Reduced font size to prevent overlap
             doc.setTextColor(107, 114, 128);
-            doc.text(`Page ${doc.internal.getNumberOfPages()}`, 190, 280, { align: 'right' });
-            doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 280, { align: 'center' });
+            doc.text(`Page ${doc.internal.getNumberOfPages()}`, 190, 285, { align: 'right' }); // Moved down to 285mm
+            doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 285, { align: 'center' });
 
             // Save PDF
             doc.save(`AMC_Agreement_${amcNumber}.pdf`);
