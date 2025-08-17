@@ -143,12 +143,6 @@
 
                     <label for="technician-name" class="block text-sm font-medium text-gray-700">Technician Name</label>
                     <input type="text" id="technician-name" class="input-field" required>
-
-                    <label for="service-time-start" class="block text-sm font-medium text-gray-700">Service Start Time</label>
-                    <input type="time" id="service-time-start" class="input-field" required>
-
-                    <label for="service-time-end" class="block text-sm font-medium text-gray-700">Service End Time</label>
-                    <input type="time" id="service-time-end" class="input-field" required>
                 </div>
 
                 <!-- Added CCTV Maintenance Checklist section -->
@@ -385,7 +379,6 @@
                 doc.text(`Service Type: ${document.getElementById('service-type').value}`, 20, 80);
                 doc.text(`Equipment Type: ${document.getElementById('equipment-type').value}`, 20, 85);
                 doc.text(`Technician: ${document.getElementById('technician-name').value}`, 20, 90);
-                doc.text(`Service Time: ${document.getElementById('service-time-start').value} - ${document.getElementById('service-time-end').value}`, 20, 95);
 
                 let currentY = 110;
                 const issueDescription = document.getElementById('issue-description').value;
@@ -459,14 +452,16 @@
 
                     checklistItems.forEach(item => {
                         const checkbox = document.getElementById(item.id);
-                        const status = checkbox && checkbox.checked ? '✓' : '✗';
-                        const statusColor = checkbox && checkbox.checked ? [0, 128, 0] : [255, 0, 0];
+                        const status = checkbox && checkbox.checked ? '\u2713' : '\u2717'; // ✓ and ✗
+                        const statusColor = checkbox && checkbox.checked ? [34, 197, 94] : [239, 68, 68]; // Green and Red
                         
                         doc.setTextColor(55, 65, 81);
                         doc.text(`${item.label}:`, 25, currentY);
                         doc.setTextColor(...statusColor);
-                        doc.setFontSize(14);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(16);
                         doc.text(status, 120, currentY);
+                        doc.setFont('helvetica', 'normal');
                         doc.setFontSize(12);
                         currentY += 6;
                     });
