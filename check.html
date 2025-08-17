@@ -189,46 +189,28 @@
 
     <script>
         let signatureImageData = null;
-        let processedSignatureData = null; // Store processed/resized image data
-
-        function resizeImage(imageData, maxWidth, maxHeight) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Calculate scaling factor to fit within bounds while maintaining aspect ratio
-                    const scaleX = maxWidth / img.width;
-                    const scaleY = maxHeight / img.height;
-                    const scale = Math.min(scaleX, scaleY);
-                    
-                    // Set canvas dimensions to scaled size
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
-                    
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = 'high';
-                    
-                    // Draw resized image
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    resolve(canvas.toDataURL('image/png', 1.0));
-                };
-                img.src = imageData;
-            });
-        }
+        let originalImageDimensions = null; // Store original image dimensions
 
         function handleSignatureUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = async function(e) {
+                reader.onload = function(e) {
                     signatureImageData = e.target.result;
                     
-                    processedSignatureData = await resizeImage(signatureImageData, 200, 100);
+                    // Get original image dimensions without resizing
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImageDimensions = {
+                            width: img.width,
+                            height: img.height
+                        };
+                        console.log(`[v0] Original image dimensions: ${img.width}x${img.height}`);
+                    };
+                    img.src = signatureImageData;
                     
-                    document.getElementById('signature-image').src = processedSignatureData;
+                    // Use original image for preview
+                    document.getElementById('signature-image').src = signatureImageData;
                     document.getElementById('signature-preview').style.display = 'block';
                 };
                 reader.readAsDataURL(file);
@@ -237,7 +219,7 @@
 
         function removeSignature() {
             signatureImageData = null;
-            processedSignatureData = null; // Clear processed data
+            originalImageDimensions = null;
             document.getElementById('signature-upload').value = '';
             document.getElementById('signature-preview').style.display = 'none';
         }
@@ -271,34 +253,47 @@
             document.getElementById('total-amount').textContent = `Total Amount: Rs.${total.toFixed(2)}`;
         }
 
-        function resizeImageForPDF(imageData, maxWidthPx, maxHeightPx) {
+        function prepareImageForPDF(imageData) {
             return new Promise((resolve) => {
+                if (!originalImageDimensions) {
+                    resolve(imageData);
+                    return;
+                }
+
                 const img = new Image();
                 img.onload = function() {
-                    if (img.width <= maxWidthPx && img.height <= maxHeightPx) {
+                    // Define optimal signature area in pixels (increased for better quality)
+                    const maxWidthPx = 300; // Increased from 200
+                    const maxHeightPx = 150; // Increased from 100
+                    
+                    // If image is already within bounds or close, use original
+                    if (img.width <= maxWidthPx * 1.2 && img.height <= maxHeightPx * 1.2) {
+                        console.log('[v0] Using original image - within acceptable bounds');
                         resolve(imageData);
                         return;
                     }
                     
+                    // Only resize if significantly larger
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    // Calculate scaling factor
+                    // Calculate scaling to fit within bounds
                     const scaleX = maxWidthPx / img.width;
                     const scaleY = maxHeightPx / img.height;
                     const scale = Math.min(scaleX, scaleY);
                     
-                    // Set canvas dimensions
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
                     
+                    // Use best quality settings
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
                     ctx.globalCompositeOperation = 'source-over';
                     
-                    // Draw resized image with high quality
+                    // Draw with high quality
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     
+                    console.log(`[v0] Resized image from ${img.width}x${img.height} to ${canvas.width}x${canvas.height}`);
                     resolve(canvas.toDataURL('image/png', 1.0));
                 };
                 img.src = imageData;
@@ -524,15 +519,38 @@
                     doc.text('Customer', leftSignatureX, signatureBoxY, { align: 'center' });
                     doc.text('Service Provider', rightSignatureX, signatureBoxY, { align: 'center' });
 
-                    const maxSignatureWidth = 50; // mm (increased from 40)
-                    const maxSignatureHeight = 25; // mm (increased from 20)
+                    const maxSignatureWidth = 60; // mm (increased from 50)
+                    const maxSignatureHeight = 30; // mm (increased from 25)
                     const imgX = rightSignatureX - (maxSignatureWidth / 2);
                     const imgY = signatureBoxY + 5;
                     
                     if (signatureImageData) {
                         try {
-                            const pdfImage = await resizeImageForPDF(signatureImageData, maxSignatureWidth * 4, maxSignatureHeight * 4);
-                            doc.addImage(pdfImage, 'PNG', imgX, imgY, maxSignatureWidth, maxSignatureHeight);
+                            const pdfImage = await prepareImageForPDF(signatureImageData);
+                            
+                            // Calculate actual image dimensions for PDF
+                            const tempImg = new Image();
+                            tempImg.onload = function() {
+                                const aspectRatio = tempImg.width / tempImg.height;
+                                let finalWidth = maxSignatureWidth;
+                                let finalHeight = maxSignatureHeight;
+                                
+                                // Maintain aspect ratio
+                                if (aspectRatio > (maxSignatureWidth / maxSignatureHeight)) {
+                                    finalHeight = finalWidth / aspectRatio;
+                                } else {
+                                    finalWidth = finalHeight * aspectRatio;
+                                }
+                                
+                                // Center the image
+                                const centeredX = rightSignatureX - (finalWidth / 2);
+                                const centeredY = imgY + (maxSignatureHeight - finalHeight) / 2;
+                                
+                                doc.addImage(pdfImage, 'PNG', centeredX, centeredY, finalWidth, finalHeight);
+                                console.log(`[v0] Added signature image: ${finalWidth}x${finalHeight}mm`);
+                            };
+                            tempImg.src = pdfImage;
+                            
                         } catch (error) {
                             console.warn('Could not add signature image:', error);
                         }
