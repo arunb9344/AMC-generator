@@ -302,7 +302,8 @@
                 let currentY = startY + 10;
                 terms.forEach((term, index) => {
                     const lines = doc.splitTextToSize(term, 170);
-                    if (currentY + lines.length * 5 > 250) { // Adjusted to fit signature at 260mm
+                    // <CHANGE> Improved page break logic to ensure signature section fits properly
+                    if (currentY + lines.length * 5 > 230) { // Reserve more space for signature section
                         doc.addPage();
                         currentY = 50;
                         doc.setFont('helvetica', 'bold');
@@ -319,50 +320,98 @@
                         doc.setLineWidth(0.5);
                         doc.line(20, 45, 190, 45);
                         startY = 50;
-                        doc.text('TERMS & CONDITIONS', 20, startY);
-                        doc.line(20, startY + 2, 70, startY + 2);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(12);
+                        doc.setTextColor(55, 65, 81);
+                        doc.text('TERMS & CONDITIONS (Continued)', 20, startY);
+                        doc.line(20, startY + 2, 90, startY + 2);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(9);
                         currentY = startY + 10;
                     }
                     doc.text(lines, 20, currentY);
                     currentY += lines.length * 5;
                 });
 
-                // Redesigned Signature Section with Proper Alignment
-                currentY = 260; // Positioned above footer at 285mm
+                // <CHANGE> Dynamic signature section positioning based on content length
+                // Ensure signature section starts with adequate spacing from terms
+                let signatureStartY = currentY + 15;
+                
+                // If signature section would be too close to bottom, move to new page
+                if (signatureStartY > 240) {
+                    doc.addPage();
+                    signatureStartY = 80;
+                    // Add header on new page for signature
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(20);
+                    doc.setTextColor(31, 41, 55);
+                    doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
+                    doc.setFontSize(12);
+                    doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
+                    doc.setFontSize(10);
+                    doc.setTextColor(107, 114, 128);
+                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
+                    doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
+                    doc.setDrawColor(37, 99, 235);
+                    doc.setLineWidth(0.5);
+                    doc.line(20, 45, 190, 45);
+                }
+
+                // <CHANGE> Improved signature section with better alignment and spacing
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Authorized Signatures', 105, currentY, { align: 'center' });
-                currentY += 5;
+                doc.setTextColor(31, 41, 55);
+                doc.text('AUTHORIZED SIGNATURES', 105, signatureStartY, { align: 'center' });
+                
+                // Create signature boxes with proper alignment
+                const leftSignatureX = 55;
+                const rightSignatureX = 135;
+                const signatureBoxY = signatureStartY + 15;
+                
+                // Signature labels
+                doc.setFontSize(11);
                 doc.setFont('helvetica', 'normal');
-                doc.text('Customer', 50, currentY);
-                doc.text('Service Provider', 140, currentY);
-                currentY += 10;
-                doc.setDrawColor(0); // Black line
-                doc.line(30, currentY, 70, currentY); // Customer signature line
-                doc.line(120, currentY, 160, currentY); // Service Provider signature line
-                currentY += 10;
+                doc.text('Customer', leftSignatureX, signatureBoxY, { align: 'center' });
+                doc.text('Service Provider', rightSignatureX, signatureBoxY, { align: 'center' });
+                
+                // Signature lines with better positioning
+                const lineY = signatureBoxY + 15;
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.3);
+                doc.line(leftSignatureX - 25, lineY, leftSignatureX + 25, lineY); // Customer signature line
+                doc.line(rightSignatureX - 25, lineY, rightSignatureX + 25, lineY); // Service Provider signature line
+                
+                // Names and titles with consistent alignment
                 doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0); // Dark black
-                doc.text(`${contactPerson || '_______________________'}`, 50, currentY, { align: 'center' });
-                doc.text('Authorized Signatory', 140, currentY, { align: 'center' });
-                currentY += 5;
-                doc.text(`${customerName || '_______________________'}`, 50, currentY, { align: 'center' });
-                doc.text('Eye Tech Securities', 140, currentY, { align: 'center' });
-                currentY += 5;
-                const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/');
-                doc.text('Date: ' + dateStr, 50, currentY, { align: 'center' });
-                doc.text('Date: ' + dateStr, 140, currentY, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+                const nameY = lineY + 8;
+                doc.text(contactPerson || 'Name: ___________________', leftSignatureX, nameY, { align: 'center' });
+                doc.text('Authorized Signatory', rightSignatureX, nameY, { align: 'center' });
+                
+                const companyY = nameY + 5;
+                doc.text(customerName || 'Company: ________________', leftSignatureX, companyY, { align: 'center' });
+                doc.text('Eye Tech Securities', rightSignatureX, companyY, { align: 'center' });
+                
+                // Date with consistent formatting
+                const dateY = companyY + 8;
+                const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                doc.text(`Date: ${dateStr}`, leftSignatureX, dateY, { align: 'center' });
+                doc.text(`Date: ${dateStr}`, rightSignatureX, dateY, { align: 'center' });
 
-                // Footer (no page number on last page)
+                // <CHANGE> Improved footer positioning to avoid overlap with signature section
                 const totalPages = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= totalPages; i++) {
                     doc.setPage(i);
-                    doc.setFontSize(9);
+                    doc.setFontSize(8);
                     doc.setTextColor(107, 114, 128);
+                    
+                    // Only add page numbers on pages other than the last one
                     if (i < totalPages) {
-                        doc.text(`Page ${i} of ${totalPages}`, 190, 285, { align: 'right' });
+                        doc.text(`Page ${i} of ${totalPages}`, 190, 290, { align: 'right' });
                     }
-                    doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 285, { align: 'center' });
+                    
+                    // Footer text positioned to avoid signature section
+                    doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 290, { align: 'center' });
                 }
 
                 // Save PDF
