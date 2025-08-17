@@ -73,11 +73,6 @@
             color: #1f2937;
             margin-top: 1rem;
         }
-        .signature-section {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #d1d5db;
-        }
     </style>
 </head>
 <body>
@@ -123,23 +118,6 @@
                 </div>
 
                 <button type="button" onclick="generatePDF()" class="btn-primary mt-6 w-full">Generate PDF</button>
-                <div class="signature-section">
-                    <h2 class="text-lg font-semibold text-gray-700">Signatures</h2>
-                    <div class="flex justify-between mt-4">
-                        <div>
-                            <p class="text-sm text-gray-600">Customer Signature:</p>
-                            <div class="border-b-2 border-gray-300 w-40 mt-1"></div>
-                            <p class="text-xs text-gray-500 mt-1">Name: _______________________</p>
-                            <p class="text-xs text-gray-500">Date: _______________________</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Eye Tech Securities Signature:</p>
-                            <div class="border-b-2 border-gray-300 w-40 mt-1"></div>
-                            <p class="text-xs text-gray-500 mt-1">Name: _______________________</p>
-                            <p class="text-xs text-gray-500">Date: _______________________</p>
-                        </div>
-                    </div>
-                </div>
             </form>
         </div>
     </div>
@@ -190,20 +168,21 @@
             doc.line(20, 35, 190, 35);
             doc.setFontSize(10);
             doc.setTextColor(107, 114, 128); // Gray-500
-            doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
+            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
 
             // AMC Number and Date
             const today = new Date();
+            today.setHours(12, 13, 0, 0); // Set to 12:13 PM IST
             const year = today.getFullYear();
             const randomSuffix = Math.floor(Math.random() * 900) + 100;
             const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
-            const amcDate = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            const amcDate = today.toLocaleString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
 
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(55, 65, 81); // Gray-700
             doc.text(`AMC Number: ${amcNumber}`, 20, 55);
-            doc.text(`AMC Date: ${amcDate}`, 20, 63);
+            doc.text(`AMC Date: ${amcDate} IST`, 20, 63);
 
             // Customer Details
             doc.setFontSize(14);
@@ -307,7 +286,8 @@
                 '19. Any additional work beyond the scope of AMC will be charged separately as per prevailing rates.',
                 '20. Disputes, if any, will be subject to the jurisdiction of local courts only.',
                 '21. This contract supersedes all previous agreements and can only be modified in writing with mutual consent.',
-                '22. Force majeure conditions (strikes, lockouts, natural disasters, government restrictions) may suspend service obligations temporarily.'
+                '22. Force majeure conditions (strikes, lockouts, natural disasters, government restrictions) may suspend service obligations temporarily.',
+                '23. Scheduled maintenance visits are non-transferable to alternative products and shall not be carried forward to subsequent contract years.'
             ];
             let currentY = startY + 10;
             terms.forEach((term, index) => {
@@ -327,13 +307,13 @@
                     doc.line(20, 35, 190, 35);
                     doc.setFontSize(10);
                     doc.setTextColor(107, 114, 128);
-                    doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
+                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
                 }
                 doc.text(lines, 20, currentY);
                 currentY += lines.length * 8;
             });
 
-            // Signatures (moved to bottom with professional spacing)
+            // Signatures (moved to bottom with professional layout)
             if (currentY + 40 > 280 - 20) {
                 doc.addPage();
                 currentY = 50;
@@ -349,7 +329,7 @@
                 doc.line(20, 35, 190, 35);
                 doc.setFontSize(10);
                 doc.setTextColor(107, 114, 128);
-                doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
+                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944 | support@eyetechsecurities.in', 105, 40, { align: 'center' });
             }
             doc.setFontSize(12);
             doc.text('Signatures', 20, currentY);
@@ -357,9 +337,9 @@
             currentY += 10;
             doc.text('Customer Signature:', 20, currentY);
             doc.line(20, currentY + 5, 60, currentY + 5);
-            doc.text('Name: _______________________', 20, currentY + 10);
+            doc.text(`Name: ${customerName || '_______________________'}`, 20, currentY + 10);
             doc.text('Date: _______________________', 20, currentY + 20);
-            doc.text('Eye Tech Securities Signature:', 120, currentY);
+            doc.text('Eye Tech Securities Authorized Signatory:', 120, currentY);
             doc.line(120, currentY + 5, 160, currentY + 5);
             doc.text('Name: _______________________', 120, currentY + 10);
             doc.text('Date: _______________________', 120, currentY + 20);
@@ -368,7 +348,7 @@
             doc.setFontSize(10);
             doc.setTextColor(107, 114, 128);
             doc.text(`Page ${doc.internal.getNumberOfPages()}`, 190, 280, { align: 'right' });
-            doc.text('Eye Tech Securities | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 280, { align: 'center' });
+            doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 280, { align: 'center' });
 
             // Save PDF
             doc.save(`AMC_Agreement_${amcNumber}.pdf`);
