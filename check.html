@@ -189,14 +189,44 @@
 
     <script>
         let signatureImageData = null;
+        let processedSignatureData = null; // Store processed/resized image data
+
+        function resizeImage(imageData, maxWidth, maxHeight) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate scaling factor to fit within bounds while maintaining aspect ratio
+                    const scaleX = maxWidth / img.width;
+                    const scaleY = maxHeight / img.height;
+                    const scale = Math.min(scaleX, scaleY);
+                    
+                    // Set canvas dimensions to scaled size
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    
+                    // Draw resized image
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Convert back to data URL
+                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                };
+                img.src = imageData;
+            });
+        }
 
         function handleSignatureUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     signatureImageData = e.target.result;
-                    document.getElementById('signature-image').src = signatureImageData;
+                    
+                    processedSignatureData = await resizeImage(signatureImageData, 200, 100);
+                    
+                    document.getElementById('signature-image').src = processedSignatureData;
                     document.getElementById('signature-preview').style.display = 'block';
                 };
                 reader.readAsDataURL(file);
@@ -205,6 +235,7 @@
 
         function removeSignature() {
             signatureImageData = null;
+            processedSignatureData = null; // Clear processed data
             document.getElementById('signature-upload').value = '';
             document.getElementById('signature-preview').style.display = 'none';
         }
@@ -238,11 +269,38 @@
             document.getElementById('total-amount').textContent = `Total Amount: Rs.${total.toFixed(2)}`;
         }
 
-        function generatePDF() {
+        function resizeImageForPDF(imageData, maxWidthPx, maxHeightPx) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate scaling factor
+                    const scaleX = maxWidthPx / img.width;
+                    const scaleY = maxHeightPx / img.height;
+                    const scale = Math.min(scaleX, scaleY);
+                    
+                    // Set canvas dimensions
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    
+                    // Draw resized image with high quality
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    resolve(canvas.toDataURL('image/jpeg', 0.9));
+                };
+                img.src = imageData;
+            });
+        }
+
+        async function generatePDF() {
             const errorMessage = document.getElementById('error-message');
             errorMessage.style.display = 'none';
 
-            loadLibraries().then(() => {
+            loadLibraries().then(async () => {
                 try {
                     const { jsPDF } = window.jspdf;
                     if (!jsPDF) {
@@ -457,14 +515,15 @@
                     doc.text('Customer', leftSignatureX, signatureBoxY, { align: 'center' });
                     doc.text('Service Provider', rightSignatureX, signatureBoxY, { align: 'center' });
 
-                    const imgWidth = 40;
-                    const imgHeight = 20;
-                    const imgX = rightSignatureX - (imgWidth / 2);
-                    const imgY = signatureBoxY + 5; // Position below "Service Provider" text but above signature line
+                    const maxSignatureWidth = 40; // mm
+                    const maxSignatureHeight = 20; // mm
+                    const imgX = rightSignatureX - (maxSignatureWidth / 2);
+                    const imgY = signatureBoxY + 5;
                     
                     if (signatureImageData) {
                         try {
-                            doc.addImage(signatureImageData, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+                            const pdfImage = await resizeImageForPDF(signatureImageData, maxSignatureWidth * 3.78, maxSignatureHeight * 3.78); // Convert mm to pixels (1mm ≈ 3.78px)
+                            doc.addImage(pdfImage, 'JPEG', imgX, imgY, maxSignatureWidth, maxSignatureHeight);
                         } catch (error) {
                             console.warn('Could not add signature image:', error);
                         }
@@ -511,9 +570,9 @@
                     console.error(error);
                 }
             }).catch(error => {
-                errorMessage.textContent = `Error loading libraries: ${error.message}. Please check your internet connection or try refreshing the page.`;
+                errorMessage.textContent = `Error loading libraries: ${error.message}. Please check your internet connection or try a different browser.`;
                 errorMessage.style.display = 'block';
-                console.error(error);
+                console.error('Library loading error:', error);
             });
         }
 
