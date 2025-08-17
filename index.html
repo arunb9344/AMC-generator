@@ -178,7 +178,7 @@
                 doc.setFontSize(10);
                 doc.setTextColor(107, 114, 128); // Gray-500
                 doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-                doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in', 105, 40, { align: 'center' });
+                doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
                 doc.setDrawColor(37, 99, 235); // Blue-600
                 doc.setLineWidth(0.5);
                 doc.line(20, 45, 190, 45);
@@ -188,7 +188,7 @@
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(55, 65, 81); // Gray-700
                 const today = new Date(2025, 7, 17); // August 17, 2025
-                today.setHours(13, 35, 0, 0); // Set to 01:35 PM IST
+                today.setHours(13, 48, 0, 0); // Set to 01:48 PM IST
                 const year = today.getFullYear();
                 const randomSuffix = Math.floor(Math.random() * 900) + 100;
                 const amcNumber = `ETS-AMC-${year}${randomSuffix.toString().padStart(3, '0')}`;
@@ -274,35 +274,35 @@
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
                 const terms = [
-                    `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
-                    '2. Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.',
-                    '3. Offer valid for 30 days from issue date.',
-                    '4. Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.',
-                    '5. Customer must provide ladder, water, power supply, and civil support for maintenance.',
-                    '6. Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
-                    '7. Technician access required during scheduled visits; no refund for missed appointments due to unavailability.',
-                    '8. Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
-                    '9. Contract is non-transferable and non-terminable before completion.',
-                    '10. Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
-                    '11. Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
-                    '12. Only registered complaints via proper channels are addressed during breakdown visits.',
-                    '13. Warranty-covered items replaced free; out-of-warranty items chargeable.',
-                    '14. Material replacements, spare parts, and consumables chargeable unless under warranty.',
-                    '15. Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
-                    '16. Unauthorized equipment modification voids the AMC contract.',
-                    '17. Service visits scheduled with 24-48 hours notice to customer.',
-                    '18. Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
-                    '19. Additional work beyond AMC scope chargeable per prevailing rates.',
-                    '20. Disputes subject to local court jurisdiction.',
-                    '21. This contract supersedes prior agreements; modifications require mutual written consent.',
-                    '22. Force majeure conditions may temporarily suspend service obligations.',
-                    '23. Maintenance visits non-transferable and not carried forward.',
-                    '24. 18% GST applies on total contract amount per tax regulations.'
+                    '1 The contract is applicable for ' + (contractPeriod * 12) + ' months from the agreement date.',
+                    '2 Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.',
+                    '3 Offer valid for 30 days from issue date.',
+                    '4 Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.',
+                    '5 Customer must provide ladder, water, power supply, and civil support for maintenance.',
+                    '6 Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
+                    '7 Technician access required during scheduled visits; no refund for missed appointments due to unavailability.',
+                    '8 Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
+                    '9 Contract is non-transferable and non-terminable before completion.',
+                    '10 Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
+                    '11 Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
+                    '12 Only registered complaints via proper channels are addressed during breakdown visits.',
+                    '13 Warranty-covered items replaced free; out-of-warranty items chargeable.',
+                    '14 Material replacements, spare parts, and consumables chargeable unless under warranty.',
+                    '15 Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
+                    '16 Unauthorized equipment modification voids the AMC contract.',
+                    '17 Service visits scheduled with 24-48 hours notice to customer.',
+                    '18 Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
+                    '19 Additional work beyond AMC scope chargeable per prevailing rates.',
+                    '20 Disputes subject to local court jurisdiction.',
+                    '21 This contract supersedes prior agreements; modifications require mutual written consent.',
+                    '22 Force majeure conditions may temporarily suspend service obligations.',
+                    '23 Maintenance visits non-transferable and not carried forward.',
+                    '24 18% GST applies on total contract amount per tax regulations.'
                 ];
                 let currentY = startY + 10;
                 terms.forEach((term, index) => {
-                    const lines = doc.splitTextToSize(`${index + 1}. ${term}`, 170);
-                    if (currentY + lines.length * 5 > 280 - 40) { // Adjusted for signature space
+                    const lines = doc.splitTextToSize(term, 170);
+                    if (currentY + lines.length * 5 > 260) { // Adjusted for signature at bottom
                         doc.addPage();
                         currentY = 50;
                         doc.setFont('helvetica', 'bold');
@@ -314,56 +314,55 @@
                         doc.setFontSize(10);
                         doc.setTextColor(107, 114, 128);
                         doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-                        doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in', 105, 40, { align: 'center' });
+                        doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
                         doc.setDrawColor(37, 99, 235);
                         doc.setLineWidth(0.5);
                         doc.line(20, 45, 190, 45);
+                        startY = 50;
+                        doc.text('TERMS & CONDITIONS', 20, startY);
+                        doc.line(20, startY + 2, 70, startY + 2);
+                        currentY = startY + 10;
                     }
                     doc.text(lines, 20, currentY);
                     currentY += lines.length * 5;
                 });
 
-                // Signatures
-                if (currentY + 40 > 280 - 20) {
-                    doc.addPage();
-                    currentY = 50;
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(20);
-                    doc.setTextColor(31, 41, 55);
-                    doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
-                    doc.setFontSize(12);
-                    doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
-                    doc.setFontSize(10);
-                    doc.setTextColor(107, 114, 128);
-                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-                    doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in', 105, 40, { align: 'center' });
-                    doc.setDrawColor(37, 99, 235);
-                    doc.setLineWidth(0.5);
-                    doc.line(20, 45, 190, 45);
-                    currentY = 60;
-                }
+                // Signatures at bottom
+                currentY = 265; // Fixed bottom position
                 doc.setFontSize(12);
                 doc.text('Customer', 20, currentY);
                 doc.text('Service Provider', 120, currentY);
                 currentY += 10;
-                doc.line(20, currentY, 70, currentY); // Signature line
-                doc.line(120, currentY, 170, currentY); // Signature line
-                currentY += 15;
-                doc.text(`${contactPerson || '_______________________'}`, 20, currentY);
-                doc.text('Authorized Signatory', 120, currentY);
+                doc.setDrawColor(37, 99, 235); // Blue line near Contact Person
+                doc.line(20, currentY, 70, currentY); // Customer signature line
+                doc.line(120, currentY, 170, currentY); // Service Provider signature line
                 currentY += 10;
-                doc.text(`${customerName || '_______________________'}`, 20, currentY);
-                doc.text('Eye Tech Securities', 120, currentY);
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0); // Dark black color
+                doc.text(`${contactPerson || '_______________________'}`, 105, currentY, { align: 'center' });
+                currentY += 10;
+                doc.text(`${customerName || '_______________________'}`, 105, currentY, { align: 'center' });
                 currentY += 10;
                 const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/');
-                doc.text(dateStr, 20, currentY);
+                doc.text(dateStr, 105, currentY, { align: 'center' });
+                currentY += 5;
+                doc.text('Authorized Signatory', 120, currentY);
+                currentY += 10;
+                doc.text('Eye Tech Securities', 120, currentY);
+                currentY += 10;
                 doc.text(dateStr, 120, currentY);
 
-                // Footer
-                doc.setFontSize(9);
-                doc.setTextColor(107, 114, 128);
-                doc.text(`Page ${doc.internal.getNumberOfPages()}`, 190, 285, { align: 'right' });
-                doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 285, { align: 'center' });
+                // Footer (no page number on last page)
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(9);
+                    doc.setTextColor(107, 114, 128);
+                    if (i < totalPages) {
+                        doc.text(`Page ${i} of ${totalPages}`, 190, 285, { align: 'right' });
+                    }
+                    doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 285, { align: 'center' });
+                }
 
                 // Save PDF
                 doc.save(`AMC_Agreement_${amcNumber}.pdf`);
