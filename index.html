@@ -78,7 +78,7 @@
 <body>
     <div class="container">
         <div class="logo-placeholder">
-            <img src="https://via.placeholder.com/150x50?text=Eye+Tech+Securities+Logo" alt="Eye Tech Securities Logo">
+            <img src="https://via.placeholder.com/150x50?text=Eye+Tech+Securities+Logo" alt="Eye Tech Securities Logo" onerror="this.src='https://via.placeholder.com/150x50?text=Logo+Not+Found';">
         </div>
         <div class="form-section">
             <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">AMC Agreement Generator</h1>
@@ -156,7 +156,7 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Header on every page
+            // Header
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(20);
             doc.setTextColor(31, 41, 55); // Gray-800
@@ -165,36 +165,10 @@
             doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
             doc.setDrawColor(37, 99, 235); // Blue-600
             doc.setLineWidth(0.5);
-            doc.line(20, 35, 190, 35); // Horizontal line
+            doc.line(20, 35, 190, 35);
             doc.setFontSize(10);
             doc.setTextColor(107, 114, 128); // Gray-500
             doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
-
-            // Footer on every page
-            doc.setFontSize(10);
-            doc.setTextColor(107, 114, 128); // Gray-500
-            doc.addPage = function() {
-                const pageCount = doc.internal.getNumberOfPages();
-                PDFDocument.prototype.addPage.apply(this, arguments);
-                doc.setPage(pageCount + 1);
-                doc.setFontSize(10);
-                doc.setTextColor(107, 114, 128);
-                doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber}`, 190, 280, { align: 'right' });
-                doc.text('Eye Tech Securities | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 280, { align: 'center' });
-                // Repeat header on new pages
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(20);
-                doc.setTextColor(31, 41, 55);
-                doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
-                doc.setFontSize(16);
-                doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
-                doc.setDrawColor(37, 99, 235);
-                doc.setLineWidth(0.5);
-                doc.line(20, 35, 190, 35);
-                doc.setFontSize(10);
-                doc.setTextColor(107, 114, 128);
-                doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
-            };
 
             // AMC Number and Date
             const today = new Date();
@@ -214,7 +188,7 @@
             doc.setFont('helvetica', 'bold');
             doc.text('Customer Details', 20, 80);
             doc.setLineWidth(0.2);
-            doc.line(20, 82, 60, 82); // Underline
+            doc.line(20, 82, 60, 82);
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             const customerName = document.getElementById('customer-name').value;
@@ -231,7 +205,7 @@
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.text('Contract Details', 20, 130);
-            doc.line(20, 132, 60, 132); // Underline
+            doc.line(20, 132, 60, 132);
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 140);
@@ -258,7 +232,7 @@
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
                 doc.text('Particulars', 20, 155);
-                doc.line(20, 157, 50, 157); // Underline
+                doc.line(20, 157, 50, 157);
                 doc.autoTable({
                     startY: 165,
                     head: [['Item', 'Maintenance Visits', 'Breakdown Visits', 'Amount (₹)']],
@@ -286,7 +260,7 @@
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.text('Terms and Conditions', 20, startY);
-            doc.line(20, startY + 2, 70, startY + 2); // Underline
+            doc.line(20, startY + 2, 70, startY + 2);
             doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
             const terms = [
@@ -307,24 +281,56 @@
                 '15. Connector replacement (Rs.500/camera) included in first visit.'
             ];
             let currentY = startY + 10;
-            terms.forEach((term) => {
+            terms.forEach((term, index) => {
                 const lines = doc.splitTextToSize(term, 170);
-                if (currentY + lines.length * 8 > 260) {
+                if (currentY + lines.length * 8 > 280 - 20) { // 20mm margin from bottom
                     doc.addPage();
                     currentY = 50;
+                    // Add header to new page
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(20);
+                    doc.setTextColor(31, 41, 55);
+                    doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
+                    doc.setFontSize(16);
+                    doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
+                    doc.setDrawColor(37, 99, 235);
+                    doc.setLineWidth(0.5);
+                    doc.line(20, 35, 190, 35);
+                    doc.setFontSize(10);
+                    doc.setTextColor(107, 114, 128);
+                    doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
                 }
                 doc.text(lines, 20, currentY);
                 currentY += lines.length * 8;
             });
 
             // Signatures
-            if (currentY + 30 > 260) {
+            if (currentY + 30 > 280 - 20) {
                 doc.addPage();
                 currentY = 50;
+                // Add header to new page
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(20);
+                doc.setTextColor(31, 41, 55);
+                doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
+                doc.setFontSize(16);
+                doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
+                doc.setDrawColor(37, 99, 235);
+                doc.setLineWidth(0.5);
+                doc.line(20, 35, 190, 35);
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.text('123 Security Lane, Tech City, India | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 40, { align: 'center' });
             }
             doc.setFontSize(12);
             doc.text('Customer Signature: _______________________', 20, currentY);
             doc.text('Eye Tech Securities Signature: _______________________', 110, currentY);
+
+            // Footer
+            doc.setFontSize(10);
+            doc.setTextColor(107, 114, 128);
+            doc.text(`Page ${doc.internal.getNumberOfPages()}`, 190, 280, { align: 'right' });
+            doc.text('Eye Tech Securities | support@eyetechsecurities.com | +91-XXX-XXX-XXXX', 105, 280, { align: 'center' });
 
             // Save PDF
             doc.save(`AMC_Agreement_${amcNumber}.pdf`);
