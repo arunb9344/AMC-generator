@@ -69,6 +69,11 @@
             color: #1f2937;
             margin-top: 1rem;
         }
+        #error-message {
+            color: #dc2626;
+            margin-top: 1rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +122,7 @@
                 </div>
 
                 <button type="button" onclick="generatePDF()" class="btn-primary mt-6 w-full">Generate PDF</button>
+                <div id="error-message"></div>
             </form>
         </div>
     </div>
@@ -152,155 +158,192 @@
         }
 
         function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none';
 
-            // Header
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(20);
-            doc.setTextColor(31, 41, 55); // Gray-800
-            doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
-            doc.setFontSize(16);
-            doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
-            doc.setFontSize(10);
-            doc.setTextColor(107, 114, 128); // Gray-500
-            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
-            doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
-            doc.setDrawColor(37, 99, 235); // Blue-600
-            doc.setLineWidth(0.5);
-            doc.line(20, 50, 190, 50);
-
-            // AMC Number and Date
-            const today = new Date(2025, 7, 17); // August 17, 2025
-            today.setHours(13, 11, 0, 0); // Set to 01:11 PM IST
-            const year = today.getFullYear();
-            const randomSuffix = Math.floor(Math.random() * 900) + 100;
-            const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
-            const amcDate = today.toLocaleString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
-            const validUntil = new Date(today);
-            validUntil.setFullYear(validUntil.getFullYear() + parseInt(document.getElementById('contract-period').value));
-            const validUntilDate = validUntil.toLocaleDateString('en-IN', { year: 'numeric', month: 'numeric', day: 'numeric' });
-
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(55, 65, 81); // Gray-700
-            doc.text(`AMC Number: ${amcNumber}`, 20, 60);
-            doc.text(`Total Amount: Rs. ${rows.length > 0 ? (parseFloat(document.querySelectorAll('.particular-row input[placeholder="Amount (Rs.)"]')[0].value) || 0).toFixed(2) : '0.00'}`, 20, 68);
-            doc.text(`AMC Date: ${amcDate} IST`, 20, 76);
-            doc.text(`Valid Until: ${validUntilDate}`, 20, 84);
-
-            // Customer Details
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Customer Details', 20, 100);
-            doc.setLineWidth(0.2);
-            doc.line(20, 102, 60, 102);
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            const customerName = document.getElementById('customer-name').value;
-            const customerAddress = document.getElementById('customer-address').value;
-            const contactPerson = document.getElementById('contact-person').value;
-            const customerContact = document.getElementById('customer-contact').value;
-            const customerEmail = document.getElementById('customer-email').value;
-            const customerGST = document.getElementById('customer-gst').value;
-            doc.text(`Name: ${customerName}`, 20, 110);
-            doc.text(`Address: ${customerAddress}`, 20, 118);
-            doc.text(`Contact Person: ${contactPerson}`, 20, 126);
-            doc.text(`Phone: ${customerContact}`, 20, 134);
-            doc.text(`Email: ${customerEmail}`, 20, 142);
-            let gstY = 150;
-            if (customerGST) {
-                doc.text(`GST: ${customerGST}`, 20, gstY);
-                gstY += 8;
-            }
-
-            // Contract Period
-            const contractPeriod = parseInt(document.getElementById('contract-period').value);
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Contract Details', 20, gstY + 10);
-            doc.line(20, gstY + 12, 60, gstY + 12);
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, gstY + 20);
-
-            // Particulars Table
-            const particulars = [];
-            let totalAmount = 0;
-            const rows = document.querySelectorAll('.particular-row');
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs.length === 4) {
-                    const amount = parseFloat(inputs[3].value) || 0;
-                    totalAmount += amount;
-                    particulars.push([
-                        inputs[0].value,
-                        inputs[1].value,
-                        inputs[2].value,
-                        `Rs.${amount.toFixed(2)}`
-                    ]);
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    throw new Error('jsPDF library failed to load. Check your internet connection or script source.');
                 }
-            });
+                const doc = new jsPDF();
 
-            if (particulars.length > 0) {
-                doc.setFontSize(14);
+                // Header
                 doc.setFont('helvetica', 'bold');
-                doc.text('Equipment Covered', 20, gstY + 35);
-                doc.line(20, gstY + 37, 70, gstY + 37);
-                doc.autoTable({
-                    startY: gstY + 45,
-                    head: [['S.No', 'Equipment Type', 'Maintenance Visits', 'Breakdown Visits']],
-                    body: particulars.map((item, index) => [index + 1, item[0], item[1], item[2]]),
-                    theme: 'grid',
-                    styles: { fontSize: 10, cellPadding: 4, textColor: [55, 65, 81] },
-                    headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
-                    columnStyles: {
-                        0: { cellWidth: 20 },
-                        1: { cellWidth: 60 },
-                        2: { cellWidth: 40 },
-                        3: { cellWidth: 40 }
+                doc.setFontSize(20);
+                doc.setTextColor(31, 41, 55); // Gray-800
+                doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
+                doc.setFontSize(16);
+                doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128); // Gray-500
+                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
+                doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
+                doc.setDrawColor(37, 99, 235); // Blue-600
+                doc.setLineWidth(0.5);
+                doc.line(20, 50, 190, 50);
+
+                // AMC Number and Date
+                const today = new Date(2025, 7, 17); // August 17, 2025
+                today.setHours(13, 18, 0, 0); // Set to 01:18 PM IST
+                const year = today.getFullYear();
+                const randomSuffix = Math.floor(Math.random() * 900) + 100;
+                const amcNumber = `ETS-AMC-${year}-${randomSuffix.toString().padStart(3, '0')}`;
+                const amcDate = today.toLocaleString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                const validUntil = new Date(today);
+                validUntil.setFullYear(validUntil.getFullYear() + parseInt(document.getElementById('contract-period').value));
+                const validUntilDate = validUntil.toLocaleDateString('en-IN', { year: 'numeric', month: 'numeric', day: 'numeric' });
+
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(55, 65, 81); // Gray-700
+                doc.text(`AMC Number: ${amcNumber}`, 20, 60);
+                const rows = document.querySelectorAll('.particular-row');
+                let totalAmount = 0;
+                rows.forEach(row => {
+                    const amountInput = row.querySelector('input[placeholder="Amount (Rs.)"]');
+                    if (amountInput && amountInput.value) {
+                        totalAmount += parseFloat(amountInput.value) || 0;
                     }
                 });
-            }
+                doc.text(`Total Amount: Rs.${totalAmount.toFixed(2)}`, 20, 68);
+                doc.text(`AMC Date: ${amcDate} IST`, 20, 76);
+                doc.text(`Valid Until: ${validUntilDate}`, 20, 84);
 
-            // Terms and Conditions
-            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : gstY + 35;
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Terms and Conditions', 20, startY);
-            doc.line(20, startY + 2, 70, startY + 2);
-            doc.setFontSize(10); // Reduced to 10pt to fit more content
-            doc.setFont('helvetica', 'normal');
-            const terms = [
-                `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
-                '2. Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or any act of God.',
-                '3. Offer valid for 30 days from issue date.',
-                '4. Equipment must be in working condition at the time of contract signing; customer to bear initial repair cost if equipment is faulty.',
-                '5. Customer must provide ladder, water, power supply, and civil support as required for maintenance work.',
-                '6. Missing/stolen items during the contract period are customer\'s liability and not covered under AMC.',
-                '7. Customer must allow technician access during scheduled maintenance visits. No refund will be provided for missed appointments due to customer unavailability.',
-                '8. Breakdown visits are only during working hours (Monday to Saturday, 9 AM to 6 PM). Emergency visits may be charged separately.',
-                '9. Contract is non-transferable and non-terminable before the completion of the contract period.',
-                '10. Payment is due within 30 days of invoice date, failing which 2% monthly penalty will be applicable on the outstanding amount.',
-                '11. Maintenance visits include cleaning, adjustments, calibration, software updates, and general health checks of the equipment.',
-                '12. Only registered complaints through proper channels will be addressed during breakdown visits.',
-                '13. Only warranty-covered items will be processed for free replacement. Out-of-warranty items will be chargeable.',
-                '14. Material replacements, spare parts, and consumables are chargeable unless specifically covered under manufacturer warranty.',
-                '15. Connector replacement charges (Rs. 500 per camera) are included in the first maintenance visit only.',
-                '16. Any modification or tampering of equipment by unauthorized personnel will void the AMC contract.',
-                '17. Service visits will be scheduled with 24-48 hours advance notice to the customer.',
-                '18. Customer is responsible for data backup before any maintenance work. Eye Tech Securities is not liable for any data loss.',
-                '19. Any additional work beyond the scope of AMC will be charged separately as per prevailing rates.',
-                '20. Disputes, if any, will be subject to the jurisdiction of local courts only.',
-                '21. This contract supersedes all previous agreements and can only be modified in writing with mutual consent.',
-                '22. Force majeure conditions (strikes, lockouts, natural disasters, government restrictions) may suspend service obligations temporarily.',
-                '23. Scheduled maintenance visits are non-transferable to alternative products and shall not be carried forward to subsequent contract years.',
-                '24. An additional 18% GST shall be applicable on the total contract amount as per prevailing tax regulations.'
-            ];
-            let currentY = startY + 10;
-            terms.forEach((term, index) => {
-                const lines = doc.splitTextToSize(term, 170);
-                if (currentY + lines.length * 7 > 280 - 50) { // Adjusted spacing to 7mm per line to fit
+                // Customer Details
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Customer Details', 20, 100);
+                doc.setLineWidth(0.2);
+                doc.line(20, 102, 60, 102);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                const customerName = document.getElementById('customer-name').value;
+                const customerAddress = document.getElementById('customer-address').value;
+                const contactPerson = document.getElementById('contact-person').value;
+                const customerContact = document.getElementById('customer-contact').value;
+                const customerEmail = document.getElementById('customer-email').value;
+                const customerGST = document.getElementById('customer-gst').value;
+                doc.text(`Name: ${customerName}`, 20, 110);
+                doc.text(`Address: ${customerAddress}`, 20, 118);
+                doc.text(`Contact Person: ${contactPerson}`, 20, 126);
+                doc.text(`Phone: ${customerContact}`, 20, 134);
+                doc.text(`Email: ${customerEmail}`, 20, 142);
+                let gstY = 150;
+                if (customerGST) {
+                    doc.text(`GST: ${customerGST}`, 20, gstY);
+                    gstY += 8;
+                }
+
+                // Contract Period
+                const contractPeriod = parseInt(document.getElementById('contract-period').value);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Contract Details', 20, gstY + 10);
+                doc.line(20, gstY + 12, 60, gstY + 12);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, gstY + 20);
+
+                // Particulars Table
+                const particulars = [];
+                totalAmount = 0;
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs.length === 4) {
+                        const amount = parseFloat(inputs[3].value) || 0;
+                        totalAmount += amount;
+                        particulars.push([
+                            inputs[0].value,
+                            inputs[1].value,
+                            inputs[2].value,
+                            `Rs.${amount.toFixed(2)}`
+                        ]);
+                    }
+                });
+
+                if (particulars.length > 0) {
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Equipment Covered', 20, gstY + 35);
+                    doc.line(20, gstY + 37, 70, gstY + 37);
+                    doc.autoTable({
+                        startY: gstY + 45,
+                        head: [['S.No', 'Equipment Type', 'Maintenance Visits', 'Breakdown Visits']],
+                        body: particulars.map((item, index) => [index + 1, item[0], item[1], item[2]]),
+                        theme: 'grid',
+                        styles: { fontSize: 10, cellPadding: 4, textColor: [55, 65, 81] },
+                        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
+                        columnStyles: {
+                            0: { cellWidth: 20 },
+                            1: { cellWidth: 60 },
+                            2: { cellWidth: 40 },
+                            3: { cellWidth: 40 }
+                        }
+                    });
+                }
+
+                // Terms and Conditions
+                let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : gstY + 35;
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Terms and Conditions', 20, startY);
+                doc.line(20, startY + 2, 70, startY + 2);
+                doc.setFontSize(10); // Reduced to 10pt to fit more content
+                doc.setFont('helvetica', 'normal');
+                const terms = [
+                    `1. The contract is applicable for ${contractPeriod * 12} months from the agreement date.`,
+                    '2. Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or any act of God.',
+                    '3. Offer valid for 30 days from issue date.',
+                    '4. Equipment must be in working condition at the time of contract signing; customer to bear initial repair cost if equipment is faulty.',
+                    '5. Customer must provide ladder, water, power supply, and civil support as required for maintenance work.',
+                    '6. Missing/stolen items during the contract period are customer\'s liability and not covered under AMC.',
+                    '7. Customer must allow technician access during scheduled maintenance visits. No refund will be provided for missed appointments due to customer unavailability.',
+                    '8. Breakdown visits are only during working hours (Monday to Saturday, 9 AM to 6 PM). Emergency visits may be charged separately.',
+                    '9. Contract is non-transferable and non-terminable before the completion of the contract period.',
+                    '10. Payment is due within 30 days of invoice date, failing which 2% monthly penalty will be applicable on the outstanding amount.',
+                    '11. Maintenance visits include cleaning, adjustments, calibration, software updates, and general health checks of the equipment.',
+                    '12. Only registered complaints through proper channels will be addressed during breakdown visits.',
+                    '13. Only warranty-covered items will be processed for free replacement. Out-of-warranty items will be chargeable.',
+                    '14. Material replacements, spare parts, and consumables are chargeable unless specifically covered under manufacturer warranty.',
+                    '15. Connector replacement charges (Rs. 500 per camera) are included in the first maintenance visit only.',
+                    '16. Any modification or tampering of equipment by unauthorized personnel will void the AMC contract.',
+                    '17. Service visits will be scheduled with 24-48 hours advance notice to the customer.',
+                    '18. Customer is responsible for data backup before any maintenance work. Eye Tech Securities is not liable for any data loss.',
+                    '19. Any additional work beyond the scope of AMC will be charged separately as per prevailing rates.',
+                    '20. Disputes, if any, will be subject to the jurisdiction of local courts only.',
+                    '21. This contract supersedes all previous agreements and can only be modified in writing with mutual consent.',
+                    '22. Force majeure conditions (strikes, lockouts, natural disasters, government restrictions) may suspend service obligations temporarily.',
+                    '23. Scheduled maintenance visits are non-transferable to alternative products and shall not be carried forward to subsequent contract years.',
+                    '24. An additional 18% GST shall be applicable on the total contract amount as per prevailing tax regulations.'
+                ];
+                let currentY = startY + 10;
+                terms.forEach((term, index) => {
+                    const lines = doc.splitTextToSize(term, 170);
+                    if (currentY + lines.length * 7 > 280 - 50) {
+                        doc.addPage();
+                        currentY = 50;
+                        // Add header to new page
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(20);
+                        doc.setTextColor(31, 41, 55);
+                        doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
+                        doc.setFontSize(16);
+                        doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
+                        doc.setFontSize(10);
+                        doc.setTextColor(107, 114, 128);
+                        doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
+                        doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
+                        doc.setDrawColor(37, 99, 235);
+                        doc.setLineWidth(0.5);
+                        doc.line(20, 50, 190, 50);
+                    }
+                    doc.text(lines, 20, currentY);
+                    currentY += lines.length * 7;
+                });
+
+                // Signatures
+                if (currentY + 50 > 280 - 20) {
                     doc.addPage();
                     currentY = 50;
                     // Add header to new page
@@ -318,53 +361,35 @@
                     doc.setLineWidth(0.5);
                     doc.line(20, 50, 190, 50);
                 }
-                doc.text(lines, 20, currentY);
-                currentY += lines.length * 7; // Reduced line spacing to fit in 2 pages
-            });
+                doc.setFontSize(12);
+                doc.text('Customer', 20, currentY);
+                doc.text('Service Provider', 120, currentY);
+                currentY += 10;
+                doc.text('"Space for Signature"', 20, currentY);
+                doc.text('"Space for Signature"', 120, currentY);
+                currentY += 15;
+                doc.text(`${contactPerson || '_______________________'}`, 20, currentY);
+                doc.text('Authorized Signatory', 120, currentY);
+                currentY += 10;
+                doc.text(`${customerName || '_______________________'}`, 20, currentY);
+                doc.text('Eye Tech Securities', 120, currentY);
+                currentY += 10;
+                doc.text(`${amcDate.split(', ')[1]}`, 20, currentY);
+                doc.text(`${amcDate.split(', ')[1]}`, 120, currentY);
 
-            // Signatures (customized as per new specification)
-            if (currentY + 50 > 280 - 20) {
-                doc.addPage();
-                currentY = 50;
-                // Add header to new page
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(20);
-                doc.setTextColor(31, 41, 55);
-                doc.text('Eye Tech Securities', 105, 20, { align: 'center' });
-                doc.setFontSize(16);
-                doc.text('Annual Maintenance Contract (AMC) Agreement', 105, 30, { align: 'center' });
-                doc.setFontSize(10);
+                // Footer
+                doc.setFontSize(9);
                 doc.setTextColor(107, 114, 128);
-                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 40, { align: 'center' });
-                doc.text('GST: 33BCMPA5207N1ZN | Ph: 9962835944 | support@eyetechsecurities.in', 105, 45, { align: 'center' });
-                doc.setDrawColor(37, 99, 235);
-                doc.setLineWidth(0.5);
-                doc.line(20, 50, 190, 50);
+                doc.text(`Page ${doc.internal.getNumberOfPages()}`, 190, 285, { align: 'right' });
+                doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 285, { align: 'center' });
+
+                // Save PDF
+                doc.save(`AMC_Agreement_${amcNumber}.pdf`);
+            } catch (error) {
+                errorMessage.textContent = `Error generating PDF: ${error.message}. Please check your browser console for details or ensure an internet connection.`;
+                errorMessage.style.display = 'block';
+                console.error(error);
             }
-            doc.setFontSize(12);
-            doc.text('Customer', 20, currentY);
-            doc.text('Service Provider', 120, currentY);
-            currentY += 10;
-            doc.text('"Space for Signature"', 20, currentY);
-            doc.text('"Space for Signature"', 120, currentY);
-            currentY += 15;
-            doc.text(`${contactPerson || '_______________________'}`, 20, currentY);
-            doc.text('Authorized Signatory', 120, currentY);
-            currentY += 10;
-            doc.text(`${customerName || '_______________________'}`, 20, currentY);
-            doc.text('Eye Tech Securities', 120, currentY);
-            currentY += 10;
-            doc.text(`${amcDate.split(', ')[1]}`, 20, currentY);
-            doc.text(`${amcDate.split(', ')[1]}`, 120, currentY);
-
-            // Footer (adjusted to avoid overlap)
-            doc.setFontSize(9); // Reduced font size to prevent overlap
-            doc.setTextColor(107, 114, 128);
-            doc.text(`Page ${doc.internal.getNumberOfPages()}`, 190, 285, { align: 'right' }); // Moved down to 285mm
-            doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 285, { align: 'center' });
-
-            // Save PDF
-            doc.save(`AMC_Agreement_${amcNumber}.pdf`);
         }
 
         // Add one particular row by default
@@ -374,6 +399,14 @@
         document.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener('input', updateTotalAmount);
         });
+
+        // Verify script loading
+        window.onload = function() {
+            if (!window.jspdf || !window.jspdf.jsPDF.prototype.autoTable) {
+                document.getElementById('error-message').textContent = 'Required libraries (jsPDF or autoTable) failed to load. Please check your internet connection or try a different browser.';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        };
     </script>
 </body>
 </html>
