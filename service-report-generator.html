@@ -283,48 +283,18 @@
                     </div>
                 </div>
 
-                <!-- Added Work Performed section -->
+                <!-- Removed Work Performed section and replaced with Issue Description -->
                 <div class="form-section mt-6">
-                    <h2>Work Performed</h2>
-                    <div id="work-container"></div>
-                    <button type="button" onclick="addWorkRow()" class="btn-secondary mt-4">Add Work Item</button>
+                    <h2>Issue Description</h2>
+                    <label for="issue-description" class="block text-sm font-medium text-gray-700">Issue Description</label>
+                    <textarea id="issue-description" class="textarea-field" style="min-height: 120px;" placeholder="Describe the issue or reason for service visit in detail..."></textarea>
                 </div>
 
-                <!-- Added Equipment Status section -->
+                <!-- Added Technician Comments section -->
                 <div class="form-section mt-6">
-                    <h2>Equipment Status & Observations</h2>
-                    <label for="equipment-condition" class="block text-sm font-medium text-gray-700">Overall Equipment Condition</label>
-                    <select id="equipment-condition" class="input-field" required>
-                        <option value="">Select Condition</option>
-                        <option value="Excellent">Excellent</option>
-                        <option value="Good">Good</option>
-                        <option value="Fair">Fair</option>
-                        <option value="Poor">Poor</option>
-                        <option value="Needs Attention">Needs Attention</option>
-                    </select>
-
-                    <label for="observations" class="block text-sm font-medium text-gray-700">Observations & Notes</label>
-                    <textarea id="observations" class="textarea-field" placeholder="Enter any observations, issues found, or recommendations..."></textarea>
-
-                    <label for="recommendations" class="block text-sm font-medium text-gray-700">Recommendations</label>
-                    <textarea id="recommendations" class="textarea-field" placeholder="Enter recommendations for future maintenance or improvements..."></textarea>
-                </div>
-
-                <!-- Added Customer Satisfaction section -->
-                <div class="form-section mt-6">
-                    <h2>Customer Satisfaction</h2>
-                    <label for="customer-satisfaction" class="block text-sm font-medium text-gray-700">Customer Satisfaction Rating</label>
-                    <select id="customer-satisfaction" class="input-field">
-                        <option value="">Select Rating</option>
-                        <option value="Excellent">Excellent</option>
-                        <option value="Very Good">Very Good</option>
-                        <option value="Good">Good</option>
-                        <option value="Fair">Fair</option>
-                        <option value="Poor">Poor</option>
-                    </select>
-
-                    <label for="customer-feedback" class="block text-sm font-medium text-gray-700">Customer Feedback</label>
-                    <textarea id="customer-feedback" class="textarea-field" placeholder="Enter customer feedback or comments..."></textarea>
+                    <h2>Technician Comments</h2>
+                    <label for="technician-comments" class="block text-sm font-medium text-gray-700">Technician Comments</label>
+                    <textarea id="technician-comments" class="textarea-field" style="min-height: 120px;" placeholder="Enter detailed technician observations, work performed, and recommendations..."></textarea>
                 </div>
 
                 <button type="button" onclick="generateServiceReport()" class="btn-primary mt-6 w-full">Generate Service Report PDF</button>
@@ -334,35 +304,6 @@
     </div>
 
     <script>
-        function addWorkRow() {
-            const container = document.getElementById('work-container');
-            const row = document.createElement('div');
-            row.className = 'work-row';
-            row.innerHTML = `
-                <select class="input-field" required>
-                    <option value="">Select Work Type</option>
-                    <option value="Cleaning">Cleaning</option>
-                    <option value="Calibration">Calibration</option>
-                    <option value="Replacement">Replacement</option>
-                    <option value="Repair">Repair</option>
-                    <option value="Testing">Testing</option>
-                    <option value="Configuration">Configuration</option>
-                    <option value="Inspection">Inspection</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="text" placeholder="Equipment/Component" class="input-field" required>
-                <input type="text" placeholder="Description of work performed" class="input-field" required>
-                <select class="input-field" required>
-                    <option value="">Status</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Partially Completed">Partially Completed</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Not Required">Not Required</option>
-                </select>
-                <button type="button" onclick="this.parentNode.remove()" class="btn-secondary">Remove</button>
-            `;
-            container.appendChild(row);
-        }
 
         function toggleServiceSections() {
             const serviceType = document.getElementById('service-type').value;
@@ -446,95 +387,17 @@
                 doc.text(`Technician: ${document.getElementById('technician-name').value}`, 20, 90);
                 doc.text(`Service Time: ${document.getElementById('service-time-start').value} - ${document.getElementById('service-time-end').value}`, 20, 95);
 
-                // Work Performed
-                doc.setFont('helvetica', 'bold');
-                doc.text('WORK PERFORMED', 20, 110);
-                doc.line(20, 112, 60, 112);
-                
-                const workRows = document.querySelectorAll('.work-row');
-                const workData = [];
-                workRows.forEach((row, index) => {
-                    const selects = row.querySelectorAll('select');
-                    const inputs = row.querySelectorAll('input');
-                    if (selects.length >= 2 && inputs.length >= 2) {
-                        workData.push([
-                            index + 1,
-                            selects[0].value,
-                            inputs[0].value,
-                            inputs[1].value,
-                            selects[1].value
-                        ]);
-                    }
-                });
-
-                if (workData.length > 0) {
-                    doc.autoTable({
-                        startY: 120,
-                        head: [['S.No', 'Work Type', 'Equipment/Component', 'Description', 'Status']],
-                        body: workData,
-                        theme: 'grid',
-                        styles: { fontSize: 9, cellPadding: 2, textColor: [55, 65, 81] },
-                        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
-                        columnStyles: {
-                            0: { cellWidth: 12 },
-                            1: { cellWidth: 25 },
-                            2: { cellWidth: 35 },
-                            3: { cellWidth: 60 },
-                            4: { cellWidth: 22 }
-                        }
-                    });
-                }
-
-                // Equipment Status & Observations
-                let currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 140;
-                doc.setFont('helvetica', 'bold');
-                doc.text('EQUIPMENT STATUS & OBSERVATIONS', 20, currentY);
-                doc.line(20, currentY + 2, 90, currentY + 2);
-                doc.setFont('helvetica', 'normal');
-                currentY += 10;
-                doc.text(`Overall Condition: ${document.getElementById('equipment-condition').value}`, 20, currentY);
-                currentY += 10;
-
-                const observations = document.getElementById('observations').value;
-                if (observations) {
-                    doc.text('Observations:', 20, currentY);
-                    currentY += 5;
-                    const obsLines = doc.splitTextToSize(observations, 170);
-                    doc.text(obsLines, 20, currentY);
-                    currentY += obsLines.length * 5 + 5;
-                }
-
-                const recommendations = document.getElementById('recommendations').value;
-                if (recommendations) {
-                    doc.text('Recommendations:', 20, currentY);
-                    currentY += 5;
-                    const recLines = doc.splitTextToSize(recommendations, 170);
-                    doc.text(recLines, 20, currentY);
-                    currentY += recLines.length * 5 + 5;
-                }
-
-                // Customer Satisfaction
-                if (document.getElementById('customer-satisfaction').value || document.getElementById('customer-feedback').value) {
-                    currentY += 10;
+                let currentY = 110;
+                const issueDescription = document.getElementById('issue-description').value;
+                if (issueDescription) {
                     doc.setFont('helvetica', 'bold');
-                    doc.text('CUSTOMER SATISFACTION', 20, currentY);
+                    doc.text('ISSUE DESCRIPTION', 20, currentY);
                     doc.line(20, currentY + 2, 70, currentY + 2);
                     doc.setFont('helvetica', 'normal');
                     currentY += 10;
-                    
-                    if (document.getElementById('customer-satisfaction').value) {
-                        doc.text(`Rating: ${document.getElementById('customer-satisfaction').value}`, 20, currentY);
-                        currentY += 8;
-                    }
-                    
-                    const feedback = document.getElementById('customer-feedback').value;
-                    if (feedback) {
-                        doc.text('Feedback:', 20, currentY);
-                        currentY += 5;
-                        const feedbackLines = doc.splitTextToSize(feedback, 170);
-                        doc.text(feedbackLines, 20, currentY);
-                        currentY += feedbackLines.length * 5;
-                    }
+                    const issueLines = doc.splitTextToSize(issueDescription, 170);
+                    doc.text(issueLines, 20, currentY);
+                    currentY += issueLines.length * 5 + 15;
                 }
 
                 // Equipment-specific checklist results to PDF
@@ -542,7 +405,6 @@
                 const serviceType = document.getElementById('service-type').value;
                 
                 if (serviceType === 'Maintenance Visit' && equipmentType) {
-                    currentY += 10;
                     doc.setFont('helvetica', 'bold');
                     doc.text(`${equipmentType.toUpperCase()} MAINTENANCE CHECKLIST`, 20, currentY);
                     doc.line(20, currentY + 2, 100, currentY + 2);
@@ -597,17 +459,32 @@
 
                     checklistItems.forEach(item => {
                         const checkbox = document.getElementById(item.id);
-                        const status = checkbox && checkbox.checked ? '✓ PASS' : '✗ FAIL';
+                        const status = checkbox && checkbox.checked ? '✓' : '✗';
                         const statusColor = checkbox && checkbox.checked ? [0, 128, 0] : [255, 0, 0];
                         
                         doc.setTextColor(55, 65, 81);
                         doc.text(`${item.label}:`, 25, currentY);
                         doc.setTextColor(...statusColor);
+                        doc.setFontSize(14);
                         doc.text(status, 120, currentY);
+                        doc.setFontSize(12);
                         currentY += 6;
                     });
                     
                     doc.setTextColor(55, 65, 81);
+                    currentY += 10;
+                }
+
+                const technicianComments = document.getElementById('technician-comments').value;
+                if (technicianComments) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('TECHNICIAN COMMENTS', 20, currentY);
+                    doc.line(20, currentY + 2, 80, currentY + 2);
+                    doc.setFont('helvetica', 'normal');
+                    currentY += 10;
+                    const commentLines = doc.splitTextToSize(technicianComments, 170);
+                    doc.text(commentLines, 20, currentY);
+                    currentY += commentLines.length * 5 + 15;
                 }
 
                 // Signature Section
@@ -654,8 +531,6 @@
             }
         }
 
-        // Initialize with one work row
-        addWorkRow();
 
         // Set current date as default
         document.getElementById('service-date').valueAsDate = new Date();
