@@ -1,288 +1,227 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Report Generator</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-</head>
-<body class="bg-gray-100 font-sans">
-    <div class="container mx-auto p-4 max-w-4xl">
-        <h1 class="text-3xl font-bold text-center mb-6">Service Report Generator</h1>
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-        <div class="flex justify-center mb-6">
-            <a href="index.html" class="px-4 py-2 bg-blue-600 text-white rounded-l-md hover:bg-blue-700">AMC Agreement</a>
-            <a href="service-report-generator.html" class="px-4 py-2 bg-gray-800 text-white rounded-r-md">Service Report</a>
+  try {
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
+
+    if (!BREVO_API_KEY) {
+      return res.status(500).json({ error: "Brevo API key not configured" });
+    }
+
+    // Parse form data
+    const formData = req.body;
+    const {
+      customerEmail,
+      customerName,
+      reportNumber,
+      serviceDate,
+      serviceType,
+      equipmentType,
+      technicianName,
+      issueDescription,
+      technicianComments,
+      sendToCustomer,
+    } = formData;
+
+    // Check if required fields are present
+    if (!reportNumber || !serviceDate || !serviceType || !equipmentType || !technicianName) {
+      return res.status(400).json({ error: "Missing required service details" });
+    }
+
+    // Convert PDF buffer to base64
+    const pdfBuffer = req.files?.pdf?.data;
+    if (!pdfBuffer) {
+      return res.status(400).json({ error: "PDF file is required" });
+    }
+    const pdfBase64 = pdfBuffer.toString("base64");
+
+    const emails = [];
+
+    // Customer email
+    if (sendToCustomer === "true" && customerEmail) {
+      emails.push({
+        to: [{ email: customerEmail, name: customerName }],
+        subject: `Service Report - ${reportNumber} - Eye Tech Securities`,
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
+              <h1 style="margin: 0;">Eye Tech Securities</h1>
+              <p style="margin: 5px 0 0 0;">Service Report</p>
+            </div>
+            <div style="padding: 30px; background-color: #f9fafb;">
+              <h2 style="color: #1f2937; margin-bottom: 20px;">Dear ${customerName},</h2>
+              <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
+                Thank you for choosing Eye Tech Securities for your security system maintenance needs. 
+                Please find attached your service report for the recent service visit.
+              </p>
+              <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1f2937; margin-top: 0;">Service Details:</h3>
+                <ul style="color: #4b5563; line-height: 1.8;">
+                  <li><strong>Report Number:</strong> ${reportNumber}</li>
+                  <li><strong>Service Date:</strong> ${serviceDate}</li>
+                  <li><strong>Service Type:</strong> ${serviceType}</li>
+                  <li><strong>Equipment Type:</strong> ${equipmentType}</li>
+                  <li><strong>Technician:</strong> ${technicianName}</li>
+                </ul>
+              </div>
+              ${
+                issueDescription
+                  ? `
+              <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1f2937; margin-top: 0;">Service Summary:</h3>
+                <p style="color: #4b5563; line-height: 1.6;">${issueDescription}</p>
+              </div>
+              `
+                  : ""
+              }
+              ${
+                technicianComments
+                  ? `
+              <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1f2937; margin-top: 0;">Technician Notes:</h3>
+                <p style="color: #4b5563; line-height: 1.6;">${technicianComments}</p>
+              </div>
+              `
+                  : ""
+              }
+              <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
+                If you have any questions about this service report or need additional support, 
+                please don't hesitate to contact us.
+              </p>
+              <div style="background-color: #dbeafe; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <p style="color: #1e40af; margin: 0; font-size: 14px;">
+                  <strong>Contact Information:</strong><br>
+                  Phone: 9962835944<br>
+                  Email: support@eyetechsecurities.in<br>
+                  Address: No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117
+                </p>
+              </div>
+              <p style="color: #4b5563; line-height: 1.6;">
+                Thank you for your continued trust in Eye Tech Securities.
+              </p>
+              <p style="color: #4b5563; line-height: 1.6;">
+                Best regards,<br>
+                <strong>Eye Tech Securities Team</strong>
+              </p>
+            </div>
+            <div style="background-color: #374151; color: #d1d5db; padding: 15px; text-align: center; font-size: 12px;">
+              <p style="margin: 0;">© 2025 Eye Tech Securities. All rights reserved.</p>
+            </div>
+          </div>
+        `,
+        attachment: [
+          {
+            content: pdfBase64,
+            name: `Service_Report_${reportNumber}.pdf`,
+            type: "application/pdf",
+          },
+        ],
+      });
+    }
+
+    // Admin email (always sent)
+    emails.push({
+      to: [{ email: "support@eyetechsecurities.in", name: "Eye Tech Securities Admin" }],
+      subject: `New Service Report Generated - ${reportNumber}`,
+      htmlContent: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #059669; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin: 0;">Eye Tech Securities</h1>
+            <p style="margin: 5px 0 0 0;">New Service Report Generated</p>
+          </div>
+          <div style="padding: 30px; background-color: #f9fafb;">
+            <h2 style="color: #1f2937; margin-bottom: 20px;">Service Report Details</h2>
+            <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1f2937; margin-top: 0;">Report Information:</h3>
+              <ul style="color: #4b5563; line-height: 1.8;">
+                <li><strong>Report Number:</strong> ${reportNumber}</li>
+                <li><strong>Service Date:</strong> ${serviceDate}</li>
+                <li><strong>Service Type:</strong> ${serviceType}</li>
+                <li><strong>Equipment Type:</strong> ${equipmentType}</li>
+                <li><strong>Technician:</strong> ${technicianName}</li>
+              </ul>
+            </div>
+            <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1f2937; margin-top: 0;">Customer Information:</h3>
+              <ul style="color: #4b5563; line-height: 1.8;">
+                <li><strong>Customer Name:</strong> ${customerName}</li>
+                <li><strong>Customer Email:</strong> ${customerEmail}</li>
+                <li><strong>Email Sent to Customer:</strong> ${sendToCustomer === "true" ? "Yes" : "No"}</li>
+              </ul>
+            </div>
+            ${
+              issueDescription
+                ? `
+            <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1f2937; margin-top: 0;">Issue Description:</h3>
+              <p style="color: #4b5563; line-height: 1.6;">${issueDescription}</p>
+            </div>
+            `
+                : ""
+            }
+            ${
+              technicianComments
+                ? `
+            <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1f2937; margin-top: 0;">Technician Comments:</h3>
+              <p style="color: #4b5563; line-height: 1.6;">${technicianComments}</p>
+            </div>
+            `
+                : ""
+            }
+            <div style="background-color: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              <p style="color: #92400e; margin: 0; font-size: 14px;">
+                <strong>Action Required:</strong> Please review the attached service report and follow up with the customer if necessary.
+              </p>
+            </div>
+          </div>
+          <div style="background-color: #374151; color: #d1d5db; padding: 15px; text-align: center; font-size: 12px;">
+            <p style="margin: 0;">© 2025 Eye Tech Securities - Internal System</p>
+          </div>
         </div>
+      `,
+      attachment: [
+        {
+          content: pdfBase64,
+          name: `Service_Report_${reportNumber}.pdf`,
+          type: "application/pdf",
+        },
+      ],
+    });
 
-        <form id="serviceReportForm" class="bg-white p-6 rounded-lg shadow-md">
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Customer Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="customerName" class="block text-sm font-medium text-gray-700">Customer Name</label>
-                        <input type="text" id="customerName" name="customerName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="customerAddress" class="block text-sm font-medium text-gray-700">Customer Address</label>
-                        <input type="text" id="customerAddress" name="customerAddress" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="contactPerson" class="block text-sm font-medium text-gray-700">Contact Person</label>
-                        <input type="text" id="contactPerson" name="contactPerson" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="customerContact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
-                        <input type="tel" id="customerContact" name="customerContact" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="customerEmail" class="block text-sm font-medium text-gray-700">Customer Email</label>
-                        <input type="email" id="customerEmail" name="customerEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                </div>
-            </div>
+    // Send emails
+    for (const email of emails) {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "api-key": BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          sender: { name: "Eye Tech Securities", email: "no-reply@eyetechsecurities.in" },
+          to: email.to,
+          subject: email.subject,
+          htmlContent: email.htmlContent,
+          attachment: email.attachment,
+        }),
+      });
 
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Service Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="serviceType" class="block text-sm font-medium text-gray-700">Service Type</label>
-                        <select id="serviceType" name="serviceType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Select Service Type</option>
-                            <option value="Maintenance Visit">Maintenance Visit</option>
-                            <option value="Breakdown Visit">Breakdown Visit</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="equipmentType" class="block text-sm font-medium text-gray-700">Equipment Type</label>
-                        <select id="equipmentType" name="equipmentType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Select Equipment Type</option>
-                            <option value="CCTV">CCTV</option>
-                            <option value="Biometrics & Access Control">Biometrics & Access Control</option>
-                            <option value="Video Door Bell">Video Door Bell</option>
-                            <option value="Fire Alarm">Fire Alarm</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="serviceDate" class="block text-sm font-medium text-gray-700">Service Date</label>
-                        <input type="date" id="serviceDate" name="serviceDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="technicianName" class="block text-sm font-medium text-gray-700">Technician Name</label>
-                        <input type="text" id="technicianName" name="technicianName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                </div>
-            </div>
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Brevo API error: ${response.status} - ${errorData}`);
+      }
+    }
 
-            <div class="mb-6" id="cctvChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">CCTV Maintenance Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="cctvCamerasLive"> Cameras Live</label></div>
-                    <div><label><input type="checkbox" name="cctvPlaybackWorking"> Playback Working</label></div>
-                    <div><label><input type="checkbox" name="cctvHddHealthy"> HDD Healthy</label></div>
-                    <div><label><input type="checkbox" name="cctvDateTimeAccurate"> Date/Time Accurate</label></div>
-                    <div><label><input type="checkbox" name="cctvRemoteAccess"> Remote Access</label></div>
-                    <div><label><input type="checkbox" name="cctvPowerSupply"> Power Supply</label></div>
-                    <div><label><input type="checkbox" name="cctvLensesClean"> Lenses Clean</label></div>
-                    <div><label><input type="checkbox" name="cctvCablesSecure"> Cables Secure</label></div>
-                </div>
-            </div>
-
-            <div class="mb-6" id="biometricsChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">Biometrics & Access Control Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="biometricsFingerprintScanner"> Fingerprint Scanner Working</label></div>
-                    <div><label><input type="checkbox" name="biometricsCardReader"> Card Reader Working</label></div>
-                    <div><label><input type="checkbox" name="biometricsDoorLock"> Door Lock Mechanism</label></div>
-                    <div><label><input type="checkbox" name="biometricsAccessLogs"> Access Logs Updated</label></div>
-                    <div><label><input type="checkbox" name="biometricsUserDatabase"> User Database Backup</label></div>
-                    <div><label><input type="checkbox" name="biometricsSensorCalibration"> Sensor Calibration</label></div>
-                </div>
-            </div>
-
-            <div class="mb-6" id="videoDoorbellChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">Video Door Bell Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="videoDoorbellVideoQuality"> Video Quality Clear</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellAudioQuality"> Audio Quality Clear</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellMotionDetection"> Motion Detection Working</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellNightVision"> Night Vision Working</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellMobileApp"> Mobile App Connectivity</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellChime"> Doorbell Chime Working</label></div>
-                </div>
-            </div>
-
-            <div class="mb-6" id="fireAlarmChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">Fire Alarm System Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="fireAlarmSmokeDetectors"> Smoke Detectors Working</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmHeatDetectors"> Heat Detectors Working</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmSounders"> Alarm Sounders Working</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmControlPanel"> Control Panel Functional</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmBatteryBackup"> Battery Backup Tested</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmManualCallPoints"> Manual Call Points Working</label></div>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Issue Description</h2>
-                <textarea id="issueDescription" name="issueDescription" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
-            </div>
-
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Technician Comments</h2>
-                <textarea id="technicianComments" name="technicianComments" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
-            </div>
-
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Email Options</h2>
-                <div class="flex items-center mb-4">
-                    <input type="checkbox" id="sendToCustomer" name="sendToCustomer" class="mr-2">
-                    <label for="sendToCustomer" class="text-sm font-medium text-gray-700">Send copy to customer</label>
-                </div>
-                <p class="text-sm text-gray-600">Admin copy will always be sent to support@eyetechsecurities.in</p>
-            </div>
-
-            <div class="flex justify-end space-x-4">
-                <button type="button" id="generatePdf" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Generate PDF Only</button>
-                <button type="button" id="generateAndEmail" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Generate PDF & Send Email</button>
-            </div>
-        </form>
-    </div>
-
-    <script>
-        document.getElementById('equipmentType').addEventListener('change', function() {
-            document.getElementById('cctvChecklist').style.display = this.value === 'CCTV' ? 'block' : 'none';
-            document.getElementById('biometricsChecklist').style.display = this.value === 'Biometrics & Access Control' ? 'block' : 'none';
-            document.getElementById('videoDoorbellChecklist').style.display = this.value === 'Video Door Bell' ? 'block' : 'none';
-            document.getElementById('fireAlarmChecklist').style.display = this.value === 'Fire Alarm' ? 'block' : 'none';
-        });
-
-        function generatePDF(sendEmail = false) {
-            const form = document.getElementById('serviceReportForm');
-            const formData = new FormData(form);
-            const reportNumber = 'SR' + Math.floor(1000 + Math.random() * 9000);
-
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
-            data.reportNumber = reportNumber;
-
-            const checklistHtml = {
-                'CCTV': `
-                    <h3 class="text-lg font-semibold mb-2">CCTV Maintenance Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Cameras Live: ${data.cctvCamerasLive ? '✓' : '✗'}</li>
-                        <li>Playback Working: ${data.cctvPlaybackWorking ? '✓' : '✗'}</li>
-                        <li>HDD Healthy: ${data.cctvHddHealthy ? '✓' : '✗'}</li>
-                        <li>Date/Time Accurate: ${data.cctvDateTimeAccurate ? '✓' : '✗'}</li>
-                        <li>Remote Access: ${data.cctvRemoteAccess ? '✓' : '✗'}</li>
-                        <li>Power Supply: ${data.cctvPowerSupply ? '✓' : '✗'}</li>
-                        <li>Lenses Clean: ${data.cctvLensesClean ? '✓' : '✗'}</li>
-                        <li>Cables Secure: ${data.cctvCablesSecure ? '✓' : '✗'}</li>
-                    </ul>`,
-                'Biometrics & Access Control': `
-                    <h3 class="text-lg font-semibold mb-2">Biometrics & Access Control Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Fingerprint Scanner Working: ${data.biometricsFingerprintScanner ? '✓' : '✗'}</li>
-                        <li>Card Reader Working: ${data.biometricsCardReader ? '✓' : '✗'}</li>
-                        <li>Door Lock Mechanism: ${data.biometricsDoorLock ? '✓' : '✗'}</li>
-                        <li>Access Logs Updated: ${data.biometricsAccessLogs ? '✓' : '✗'}</li>
-                        <li>User Database Backup: ${data.biometricsUserDatabase ? '✓' : '✗'}</li>
-                        <li>Sensor Calibration: ${data.biometricsSensorCalibration ? '✓' : '✗'}</li>
-                    </ul>`,
-                'Video Door Bell': `
-                    <h3 class="text-lg font-semibold mb-2">Video Door Bell Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Video Quality Clear: ${data.videoDoorbellVideoQuality ? '✓' : '✗'}</li>
-                        <li>Audio Quality Clear: ${data.videoDoorbellAudioQuality ? '✓' : '✗'}</li>
-                        <li>Motion Detection Working: ${data.videoDoorbellMotionDetection ? '✓' : '✗'}</li>
-                        <li>Night Vision Working: ${data.videoDoorbellNightVision ? '✓' : '✗'}</li>
-                        <li>Mobile App Connectivity: ${data.videoDoorbellMobileApp ? '✓' : '✗'}</li>
-                        <li>Doorbell Chime Working: ${data.videoDoorbellChime ? '✓' : '✗'}</li>
-                    </ul>`,
-                'Fire Alarm': `
-                    <h3 class="text-lg font-semibold mb-2">Fire Alarm System Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Smoke Detectors Working: ${data.fireAlarmSmokeDetectors ? '✓' : '✗'}</li>
-                        <li>Heat Detectors Working: ${data.fireAlarmHeatDetectors ? '✓' : '✗'}</li>
-                        <li>Alarm Sounders Working: ${data.fireAlarmSounders ? '✓' : '✗'}</li>
-                        <li>Control Panel Functional: ${data.fireAlarmControlPanel ? '✓' : '✗'}</li>
-                        <li>Battery Backup Tested: ${data.fireAlarmBatteryBackup ? '✓' : '✗'}</li>
-                        <li>Manual Call Points Working: ${data.fireAlarmManualCallPoints ? '✓' : '✗'}</li>
-                    </ul>`
-            };
-
-            const pdfContent = `
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h1 style="text-align: center; color: #2563eb;">Eye Tech Securities</h1>
-                    <h2 style="text-align: center;">Service Report #${reportNumber}</h2>
-                    <hr style="margin: 20px 0;">
-                    <h3 class="text-lg font-semibold mb-2">Customer Details</h3>
-                    <p><strong>Name:</strong> ${data.customerName}</p>
-                    <p><strong>Address:</strong> ${data.customerAddress}</p>
-                    <p><strong>Contact Person:</strong> ${data.contactPerson}</p>
-                    <p><strong>Contact Number:</strong> ${data.customerContact}</p>
-                    <p><strong>Email:</strong> ${data.customerEmail}</p>
-                    <hr style="margin: 20px 0;">
-                    <h3 class="text-lg font-semibold mb-2">Service Details</h3>
-                    <p><strong>Service Type:</strong> ${data.serviceType}</p>
-                    <p><strong>Equipment Type:</strong> ${data.equipmentType}</p>
-                    <p><strong>Service Date:</strong> ${data.serviceDate}</p>
-                    <p><strong>Technician Name:</strong> ${data.technicianName}</p>
-                    <hr style="margin: 20px 0;">
-                    ${checklistHtml[data.equipmentType] || ''}
-                    <hr style="margin: 20px 0;">
-                    <h3 class="text-lg font-semibold mb-2">Issue Description</h3>
-                    <p>${data.issueDescription || 'No issues reported'}</p>
-                    <h3 class="text-lg font-semibold mb-2">Technician Comments</h3>
-                    <p>${data.technicianComments || 'No additional comments'}</p>
-                </div>
-            `;
-
-            const element = document.createElement('div');
-            element.innerHTML = pdfContent;
-
-            const opt = {
-                margin: 1,
-                filename: `Service_Report_${reportNumber}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().from(element).set(opt).toPdf().get('pdf').then(function (pdf) {
-                if (sendEmail) {
-                    const pdfBlob = pdf.output('blob');
-                    const formData = new FormData();
-                    formData.append('pdf', pdfBlob, `Service_Report_${reportNumber}.pdf`);
-                    for (const [key, value] of Object.entries(data)) {
-                        formData.append(key, value);
-                    }
-
-                    fetch('/api/send-service-report-email', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            alert('Service report generated and emails sent successfully!');
-                        } else {
-                            alert('Error sending emails: ' + result.error);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error sending emails: ' + error.message);
-                    });
-                } else {
-                    html2pdf().from(element).set(opt).save();
-                }
-            });
-        }
-
-        document.getElementById('generatePdf').addEventListener('click', () => generatePDF(false));
-        document.getElementById('generateAndEmail').addEventListener('click', () => generatePDF(true));
-    </script>
+    res.status(200).json({
+      success: true,
+      message: "Service report emails sent successfully",
+      emailsSent: emails.length,
+    });
+  } catch (error) {
+    console.error("Service report email error:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
