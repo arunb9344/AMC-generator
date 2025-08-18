@@ -3,558 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Report Generator - Eye Tech Securities</title>
-    <!-- Updated to more reliable CDN sources with fallbacks -->
-    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/jspdf-autotable@3.8.3/jspdf.plugin.autotable.min.js"></script>
-    <script>
-        if (!window.jspdf) {
-            const script1 = document.createElement('script');
-            script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-            document.head.appendChild(script1);
-            
-            script1.onload = function() {
-                const script2 = document.createElement('script');
-                script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js';
-                document.head.appendChild(script2);
-            };
-        }
-    </script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Service Report Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f9fafb;
-        }
-        .container {
+            font-family: Arial, sans-serif;
             max-width: 900px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tabs a {
+            padding: 10px 20px;
+            margin: 0 5px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #3498db;
+            border-radius: 5px;
+        }
+        .tabs a:hover {
+            background-color: #2980b9;
         }
         .form-section {
-            background: white;
-            padding: 2rem;
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .form-section h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 1rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
         }
-        .input-field {
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            padding: 0.5rem;
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            margin-bottom: 1rem;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-        .work-row {
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .checklist label {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
             align-items: center;
         }
-        .work-row input, .work-row select {
-            flex: 1;
-        }
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .btn-secondary {
-            background-color: #6b7280;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-        }
-        .btn-secondary:hover {
-            background-color: #4b5563;
-        }
-        .btn-success {
-            background-color: #059669;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-        }
-        .btn-success:hover {
-            background-color: #047857;
-        }
-        #error-message {
-            color: #dc2626;
-            margin-top: 1rem;
-            display: none;
-        }
-        .textarea-field {
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            padding: 0.5rem;
+        .generate-btn {
+            display: block;
             width: 100%;
-            margin-bottom: 1rem;
-            min-height: 80px;
-            resize: vertical;
+            padding: 12px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .generate-btn:hover {
+            background-color: #c0392b;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="form-section">
-            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Service Report Generator</h1>
-            
-            <!-- Updated navigation to match AMC Agreement Generator style -->
-            <div class="flex justify-center gap-4 mb-6">
-                <!-- Fixed navigation link to point to correct AMC file -->
-                <a href="index.html" class="btn-secondary text-center">AMC Agreement</a>
-                <a href="service-report-generator.html" class="btn-primary text-center">Service Report</a>
-            </div>
-            
-            <form id="service-form">
-                <div class="form-section">
-                    <h2>Customer Details</h2>
-                    <label for="customer-name" class="block text-sm font-medium text-gray-700">Customer Name</label>
-                    <input type="text" id="customer-name" class="input-field" required>
+    <h1>Service Report Generator</h1>
+    <div class="tabs">
+        <a href="#">AMC Agreement</a>
+        <a href="#">Service Report</a>
+    </div>
 
-                    <label for="customer-address" class="block text-sm font-medium text-gray-700">Customer Address</label>
-                    <input type="text" id="customer-address" class="input-field" required>
-
-                    <label for="contact-person" class="block text-sm font-medium text-gray-700">Contact Person</label>
-                    <input type="text" id="contact-person" class="input-field" required>
-
-                    <label for="customer-contact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
-                    <input type="text" id="customer-contact" class="input-field" required>
-
-                    <label for="customer-email" class="block text-sm font-medium text-gray-700">Customer Email</label>
-                    <input type="email" id="customer-email" class="input-field" required>
-                </div>
-
-                <!-- Updated Service Details section with specific service types and equipment selection -->
-                <div class="form-section mt-6">
-                    <h2>Service Details</h2>
-                    <label for="service-type" class="block text-sm font-medium text-gray-700">Service Type</label>
-                    <select id="service-type" class="input-field" required onchange="toggleServiceSections()">
-                        <option value="">Select Service Type</option>
-                        <option value="Maintenance Visit">Maintenance Visit</option>
-                        <option value="Breakdown Visit">Breakdown Visit</option>
-                    </select>
-
-                    <label for="equipment-type" class="block text-sm font-medium text-gray-700">Equipment Type</label>
-                    <select id="equipment-type" class="input-field" required onchange="toggleEquipmentSections()">
-                        <option value="">Select Equipment Type</option>
-                        <option value="CCTV">CCTV</option>
-                        <option value="Biometrics & Access Control">Biometrics & Access Control</option>
-                        <option value="Video Door Bell">Video Door Bell</option>
-                        <option value="Fire Alarm">Fire Alarm</option>
-                    </select>
-
-                    <label for="service-date" class="block text-sm font-medium text-gray-700">Service Date</label>
-                    <input type="date" id="service-date" class="input-field" required>
-
-                    <label for="technician-name" class="block text-sm font-medium text-gray-700">Technician Name</label>
-                    <input type="text" id="technician-name" class="input-field" required>
-                </div>
-
-                <!-- Added CCTV Maintenance Checklist section -->
-                <div id="cctv-maintenance-section" class="form-section mt-6" style="display: none;">
-                    <h2>CCTV Maintenance Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="cameras-live" class="mr-2">
-                            <label for="cameras-live" class="text-sm font-medium text-gray-700">Cameras Live</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="playback-working" class="mr-2">
-                            <label for="playback-working" class="text-sm font-medium text-gray-700">Playback Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="hdd-healthy" class="mr-2">
-                            <label for="hdd-healthy" class="text-sm font-medium text-gray-700">HDD Healthy</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="datetime-accurate" class="mr-2">
-                            <label for="datetime-accurate" class="text-sm font-medium text-gray-700">Date/Time Accurate</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="remote-access" class="mr-2">
-                            <label for="remote-access" class="text-sm font-medium text-gray-700">Remote Access</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="power-supply" class="mr-2">
-                            <label for="power-supply" class="text-sm font-medium text-gray-700">Power Supply</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="lenses-clean" class="mr-2">
-                            <label for="lenses-clean" class="text-sm font-medium text-gray-700">Lenses Clean</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="cables-secure" class="mr-2">
-                            <label for="cables-secure" class="text-sm font-medium text-gray-700">Cables Secure</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Added Biometrics & Access Control Checklist section -->
-                <div id="biometrics-maintenance-section" class="form-section mt-6" style="display: none;">
-                    <h2>Biometrics & Access Control Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="fingerprint-scanner" class="mr-2">
-                            <label for="fingerprint-scanner" class="text-sm font-medium text-gray-700">Fingerprint Scanner Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="card-reader" class="mr-2">
-                            <label for="card-reader" class="text-sm font-medium text-gray-700">Card Reader Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="door-lock" class="mr-2">
-                            <label for="door-lock" class="text-sm font-medium text-gray-700">Door Lock Mechanism</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="access-logs" class="mr-2">
-                            <label for="access-logs" class="text-sm font-medium text-gray-700">Access Logs Updated</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="user-database" class="mr-2">
-                            <label for="user-database" class="text-sm font-medium text-gray-700">User Database Backup</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="sensor-calibration" class="mr-2">
-                            <label for="sensor-calibration" class="text-sm font-medium text-gray-700">Sensor Calibration</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Added Video Door Bell Checklist section -->
-                <div id="doorbell-maintenance-section" class="form-section mt-6" style="display: none;">
-                    <h2>Video Door Bell Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="video-quality" class="mr-2">
-                            <label for="video-quality" class="text-sm font-medium text-gray-700">Video Quality Clear</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="audio-quality" class="mr-2">
-                            <label for="audio-quality" class="text-sm font-medium text-gray-700">Audio Quality Clear</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="motion-detection" class="mr-2">
-                            <label for="motion-detection" class="text-sm font-medium text-gray-700">Motion Detection Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="night-vision" class="mr-2">
-                            <label for="night-vision" class="text-sm font-medium text-gray-700">Night Vision Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="mobile-app" class="mr-2">
-                            <label for="mobile-app" class="text-sm font-medium text-gray-700">Mobile App Connectivity</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="doorbell-chime" class="mr-2">
-                            <label for="doorbell-chime" class="text-sm font-medium text-gray-700">Doorbell Chime Working</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Added Fire Alarm Checklist section -->
-                <div id="firealarm-maintenance-section" class="form-section mt-6" style="display: none;">
-                    <h2>Fire Alarm System Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="smoke-detectors" class="mr-2">
-                            <label for="smoke-detectors" class="text-sm font-medium text-gray-700">Smoke Detectors Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="heat-detectors" class="mr-2">
-                            <label for="heat-detectors" class="text-sm font-medium text-gray-700">Heat Detectors Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="alarm-sounders" class="mr-2">
-                            <label for="alarm-sounders" class="text-sm font-medium text-gray-700">Alarm Sounders Working</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="control-panel" class="mr-2">
-                            <label for="control-panel" class="text-sm font-medium text-gray-700">Control Panel Functional</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="battery-backup" class="mr-2">
-                            <label for="battery-backup" class="text-sm font-medium text-gray-700">Battery Backup Tested</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="manual-call-points" class="mr-2">
-                            <label for="manual-call-points" class="text-sm font-medium text-gray-700">Manual Call Points Working</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Removed Work Performed section and replaced with Issue Description -->
-                <div class="form-section mt-6">
-                    <h2>Issue Description</h2>
-                    <label for="issue-description" class="block text-sm font-medium text-gray-700">Issue Description</label>
-                    <textarea id="issue-description" class="textarea-field" style="min-height: 120px;" placeholder="Describe the issue or reason for service visit in detail..."></textarea>
-                </div>
-
-                <!-- Added Technician Comments section -->
-                <div class="form-section mt-6">
-                    <h2>Technician Comments</h2>
-                    <label for="technician-comments" class="block text-sm font-medium text-gray-700">Technician Comments</label>
-                    <textarea id="technician-comments" class="textarea-field" style="min-height: 120px;" placeholder="Enter detailed technician observations, work performed, and recommendations..."></textarea>
-                </div>
-
-                <button type="button" onclick="generateServiceReport()" class="btn-primary mt-6 w-full">Generate Service Report PDF</button>
-                <div id="error-message"></div>
-            </form>
+    <div class="form-section">
+        <h2>Customer Details</h2>
+        <div class="form-group">
+            <label for="customer-name">Customer Name</label>
+            <input type="text" id="customer-name" placeholder="Enter customer name">
+        </div>
+        <div class="form-group">
+            <label for="customer-address">Customer Address</label>
+            <input type="text" id="customer-address" placeholder="Enter customer address">
+        </div>
+        <div class="form-group">
+            <label for="contact-person">Contact Person</label>
+            <input type="text" id="contact-person" placeholder="Enter contact person">
+        </div>
+        <div class="form-group">
+            <label for="customer-contact">Customer Contact Number</label>
+            <input type="text" id="customer-contact" placeholder="Enter contact number">
+        </div>
+        <div class="form-group">
+            <label for="customer-email">Customer Email</label>
+            <input type="email" id="customer-email" placeholder="Enter email address">
         </div>
     </div>
 
+    <div class="form-section">
+        <h2>Service Details</h2>
+        <div classUV class="form-group">
+            <label for="service-type">Service Type</label>
+            <select id="service-type">
+                <option value="">Select Service Type</option>
+                <option value="Maintenance Visit">Maintenance Visit</option>
+                <option value="Breakdown Visit">Breakdown Visit</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="equipment-type">Equipment Type</label>
+            <select id="equipment-type" onchange="toggleChecklists()">
+                <option value="">Select Equipment Type</option>
+                <option value="CCTV">CCTV</option>
+                <option value="Biometrics & Access Control">Biometrics & Access Control</option>
+                <option value="Video Door Bell">Video Door Bell</option>
+                <option value="Fire Alarm">Fire Alarm</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="service-date">Service Date</label>
+            <input type="date" id="service-date">
+        </div>
+        <div class="form-group">
+            <label for="technician-name">Technician Name</label>
+            <input type="text" id="technician-name" placeholder="Enter technician name">
+        </div>
+    </div>
+
+    <div class="form-section" id="cctv-checklist" style="display: none;">
+        <h2>CCTV Maintenance Checklist</h2>
+        <div class="checklist">
+            <label><input type="checkbox" id="cameras-live"> Cameras Live</label>
+            <label><input type="checkbox" id="playback-working"> Playback Working</label>
+            <label><input type="checkbox" id="hdd-healthy"> HDD Healthy</label>
+            <label><input type="checkbox" id="date-time-accurate"> Date/Time Accurate</label>
+            <label><input type="checkbox" id="remote-access"> Remote Access</label>
+            <label><input type="checkbox" id="power-supply"> Power Supply</label>
+            <label><input type="checkbox" id="lenses-clean"> Lenses Clean</label>
+            <label><input type="checkbox" id="cables-secure"> Cables Secure</label>
+        </div>
+    </div>
+
+    <div class="form-section" id="biometrics-checklist" style="display: none;">
+        <h2>Biometrics & Access Control Checklist</h2>
+        <div class="checklist">
+            <label><input type="checkbox" id="fingerprint-working"> Fingerprint Scanner Working</label>
+            <label><input type="checkbox" id="card-reader-working"> Card Reader Working</label>
+            <label><input type="checkbox" id="door-lock-mechanism"> Door Lock Mechanism</label>
+            <label><input type="checkbox" id="access-logs-updated"> Access Logs Updated</label>
+            <label><input type="checkbox" id="user-database-backup"> User Database Backup</label>
+            <label><input type="checkbox" id="sensor-calibration"> Sensor Calibration</label>
+        </div>
+    </div>
+
+    <div class="form-section" id="video-doorbell-checklist" style="display: none;">
+        <h2>Video Door Bell Checklist</h2>
+        <div class="checklist">
+            <label><input type="checkbox" id="video-quality-clear"> Video Quality Clear</label>
+            <label><input type="checkbox" id="audio-quality-clear"> Audio Quality Clear</label>
+            <label><input type="checkbox" id="motion-detection-working"> Motion Detection Working</label>
+            <label><input type="checkbox" id="night-vision-working"> Night Vision Working</label>
+            <label><input type="checkbox" id="mobile-app-connectivity"> Mobile App Connectivity</label>
+            <label><input type="checkbox" id="doorbell-chime-working"> Doorbell Chime Working</label>
+        </div>
+    </div>
+
+    <div class="form-section" id="fire-alarm-checklist" style="display: none;">
+        <h2>Fire Alarm System Checklist</h2>
+        <div class="checklist">
+            <label><input type="checkbox" id="smoke-detectors-working"> Smoke Detectors Working</label>
+            <label><input type="checkbox" id="heat-detectors-working"> Heat Detectors Working</label>
+            <label><input type="checkbox" id="alarm-sounders-working"> Alarm Sounders Working</label>
+            <label><input type="checkbox" id="control-panel-functional"> Control Panel Functional</label>
+            <label><input type="checkbox" id="battery-backup-tested"> Battery Backup Tested</label>
+            <label><input type="checkbox" id="manual-call-points-working"> Manual Call Points Working</label>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2>Issue Description</h2>
+        <div class="form-group">
+            <label for="issue-description">Issue Description</label>
+            <textarea id="issue-description" rows="4" placeholder="Describe any issues"></textarea>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2>Technician Comments</h2>
+        <div class="form-group">
+            <label for="technician-comments">Technician Comments</label>
+            <textarea id="technician-comments" rows="4" placeholder="Enter technician comments"></textarea>
+        </div>
+    </div>
+
+    <button class="generate-btn" onclick="generatePDF()">Generate Service Report PDF</button>
+
     <script>
+        const { jsPDF } = window.jspdf;
 
-        function toggleServiceSections() {
-            const serviceType = document.getElementById('service-type').value;
+        function toggleChecklists() {
             const equipmentType = document.getElementById('equipment-type').value;
-            
-            if (serviceType && equipmentType) {
-                toggleEquipmentSections();
+            const checklists = [
+                'cctv-checklist',
+                'biometrics-checklist',
+                'video-doorbell-checklist',
+                'fire-alarm-checklist'
+            ];
+            checklists.forEach(checklist => {
+                document.getElementById(checklist).style.display = 'none';
+            });
+            if (equipmentType) {
+                document.getElementById(equipmentType.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-') + '-checklist').style.display = 'block';
             }
         }
 
-        function toggleEquipmentSections() {
+        function generatePDF() {
+            const doc = new jsPDF();
+            
+            // Set document properties
+            doc.setProperties({
+                title: 'Service Report',
+                author: 'Service Team',
+                creator: 'Service Report Generator'
+            });
+
+            // Header
+            doc.setFillColor(0, 102, 204);
+            doc.rect(0, 0, 210, 30, 'F');
+            doc.setFontSize(20);
+            doc.setTextColor(255, 255, 255);
+            doc.text('Service Report', 105, 20, null, null, 'center');
+
+            // Customer Details
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Customer Details', 10, 40);
+            doc.setLineWidth(0.5);
+            doc.line(10, 42, 200, 42);
+
+            doc.setFontSize(10);
+            const customerDetails = [
+                `Customer Name: ${document.getElementById('customer-name').value || 'N/A'}`,
+                `Address: ${document.getElementById('customer-address').value || 'N/A'}`,
+                `Contact Person: ${document.getElementById('contact-person').value || 'N/A'}`,
+                `Contact Number: ${document.getElementById('customer-contact').value || 'N/A'}`,
+                `Email: ${document.getElementById('customer-email').value || 'N/A'}`
+            ];
+            let y = 50;
+            customerDetails.forEach(detail => {
+                doc.text(detail, 10, y);
+                y += 7;
+            });
+
+            // Service Details
+            doc.setFontSize(14);
+            doc.text('Service Details', 10, y + 10);
+            doc.line(10, y + 12, 200, y + 12);
+            doc.setFontSize(10);
+            y += 20;
+            const serviceDetails = [
+                `Service Type: ${document.getElementById('service-type').value || 'N/A'}`,
+                `Equipment Type: ${document.getElementById('equipment-type').value || 'N/A'}`,
+                `Service Date: ${document.getElementById('service-date').value || 'N/A'}`,
+                `Technician Name: ${document.getElementById('technician-name').value || 'N/A'}`
+            ];
+            serviceDetails.forEach(detail => {
+                doc.text(detail, 10, y);
+                y += 7;
+            });
+
+            // Checklist
             const equipmentType = document.getElementById('equipment-type').value;
-            const serviceType = document.getElementById('service-type').value;
-            
-            // Hide all equipment sections
-            document.getElementById('cctv-maintenance-section').style.display = 'none';
-            document.getElementById('biometrics-maintenance-section').style.display = 'none';
-            document.getElementById('doorbell-maintenance-section').style.display = 'none';
-            document.getElementById('firealarm-maintenance-section').style.display = 'none';
-            
-            // Show relevant section based on equipment type and service type
-            if (serviceType === 'Maintenance Visit') {
-                switch(equipmentType) {
-                    case 'CCTV':
-                        document.getElementById('cctv-maintenance-section').style.display = 'block';
-                        break;
-                    case 'Biometrics & Access Control':
-                        document.getElementById('biometrics-maintenance-section').style.display = 'block';
-                        break;
-                    case 'Video Door Bell':
-                        document.getElementById('doorbell-maintenance-section').style.display = 'block';
-                        break;
-                    case 'Fire Alarm':
-                        document.getElementById('firealarm-maintenance-section').style.display = 'block';
-                        break;
-                }
+            let checklistItems = [];
+            if (equipmentType === 'CCTV') {
+                checklistItems = [
+                    `Cameras Live: ${document.getElementById('cameras-live').checked ? 'Yes' : 'No'}`,
+                    `Playback Working: ${document.getElementById('playback-working').checked ? 'Yes' : 'No'}`,
+                    `HDD Healthy: ${document.getElementById('hdd-healthy').checked ? 'Yes' : 'No'}`,
+                    `Date/Time Accurate: ${document.getElementById('date-time-accurate').checked ? 'Yes' : 'No'}`,
+                    `Remote Access: ${document.getElementById('remote-access').checked ? 'Yes' : 'No'}`,
+                    `Power Supply: ${document.getElementById('power-supply').checked ? 'Yes' : 'No'}`,
+                    `Lenses Clean: ${document.getElementById('lenses-clean').checked ? 'Yes' : 'No'}`,
+                    `Cables Secure: ${document.getElementById('cables-secure').checked ? 'Yes' : 'No'}`
+                ];
+            } else if (equipmentType === 'Biometrics & Access Control') {
+                checklistItems = [
+                    `Fingerprint Scanner Working: ${document.getElementById('fingerprint-working').checked ? 'Yes' : 'No'}`,
+                    `Card Reader Working: ${document.getElementById('card-reader-working').checked ? 'Yes' : 'No'}`,
+                    `Door Lock Mechanism: ${document.getElementById('door-lock-mechanism').checked ? 'Yes' : 'No'}`,
+                    `Access Logs Updated: ${document.getElementById('access-logs-updated').checked ? 'Yes' : 'No'}`,
+                    `User Database Backup: ${document.getElementById('user-database-backup').checked ? 'Yes' : 'No'}`,
+                    `Sensor Calibration: ${document.getElementById('sensor-calibration').checked ? 'Yes' : 'No'}`
+                ];
+            } else if (equipmentType === 'Video Door Bell') {
+                checklistItems = [
+                    `Video Quality Clear: ${document.getElementById('video-quality-clear').checked ? 'Yes' : 'No'}`,
+                    `Audio Quality Clear: ${document.getElementById('audio-quality-clear').checked ? 'Yes' : 'No'}`,
+                    `Motion Detection Working: ${document.getElementById('motion-detection-working').checked ? 'Yes' : 'No'}`,
+                    `Night Vision Working: ${document.getElementById('night-vision-working').checked ? 'Yes' : 'No'}`,
+                    `Mobile App Connectivity: ${document.getElementById('mobile-app-connectivity').checked ? 'Yes' : 'No'}`,
+                    `Doorbell Chime Working: ${document.getElementById('doorbell-chime-working').checked ? 'Yes' : 'No'}`
+                ];
+            } else if (equipmentType === 'Fire Alarm') {
+                checklistItems = [
+                    `Smoke Detectors Working: ${document.getElementById('smoke-detectors-working').checked ? 'Yes' : 'No'}`,
+                    `Heat Detectors Working: ${document.getElementById('heat-detectors-working').checked ? 'Yes' : 'No'}`,
+                    `Alarm Sounders Working: ${document.getElementById('alarm-sounders-working').checked ? 'Yes' : 'No'}`,
+                    `Control Panel Functional: ${document.getElementById('control-panel-functional').checked ? 'Yes' : 'No'}`,
+                    `Battery Backup Tested: ${document.getElementById('battery-backup-tested').checked ? 'Yes' : 'No'}`,
+                    `Manual Call Points Working: ${document.getElementById('manual-call-points-working').checked ? 'Yes' : 'No'}`
+                ];
             }
-        }
 
-        function generateServiceReport() {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.style.display = 'none';
-
-            try {
-                const { jsPDF } = window.jspdf;
-                if (!jsPDF) {
-                    throw new Error('jsPDF library failed to load. Check your internet connection or script source.');
-                }
-                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-                // Header
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(20);
-                doc.setTextColor(31, 41, 55);
-                doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
-                doc.setFontSize(12);
-                doc.text('SERVICE REPORT', 105, 25, { align: 'center' });
+            if (checklistItems.length > 0) {
+                doc.setFontSize(14);
+                doc.text(`${equipmentType} Checklist`, 10, y + 10);
+                doc.line(10, y + 12, 200, y + 12);
                 doc.setFontSize(10);
-                doc.setTextColor(107, 114, 128);
-                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-                doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
-                doc.setDrawColor(37, 99, 235);
-                doc.setLineWidth(0.5);
-                doc.line(20, 45, 190, 45);
-
-                // Service Report Details
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(55, 65, 81);
-                const today = new Date();
-                const reportNumber = `ETS-SR-${today.getFullYear()}${(Math.floor(Math.random() * 900) + 100).toString().padStart(3, '0')}`;
-                const reportDate = today.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-                doc.text('REPORT DETAILS', 20, 55);
-                doc.line(20, 57, 60, 57);
-                doc.text(`Report No: ${reportNumber}`, 20, 65);
-                doc.text(`Generated: ${reportDate}`, 20, 70);
-                doc.text(`Service Date: ${document.getElementById('service-date').value}`, 20, 75);
-                doc.text(`Service Type: ${document.getElementById('service-type').value}`, 20, 80);
-                doc.text(`Equipment Type: ${document.getElementById('equipment-type').value}`, 20, 85);
-                doc.text(`Technician: ${document.getElementById('technician-name').value}`, 20, 90);
-
-                let currentY = 110;
-                const issueDescription = document.getElementById('issue-description').value;
-                if (issueDescription) {
-                    doc.setFont('helvetica', 'bold');
-                    doc.text('ISSUE DESCRIPTION', 20, currentY);
-                    doc.line(20, currentY + 2, 70, currentY + 2);
-                    doc.setFont('helvetica', 'normal');
-                    currentY += 10;
-                    const issueLines = doc.splitTextToSize(issueDescription, 170);
-                    doc.text(issueLines, 20, currentY);
-                    currentY += issueLines.length * 5 + 15;
-                }
-
-                // Equipment-specific checklist results to PDF
-                const equipmentType = document.getElementById('equipment-type').value;
-                const serviceType = document.getElementById('service-type').value;
-                
-                if (serviceType === 'Maintenance Visit' && equipmentType) {
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${equipmentType.toUpperCase()} MAINTENANCE CHECKLIST`, 20, currentY);
-                    doc.line(20, currentY + 2, 100, currentY + 2);
-                    doc.setFont('helvetica', 'normal');
-                    currentY += 10;
-
-                    let checklistItems = [];
-                    switch(equipmentType) {
-                        case 'CCTV':
-                            checklistItems = [
-                                { id: 'cameras-live', label: 'Cameras Live' },
-                                { id: 'playback-working', label: 'Playback Working' },
-                                { id: 'hdd-healthy', label: 'HDD Healthy' },
-                                { id: 'datetime-accurate', label: 'Date/Time Accurate' },
-                                { id: 'remote-access', label: 'Remote Access' },
-                                { id: 'power-supply', label: 'Power Supply' },
-                                { id: 'lenses-clean', label: 'Lenses Clean' },
-                                { id: 'cables-secure', label: 'Cables Secure' }
-                            ];
-                            break;
-                        case 'Biometrics & Access Control':
-                            checklistItems = [
-                                { id: 'fingerprint-scanner', label: 'Fingerprint Scanner Working' },
-                                { id: 'card-reader', label: 'Card Reader Working' },
-                                { id: 'door-lock', label: 'Door Lock Mechanism' },
-                                { id: 'access-logs', label: 'Access Logs Updated' },
-                                { id: 'user-database', label: 'User Database Backup' },
-                                { id: 'sensor-calibration', label: 'Sensor Calibration' }
-                            ];
-                            break;
-                        case 'Video Door Bell':
-                            checklistItems = [
-                                { id: 'video-quality', label: 'Video Quality Clear' },
-                                { id: 'audio-quality', label: 'Audio Quality Clear' },
-                                { id: 'motion-detection', label: 'Motion Detection Working' },
-                                { id: 'night-vision', label: 'Night Vision Working' },
-                                { id: 'mobile-app', label: 'Mobile App Connectivity' },
-                                { id: 'doorbell-chime', label: 'Doorbell Chime Working' }
-                            ];
-                            break;
-                        case 'Fire Alarm':
-                            checklistItems = [
-                                { id: 'smoke-detectors', label: 'Smoke Detectors Working' },
-                                { id: 'heat-detectors', label: 'Heat Detectors Working' },
-                                { id: 'alarm-sounders', label: 'Alarm Sounders Working' },
-                                { id: 'control-panel', label: 'Control Panel Functional' },
-                                { id: 'battery-backup', label: 'Battery Backup Tested' },
-                                { id: 'manual-call-points', label: 'Manual Call Points Working' }
-                            ];
-                            break;
-                    }
-
-                    checklistItems.forEach(item => {
-                        const checkbox = document.getElementById(item.id);
-                        const status = checkbox && checkbox.checked ? 'Pass' : 'Fail'; // Changed from Unicode symbols to Pass/Fail text for better PDF compatibility
-                        const statusColor = checkbox && checkbox.checked ? [34, 197, 94] : [239, 68, 68]; // Green and Red
-                        
-                        doc.setTextColor(55, 65, 81);
-                        doc.text(`${item.label}:`, 25, currentY);
-                        doc.setTextColor(...statusColor);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(12); // Reduced font size back to 12 for Pass/Fail text
-                        doc.text(status, 120, currentY);
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(12);
-                        currentY += 6;
-                    });
-                    
-                    doc.setTextColor(55, 65, 81);
-                    currentY += 10;
-                }
-
-                const technicianComments = document.getElementById('technician-comments').value;
-                if (technicianComments) {
-                    doc.setFont('helvetica', 'bold');
-                    doc.text('TECHNICIAN COMMENTS', 20, currentY);
-                    doc.line(20, currentY + 2, 80, currentY + 2);
-                    doc.setFont('helvetica', 'normal');
-                    currentY += 10;
-                    const commentLines = doc.splitTextToSize(technicianComments, 170);
-                    doc.text(commentLines, 20, currentY);
-                    currentY += commentLines.length * 5 + 15;
-                }
-
-                // Signature Section
-                currentY += 20;
-                if (currentY > 240) {
-                    doc.addPage();
-                    currentY = 50;
-                }
-
-                doc.setFont('helvetica', 'bold');
-                doc.text('SIGNATURES', 105, currentY, { align: 'center' });
-                currentY += 15;
-
-                const leftX = 55;
-                const rightX = 135;
-                
-                doc.setFont('helvetica', 'normal');
-                doc.text('Customer', leftX, currentY, { align: 'center' });
-                doc.text('Technician', rightX, currentY, { align: 'center' });
-
-                currentY += 15;
-                doc.line(leftX - 25, currentY, leftX + 25, currentY);
-                doc.line(rightX - 25, currentY, rightX + 25, currentY);
-
-                currentY += 8;
-                doc.text(document.getElementById('contact-person').value || 'Name: ___________________', leftX, currentY, { align: 'center' });
-                doc.text(document.getElementById('technician-name').value || 'Name: ___________________', rightX, currentY, { align: 'center' });
-
-                currentY += 8;
-                doc.text(`Date: ${reportDate}`, leftX, currentY, { align: 'center' });
-                doc.text(`Date: ${reportDate}`, rightX, currentY, { align: 'center' });
-
-                // Footer
-                doc.setFontSize(8);
-                doc.setTextColor(107, 114, 128);
-                doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 290, { align: 'center' });
-
-                // Save PDF
-                doc.save(`Service_Report_${reportNumber}.pdf`);
-            } catch (error) {
-                errorMessage.textContent = `Error generating PDF: ${error.message}. Please check your browser console for details.`;
-                errorMessage.style.display = 'block';
-                console.error(error);
+                y += 20;
+                checklistItems.forEach(item => {
+                    doc.text(item, 10, y);
+                    y += 7;
+                });
             }
+
+            // Issue Description
+            const issueDescription = document.getElementById('issue-description').value;
+            if (issueDescription) {
+                doc.setFontSize(14);
+                doc.text('Issue Description', 10, y + 10);
+                doc.line(10, y + 12, 200, y + 12);
+                doc.setFontSize(10);
+                y += 20;
+                doc.text(doc.splitTextToSize(issueDescription, 190), 10, y);
+                y += 7 * Math.ceil(issueDescription.length / 90) + 10;
+            }
+
+            // Technician Comments
+            const technicianComments = document.getElementById('technician-comments').value;
+            if (technicianComments) {
+                doc.setFontSize(14);
+                doc.text('Technician Comments', 10, y + 10);
+                doc.line(10, y + 12, 200, y + 12);
+                doc.setFontSize(10);
+                y += 20;
+                doc.text(doc.splitTextToSize(technicianComments, 190), 10, y);
+            }
+
+            // Footer
+            doc.setFillColor(0, 102, 204);
+            doc.rect(0, 280, 210, 20, 'F');
+            doc.setFontSize(8);
+            doc.setTextColor(255, 255, 255);
+            doc.text('Generated by Service Report Generator', 105, 290, null, null, 'center');
+
+            // Save the PDF
+            doc.save('Service_Report.pdf');
         }
-
-
-        // Set current date as default
-        document.getElementById('service-date').valueAsDate = new Date();
-
-        window.onload = function() {
-            setTimeout(function() {
-                if (!window.jspdf || !window.jspdf.jsPDF) {
-                    document.getElementById('error-message').textContent = 'Required libraries (jsPDF or autoTable) failed to load. Please check your internet connection or try a different browser.';
-                    document.getElementById('error-message').style.display = 'block';
-                } else {
-                    document.getElementById('error-message').style.display = 'none';
-                }
-            }, 2000); // Wait 2 seconds for libraries to load
-        };
     </script>
 </body>
 </html>
