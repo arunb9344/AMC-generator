@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Service Report Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -298,8 +299,23 @@
             }));
         }
 
-        function generatePDF() {
-            const doc = new jsPDF();
+        async function generatePDF() {
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // Add logo or header
+            doc.setFillColor(0, 102, 204);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.text('EyeTech Securities', 105, 25, { align: 'center' });
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Service Report', 105, 35, { align: 'center' });
+
             const customerName = document.getElementById('customerName').value;
             const customerAddress = document.getElementById('customerAddress').value;
             const gstNumber = document.getElementById('gstNumber').value;
@@ -325,20 +341,20 @@
                 checklistData = collectChecklistData('fireAlarmChecklist', 'Fire Alarm System Checklist');
             }
 
-            let y = 20;
-            doc.setFontSize(16);
-            doc.text(`${reportType}`, 20, y);
-            y += 10;
+            let y = 50;
             doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Report Type: ${reportType}`, 20, y);
+            y += 10;
             doc.text(`Customer Name: ${customerName}`, 20, y);
             y += 10;
-            doc.text(`Customer Address: ${customerAddress}`, 20, y);
+            doc.text(`Address: ${customerAddress}`, 20, y);
             y += 10;
             doc.text(`GST Number: ${gstNumber}`, 20, y);
             y += 10;
             doc.text(`Contact Person: ${contactPerson}`, 20, y);
             y += 10;
-            doc.text(`Contact Number: ${customerContact}`, 20, y);
+            doc.text(`Contact: ${customerContact}`, 20, y);
             y += 10;
             doc.text(`Email: ${customerEmail}`, 20, y);
             y += 10;
@@ -348,32 +364,40 @@
             y += 10;
             doc.text(`Service Date: ${serviceDate}`, 20, y);
             y += 10;
-            doc.text(`Technician Name: ${technicianName}`, 20, y);
+            doc.text(`Technician: ${technicianName}`, 20, y);
             y += 15;
 
-            doc.text(`${equipmentType} Checklist:`, 20, y);
+            doc.setFillColor(0, 102, 204);
+            doc.rect(20, y - 5, 170, 0.5, 'F');
+            doc.text(`${equipmentType} Checklist`, 20, y);
             y += 10;
             checklistData.forEach(item => {
                 doc.text(`${item.item}: ${item.checked ? '✓' : '✗'}`, 30, y);
-                y += 10;
+                y += 8;
             });
 
             y += 5;
-            doc.text('Issue Description:', 20, y);
+            doc.setFillColor(0, 102, 204);
+            doc.rect(20, y - 5, 170, 0.5, 'F');
+            doc.text('Issue Description', 20, y);
             y += 10;
-            doc.text(issueDescription, 20, y, { maxWidth: 170 });
-            y += doc.getTextDimensions(issueDescription, { maxWidth: 170 }).h + 10;
+            doc.setFontSize(10);
+            doc.text(issueDescription, 20, y, { maxWidth: 170, align: 'justify' });
+            y += 20;
 
-            doc.text('Technician Comments:', 20, y);
+            doc.text('Technician Comments', 20, y);
             y += 10;
-            doc.text(technicianComments, 20, y, { maxWidth: 170 });
+            doc.text(technicianComments, 20, y, { maxWidth: 170, align: 'justify' });
+
+            doc.setFontSize(8);
+            doc.text(`Generated on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`, 20, 290);
 
             doc.save(`Service_Report_${customerName}.pdf`);
             return doc.output('datauristring');
         }
 
         async function generateAndSend() {
-            const pdfDataUri = generatePDF();
+            const pdfDataUri = await generatePDF();
             const customerName = document.getElementById('customerName').value;
             const serviceType = document.getElementById('serviceType').value;
             const equipmentType = document.getElementById('equipmentType').value;
@@ -399,21 +423,20 @@
                 if (response.ok) {
                     alert('PDF generated and email sent successfully!');
                 } else {
-                    alert('Error sending email. PDF has been generated.');
+                    const errorText = await response.text();
+                    alert(`Error sending email: ${errorText}. PDF has been generated.`);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error sending email. PDF has been generated.');
+                alert(`Error sending email: ${error.message}. PDF has been generated.`);
             }
         }
 
-        // Navigation tab functionality
         document.querySelectorAll('.nav-tabs a').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.querySelectorAll('.nav-tabs a').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
-                // Add logic here if you need to switch between AMC Agreement and Service Report forms
             });
         });
     </script>
