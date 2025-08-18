@@ -1,16 +1,17 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" })
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const BREVO_API_KEY = process.env.BREVO_API_KEY
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
     if (!BREVO_API_KEY) {
-      return res.status(500).json({ error: "Brevo API key not configured" })
+      return res.status(500).json({ error: "Brevo API key not configured" });
     }
 
-    const formData = req.body
+    // Parse form data
+    const formData = req.body;
     const {
       customerEmail,
       customerName,
@@ -22,16 +23,21 @@ export default async function handler(req, res) {
       issueDescription,
       technicianComments,
       sendToCustomer,
-    } = formData
+    } = formData;
+
+    // Check if required fields are present
+    if (!reportNumber || !serviceDate || !serviceType || !equipmentType || !technicianName) {
+      return res.status(400).json({ error: "Missing required service details" });
+    }
 
     // Convert PDF buffer to base64
-    const pdfBuffer = req.files?.pdf?.data
+    const pdfBuffer = req.files?.pdf?.data;
     if (!pdfBuffer) {
-      return res.status(400).json({ error: "PDF file is required" })
+      return res.status(400).json({ error: "PDF file is required" });
     }
-    const pdfBase64 = pdfBuffer.toString("base64")
+    const pdfBase64 = pdfBuffer.toString("base64");
 
-    const emails = []
+    const emails = [];
 
     // Customer email
     if (sendToCustomer === "true" && customerEmail) {
@@ -44,15 +50,12 @@ export default async function handler(req, res) {
               <h1 style="margin: 0;">Eye Tech Securities</h1>
               <p style="margin: 5px 0 0 0;">Service Report</p>
             </div>
-            
             <div style="padding: 30px; background-color: #f9fafb;">
               <h2 style="color: #1f2937; margin-bottom: 20px;">Dear ${customerName},</h2>
-              
               <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
                 Thank you for choosing Eye Tech Securities for your security system maintenance needs. 
                 Please find attached your service report for the recent service visit.
               </p>
-              
               <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #1f2937; margin-top: 0;">Service Details:</h3>
                 <ul style="color: #4b5563; line-height: 1.8;">
@@ -63,7 +66,6 @@ export default async function handler(req, res) {
                   <li><strong>Technician:</strong> ${technicianName}</li>
                 </ul>
               </div>
-              
               ${
                 issueDescription
                   ? `
@@ -74,7 +76,6 @@ export default async function handler(req, res) {
               `
                   : ""
               }
-              
               ${
                 technicianComments
                   ? `
@@ -85,12 +86,10 @@ export default async function handler(req, res) {
               `
                   : ""
               }
-              
               <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
                 If you have any questions about this service report or need additional support, 
                 please don't hesitate to contact us.
               </p>
-              
               <div style="background-color: #dbeafe; padding: 15px; border-radius: 6px; margin: 20px 0;">
                 <p style="color: #1e40af; margin: 0; font-size: 14px;">
                   <strong>Contact Information:</strong><br>
@@ -99,17 +98,14 @@ export default async function handler(req, res) {
                   Address: No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117
                 </p>
               </div>
-              
               <p style="color: #4b5563; line-height: 1.6;">
                 Thank you for your continued trust in Eye Tech Securities.
               </p>
-              
               <p style="color: #4b5563; line-height: 1.6;">
                 Best regards,<br>
                 <strong>Eye Tech Securities Team</strong>
               </p>
             </div>
-            
             <div style="background-color: #374151; color: #d1d5db; padding: 15px; text-align: center; font-size: 12px;">
               <p style="margin: 0;">© 2025 Eye Tech Securities. All rights reserved.</p>
             </div>
@@ -122,7 +118,7 @@ export default async function handler(req, res) {
             type: "application/pdf",
           },
         ],
-      })
+      });
     }
 
     // Admin email (always sent)
@@ -135,10 +131,8 @@ export default async function handler(req, res) {
             <h1 style="margin: 0;">Eye Tech Securities</h1>
             <p style="margin: 5px 0 0 0;">New Service Report Generated</p>
           </div>
-          
           <div style="padding: 30px; background-color: #f9fafb;">
             <h2 style="color: #1f2937; margin-bottom: 20px;">Service Report Details</h2>
-            
             <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #1f2937; margin-top: 0;">Report Information:</h3>
               <ul style="color: #4b5563; line-height: 1.8;">
@@ -149,7 +143,6 @@ export default async function handler(req, res) {
                 <li><strong>Technician:</strong> ${technicianName}</li>
               </ul>
             </div>
-            
             <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #1f2937; margin-top: 0;">Customer Information:</h3>
               <ul style="color: #4b5563; line-height: 1.8;">
@@ -158,7 +151,6 @@ export default async function handler(req, res) {
                 <li><strong>Email Sent to Customer:</strong> ${sendToCustomer === "true" ? "Yes" : "No"}</li>
               </ul>
             </div>
-            
             ${
               issueDescription
                 ? `
@@ -169,7 +161,6 @@ export default async function handler(req, res) {
             `
                 : ""
             }
-            
             ${
               technicianComments
                 ? `
@@ -180,14 +171,12 @@ export default async function handler(req, res) {
             `
                 : ""
             }
-            
             <div style="background-color: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0;">
               <p style="color: #92400e; margin: 0; font-size: 14px;">
                 <strong>Action Required:</strong> Please review the attached service report and follow up with the customer if necessary.
               </p>
             </div>
           </div>
-          
           <div style="background-color: #374151; color: #d1d5db; padding: 15px; text-align: center; font-size: 12px;">
             <p style="margin: 0;">© 2025 Eye Tech Securities - Internal System</p>
           </div>
@@ -200,7 +189,7 @@ export default async function handler(req, res) {
           type: "application/pdf",
         },
       ],
-    })
+    });
 
     // Send emails
     for (const email of emails) {
@@ -218,11 +207,11 @@ export default async function handler(req, res) {
           htmlContent: email.htmlContent,
           attachment: email.attachment,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.text()
-        throw new Error(`Brevo API error: ${response.status} - ${errorData}`)
+        const errorData = await response.text();
+        throw new Error(`Brevo API error: ${response.status} - ${errorData}`);
       }
     }
 
@@ -230,9 +219,9 @@ export default async function handler(req, res) {
       success: true,
       message: "Service report emails sent successfully",
       emailsSent: emails.length,
-    })
+    });
   } catch (error) {
-    console.error("Service report email error:", error)
-    res.status(500).json({ error: error.message })
+    console.error("Service report email error:", error);
+    res.status(500).json({ error: error.message });
   }
 }
