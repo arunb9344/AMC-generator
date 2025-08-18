@@ -41,24 +41,24 @@
         }
         .form-section {
             background-color: #fff;
-            padding: 15px;
+            padding: 20px;
             margin-bottom: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .form-section h2 {
             color: #1a3c6d;
-            font-size: 15px;
-            margin-bottom: 10px;
+            font-size: 16px;
+            margin-bottom: 12px;
             border-bottom: 2px solid #1a3c6d;
-            padding-bottom: 3px;
+            padding-bottom: 4px;
         }
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             font-weight: 600;
             color: #333;
         }
@@ -66,23 +66,23 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 7px;
+            padding: 8px;
             border: 1px solid #d0d4db;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 13px;
         }
         .checklist {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+            gap: 10px;
         }
         .checklist label {
             display: flex;
             align-items: center;
-            font-size: 12px;
+            font-size: 13px;
         }
         .checklist input[type="checkbox"] {
-            margin-right: 5px;
+            margin-right: 6px;
         }
         .generate-btn {
             display: block;
@@ -261,47 +261,89 @@
             });
 
             // Company Header
-            doc.setFillColor(26, 60, 109);
-            doc.rect(0, 0, 210, 25, 'F');
+            doc.setFillColor(26, 60, 109); // Dark Blue
+            doc.rect(0, 0, 210, 30, 'F');
             doc.setFont('Helvetica', 'bold');
-            doc.setFontSize(14);
+            doc.setFontSize(16);
             doc.setTextColor(255, 255, 255);
             doc.text('Eye Tech Securities', 10, 15);
-            doc.setFontSize(8);
+            doc.setFontSize(9);
             doc.setFont('Helvetica', 'normal');
             doc.text('No.36/80, Medavakkam Main Road, Keelkattalai', 10, 20);
             doc.text('Chennai, Tamil Nadu 600113', 10, 24);
             doc.text('Phone: +91916218229 | Email: eyetecsecurities@gmail.com', 10, 28);
 
             // Title
-            doc.setFontSize(12);
+            doc.setFontSize(14);
             doc.setTextColor(0, 0, 0);
             doc.setFont('Helvetica', 'bold');
-            doc.text('Service Report', 105, 35, null, null, 'center');
+            doc.text('Service Report', 105, 40, null, null, 'center');
 
-            // Service Details Table
-            doc.setFontSize(9);
+            // Customer Details Table
+            doc.setFontSize(10);
             doc.setFont('Helvetica', 'bold');
-            doc.text('Service Details', 10, 45);
+            doc.text('Customer Details', 10, 50);
             doc.setDrawColor(26, 60, 109);
             doc.setLineWidth(0.3);
-            doc.line(10, 47, 200, 47);
+            doc.line(10, 52, 200, 52);
+
             doc.autoTable({
-                startY: 50,
+                startY: 55,
                 head: [['Field', 'Details']],
                 body: [
-                    ['Equipment Type', document.getElementById('equipment-type').value || 'N/A'],
-                    ['Service Date', document.getElementById('service-date').value || 'N/A'],
-                    ['Technician Name', document.getElementById('technician-name').value || 'N/A']
+                    ['Customer Name', document.getElementById('customer-name').value || 'N/A'],
+                    ['Address', document.getElementById('customer-address').value || 'N/A'],
+                    ['Contact Person', document.getElementById('contact-person').value || 'N/A'],
+                    ['Contact Number', document.getElementById('customer-contact').value || 'N/A'],
+                    ['Email', document.getElementById('customer-email').value || 'N/A']
                 ],
                 theme: 'grid',
-                headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 7, fontStyle: 'bold' },
-                bodyStyles: { fontSize: 7, textColor: [0, 0, 0] },
+                headStyles: {
+                    fillColor: [26, 60, 109],
+                    textColor: [255, 255, 255],
+                    fontSize: 8,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 8,
+                    textColor: [0, 0, 0]
+                },
                 margin: { left: 10, right: 10 },
                 tableWidth: 180
             });
 
             let y = doc.lastAutoTable.finalY + 5;
+
+            // Service Details Table
+            doc.setFontSize(10);
+            doc.setFont('Helvetica', 'bold');
+            doc.text('Service Details', 10, y);
+            doc.line(10, y + 2, 200, y + 2);
+            doc.autoTable({
+                startY: y + 5,
+                head: [['Field', 'Details']],
+                body: [
+                    ['Service Type', document.getElementById('service-type').value || 'N/A'],
+                    ['Equipment Type', document.getElementById('equipment-type').value || 'N/A'],
+                    ['Service Date', document.getElementById('service-date').value || 'N/A'],
+                    ['Technician Name', document.getElementById('technician-name').value || 'N/A']
+                ],
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [26, 60, 109],
+                    textColor: [255, 255, 255],
+                    fontSize: 8,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 8,
+                    textColor: [0, 0, 0]
+                },
+                margin: { left: 10, right: 10 },
+                tableWidth: 180
+            });
+
+            y = doc.lastAutoTable.finalY + 5;
 
             // Checklist
             const equipmentType = document.getElementById('equipment-type').value;
@@ -347,7 +389,7 @@
             }
 
             if (checklistItems.length > 0) {
-                doc.setFontSize(9);
+                doc.setFontSize(10);
                 doc.setFont('Helvetica', 'bold');
                 doc.text(`${equipmentType} Checklist`, 10, y);
                 doc.line(10, y + 2, 200, y + 2);
@@ -356,8 +398,16 @@
                     head: [['Item', 'Status']],
                     body: checklistItems,
                     theme: 'grid',
-                    headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 7, fontStyle: 'bold' },
-                    bodyStyles: { fontSize: 6, textColor: [0, 0, 0] },
+                    headStyles: {
+                        fillColor: [26, 60, 109],
+                        textColor: [255, 255, 255],
+                        fontSize: 8,
+                        fontStyle: 'bold'
+                    },
+                    bodyStyles: {
+                        fontSize: 7,
+                        textColor: [0, 0, 0]
+                    },
                     margin: { left: 10, right: 10 },
                     tableWidth: 180
                 });
@@ -367,21 +417,28 @@
             // Issue Description and Technician Comments Table
             const issueDescription = document.getElementById('issue-description').value || 'N/A';
             const technicianComments = document.getElementById('technician-comments').value || 'N/A';
-            doc.setFontSize(9);
+            doc.setFontSize(10);
             doc.setFont('Helvetica', 'bold');
             doc.text('Additional Notes', 10, y);
             doc.line(10, y + 2, 200, y + 2);
             doc.autoTable({
                 startY: y + 5,
-                head: [['Section', 'Details']],
+                head: [['Field', 'Details']],
                 body: [
                     ['Issue Description', issueDescription],
                     ['Technician Comments', technicianComments]
                 ],
                 theme: 'grid',
-                headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 7, fontStyle: 'bold' },
-                bodyStyles: { fontSize: 6, textColor: [0, 0, 0] },
-                columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 130 } },
+                headStyles: {
+                    fillColor: [26, 60, 109],
+                    textColor: [255, 255, 255],
+                    fontSize: 8,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 7,
+                    textColor: [0, 0, 0]
+                },
                 margin: { left: 10, right: 10 },
                 tableWidth: 180
             });
@@ -389,7 +446,7 @@
             // Footer
             doc.setFillColor(26, 60, 109);
             doc.rect(0, 270, 210, 27, 'F');
-            doc.setFontSize(7);
+            doc.setFontSize(8);
             doc.setTextColor(255, 255, 255);
             doc.setFont('Helvetica', 'normal');
             doc.text('Eye Tech Securities | No.36/80, Medavakkam Main Road, Keelkattalai, Chennai, Tamil Nadu 600113', 10, 280);
