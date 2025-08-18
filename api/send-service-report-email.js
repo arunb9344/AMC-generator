@@ -19,6 +19,8 @@ export default async function handler(req, res) {
       serviceType,
       equipmentType,
       technicianName,
+      issueDescription,
+      technicianComments,
       sendToCustomer,
     } = formData
 
@@ -61,6 +63,28 @@ export default async function handler(req, res) {
                   <li><strong>Technician:</strong> ${technicianName}</li>
                 </ul>
               </div>
+              
+              ${
+                issueDescription
+                  ? `
+              <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1f2937; margin-top: 0;">Service Summary:</h3>
+                <p style="color: #4b5563; line-height: 1.6;">${issueDescription}</p>
+              </div>
+              `
+                  : ""
+              }
+              
+              ${
+                technicianComments
+                  ? `
+              <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1f2937; margin-top: 0;">Technician Notes:</h3>
+                <p style="color: #4b5563; line-height: 1.6;">${technicianComments}</p>
+              </div>
+              `
+                  : ""
+              }
               
               <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
                 If you have any questions about this service report or need additional support, 
@@ -134,6 +158,28 @@ export default async function handler(req, res) {
                 <li><strong>Email Sent to Customer:</strong> ${sendToCustomer === "true" ? "Yes" : "No"}</li>
               </ul>
             </div>
+            
+            ${
+              issueDescription
+                ? `
+            <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1f2937; margin-top: 0;">Issue Description:</h3>
+              <p style="color: #4b5563; line-height: 1.6;">${issueDescription}</p>
+            </div>
+            `
+                : ""
+            }
+            
+            ${
+              technicianComments
+                ? `
+            <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1f2937; margin-top: 0;">Technician Comments:</h3>
+              <p style="color: #4b5563; line-height: 1.6;">${technicianComments}</p>
+            </div>
+            `
+                : ""
+            }
             
             <div style="background-color: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0;">
               <p style="color: #92400e; margin: 0; font-size: 14px;">
