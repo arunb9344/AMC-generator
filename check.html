@@ -106,16 +106,6 @@
         .btn-secondary:hover {
             background-color: #4b5563;
         }
-        .btn-success {
-            background-color: #10b981;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-        }
-        .btn-success:hover {
-            background-color: #059669;
-        }
         #total-amount {
             font-weight: 600;
             color: #1f2937;
@@ -172,15 +162,6 @@
             </div>
 
             <form id="amc-form">
-                <!-- API Key Configuration Section -->
-                <div class="form-section api-key-section">
-                    <h3>Email Configuration</h3>
-                    <p><strong>Important:</strong> For security, set your Brevo API key as an environment variable or use a backend service.</p>
-                    <label for="brevo-api-key" class="block text-sm font-medium text-yellow-800">Brevo API Key (for testing only)</label>
-                    <input type="password" id="brevo-api-key" class="input-field" placeholder="Enter your Brevo API key">
-                    <p class="text-xs text-yellow-700">⚠️ Never expose API keys in production. Use environment variables or backend services.</p>
-                </div>
-
                 <div class="form-section">
                     <h2>Customer Details</h2>
                     <label for="customer-name" class="block text-sm font-medium text-gray-700">Customer Name</label>
@@ -646,16 +627,9 @@
         async function generateAndEmail() {
             const errorMessage = document.getElementById('error-message');
             const successMessage = document.getElementById('success-message');
-            const brevoApiKey = document.getElementById('brevo-api-key').value.trim();
             
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
-
-            if (!brevoApiKey) {
-                errorMessage.textContent = 'Please enter your Brevo API key to send emails.';
-                errorMessage.style.display = 'block';
-                return;
-            }
 
             // Show loading state
             const generateButton = document.querySelector('button[onclick="generateAndEmail()"]');
@@ -689,7 +663,7 @@
                 const pdfBase64 = await blobToBase64(currentPdfBlob);
 
                 // Send emails
-                await sendEmails(brevoApiKey, currentAmcData, pdfBase64);
+                await sendEmails(currentAmcData, pdfBase64);
 
                 // Also save PDF locally
                 doc.save(`AMC_Agreement_${currentAmcData.amcNumber}.pdf`);
@@ -720,14 +694,14 @@
             });
         }
 
-        async function sendEmails(apiKey, amcData, pdfBase64) {
+        async function sendEmails(amcData, pdfBase64) {
             const sendToCustomer = document.getElementById('send-to-customer').checked;
             const adminEmail = 'support@eyetechsecurities.in';
             
             const emailPromises = [];
 
             // Always send to admin
-            emailPromises.push(sendEmail(apiKey, {
+            emailPromises.push(sendEmailWithBrevo({
                 to: adminEmail,
                 subject: `New AMC Agreement Generated - ${amcData.amcNumber}`,
                 htmlContent: generateAdminEmailTemplate(amcData),
@@ -739,7 +713,7 @@
 
             // Send to customer if checkbox is checked
             if (sendToCustomer && amcData.customerEmail) {
-                emailPromises.push(sendEmail(apiKey, {
+                emailPromises.push(sendEmailWithBrevo({
                     to: amcData.customerEmail,
                     subject: `Your AMC Agreement - ${amcData.amcNumber} | Eye Tech Securities`,
                     htmlContent: generateCustomerEmailTemplate(amcData),
@@ -753,37 +727,51 @@
             await Promise.all(emailPromises);
         }
 
-        async function sendEmail(apiKey, emailData) {
-            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'api-key': apiKey
-                },
-                body: JSON.stringify({
-                    sender: {
-                        name: 'Eye Tech Securities',
-                        email: 'no-reply@eyetechsecurities.in'
+        async function sendEmailWithBrevo(emailData) {
+            try {
+                // Note: In production, this should be handled by a backend service
+                // For now, this assumes BREVO_API_KEY is available through your deployment environment
+                const apiKey = process.env.BREVO_API_KEY || window.BREVO_API_KEY;
+                
+                if (!apiKey) {
+                    throw new Error('Brevo API key not configured. Please set BREVO_API_KEY environment variable.');
+                }
+
+                const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'api-key': apiKey
                     },
-                    to: [{
-                        email: emailData.to
-                    }],
-                    subject: emailData.subject,
-                    htmlContent: emailData.htmlContent,
-                    attachment: [{
-                        name: emailData.attachment.name,
-                        content: emailData.attachment.content
-                    }]
-                })
-            });
+                    body: JSON.stringify({
+                        sender: {
+                            name: 'Eye Tech Securities',
+                            email: 'no-reply@eyetechsecurities.in'
+                        },
+                        to: [{
+                            email: emailData.to
+                        }],
+                        subject: emailData.subject,
+                        htmlContent: emailData.htmlContent,
+                        attachment: [{
+                            name: emailData.attachment.name,
+                            content: emailData.attachment.content
+                        }]
+                    })
+                });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Email sending failed: ${errorData.message || response.statusText}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Email sending failed: ${errorData.message || response.statusText}`);
+                }
+
+                return response.json();
+
+            } catch (error) {
+                console.error('Error sending email:', error);
+                throw error;
             }
-
-            return response.json();
         }
 
         function generateCustomerEmailTemplate(amcData) {
