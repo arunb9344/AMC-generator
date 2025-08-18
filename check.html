@@ -7,7 +7,209 @@
     <!-- Updated to more reliable CDN sources with fallbacks -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
-    <script src="config.js"></script>
+    <script>
+        function loadLibraries() {
+            return new Promise((resolve, reject) => {
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    resolve();
+                    return;
+                }
+
+                let scriptsLoaded = 0;
+                const totalScripts = 2;
+
+                function checkComplete() {
+                    scriptsLoaded++;
+                    if (scriptsLoaded === totalScripts) {
+                        setTimeout(() => {
+                            if (window.jspdf && window.jspdf.jsPDF) {
+                                resolve();
+                            } else {
+                                reject(new Error('Libraries failed to load properly'));
+                            }
+                        }, 500);
+                    }
+                }
+
+                // Load jsPDF first
+                const script1 = document.createElement('script');
+                script1.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+                script1.onload = () => {
+                    // Load autoTable plugin after jsPDF
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://unpkg.com/jspdf-autotable@3.8.3/dist/jspdf.plugin.autotable.min.js';
+                    script2.onload = checkComplete;
+                    script2.onerror = () => reject(new Error('autoTable plugin failed to load'));
+                    document.head.appendChild(script2);
+                    checkComplete();
+                };
+                script1.onerror = () => reject(new Error('jsPDF failed to load'));
+                document.head.appendChild(script1);
+            });
+        }
+    </script>
+    
+    <!-- Added Tailwind CSS CDN link -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Added custom CSS styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        
+        .input-field {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .particular-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        
+        .particular-row input {
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        
+        .btn-success.loading {
+            background-color: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        #total-amount {
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 1rem;
+        }
+        
+        #error-message {
+            color: #dc2626;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        #success-message {
+            color: #10b981;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        .flex-1 {
+            flex: 1;
+        }
+        
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+        
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .ml-2 {
+            margin-left: 0.5rem;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .justify-center {
+            justify-content: center;
+        }
+    </style>
+
     <script>
         let signatureImageData = null;
         let currentPdfBlob = null;
