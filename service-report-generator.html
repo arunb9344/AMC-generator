@@ -345,50 +345,48 @@
 
             y = doc.lastAutoTable.finalY + 5;
 
-            // Checklist (Exclude CCTV Checklist for Breakdown Visit)
+            // Checklist
             const serviceType = document.getElementById('service-type').value;
             const equipmentType = document.getElementById('equipment-type').value;
             let checklistItems = [];
-            if (equipmentType && serviceType !== 'Breakdown Visit') {
-                if (equipmentType === 'CCTV') {
-                    checklistItems = [
-                        ['Cameras Live', document.getElementById('cameras-live').checked ? 'Yes' : 'No'],
-                        ['Playback Working', document.getElementById('playback-working').checked ? 'Yes' : 'No'],
-                        ['HDD Healthy', document.getElementById('hdd-healthy').checked ? 'Yes' : 'No'],
-                        ['Date/Time Accurate', document.getElementById('date-time-accurate').checked ? 'Yes' : 'No'],
-                        ['Remote Access', document.getElementById('remote-access').checked ? 'Yes' : 'No'],
-                        ['Power Supply', document.getElementById('power-supply').checked ? 'Yes' : 'No'],
-                        ['Lenses Clean', document.getElementById('lenses-clean').checked ? 'Yes' : 'No'],
-                        ['Cables Secure', document.getElementById('cables-secure').checked ? 'Yes' : 'No']
-                    ];
-                } else if (equipmentType === 'Biometrics & Access Control') {
-                    checklistItems = [
-                        ['Fingerprint Scanner Working', document.getElementById('fingerprint-working').checked ? 'Yes' : 'No'],
-                        ['Card Reader Working', document.getElementById('card-reader-working').checked ? 'Yes' : 'No'],
-                        ['Door Lock Mechanism', document.getElementById('door-lock-mechanism').checked ? 'Yes' : 'No'],
-                        ['Access Logs Updated', document.getElementById('access-logs-updated').checked ? 'Yes' : 'No'],
-                        ['User Database Backup', document.getElementById('user-database-backup').checked ? 'Yes' : 'No'],
-                        ['Sensor Calibration', document.getElementById('sensor-calibration').checked ? 'Yes' : 'No']
-                    ];
-                } else if (equipmentType === 'Video Door Bell') {
-                    checklistItems = [
-                        ['Video Quality Clear', document.getElementById('video-quality-clear').checked ? 'Yes' : 'No'],
-                        ['Audio Quality Clear', document.getElementById('audio-quality-clear').checked ? 'Yes' : 'No'],
-                        ['Motion Detection Working', document.getElementById('motion-detection-working').checked ? 'Yes' : 'No'],
-                        ['Night Vision Working', document.getElementById('night-vision-working').checked ? 'Yes' : 'No'],
-                        ['Mobile App Connectivity', document.getElementById('mobile-app-connectivity').checked ? 'Yes' : 'No'],
-                        ['Doorbell Chime Working', document.getElementById('doorbell-chime-working').checked ? 'Yes' : 'No']
-                    ];
-                } else if (equipmentType === 'Fire Alarm') {
-                    checklistItems = [
-                        ['Smoke Detectors Working', document.getElementById('smoke-detectors-working').checked ? 'Yes' : 'No'],
-                        ['Heat Detectors Working', document.getElementById('heat-detectors-working').checked ? 'Yes' : 'No'],
-                        ['Alarm Sounders Working', document.getElementById('alarm-sounders-working').checked ? 'Yes' : 'No'],
-                        ['Control Panel Functional', document.getElementById('control-panel-functional').checked ? 'Yes' : 'No'],
-                        ['Battery Backup Tested', document.getElementById('battery-backup-tested').checked ? 'Yes' : 'No'],
-                        ['Manual Call Points Working', document.getElementById('manual-call-points-working').checked ? 'Yes' : 'No']
-                    ];
-                }
+            if (equipmentType === 'CCTV' && serviceType === 'Maintenance Visit') {
+                checklistItems = [
+                    ['Cameras Live', document.getElementById('cameras-live').checked ? 'Yes' : 'No'],
+                    ['Playback Working', document.getElementById('playback-working').checked ? 'Yes' : 'No'],
+                    ['HDD Healthy', document.getElementById('hdd-healthy').checked ? 'Yes' : 'No'],
+                    ['Date/Time Accurate', document.getElementById('date-time-accurate').checked ? 'Yes' : 'No'],
+                    ['Remote Access', document.getElementById('remote-access').checked ? 'Yes' : 'No'],
+                    ['Power Supply', document.getElementById('power-supply').checked ? 'Yes' : 'No'],
+                    ['Lenses Clean', document.getElementById('lenses-clean').checked ? 'Yes' : 'No'],
+                    ['Cables Secure', document.getElementById('cables-secure').checked ? 'Yes' : 'No']
+                ];
+            } else if (equipmentType === 'Biometrics & Access Control') {
+                checklistItems = [
+                    ['Fingerprint Scanner Working', document.getElementById('fingerprint-working').checked ? 'Yes' : 'No'],
+                    ['Card Reader Working', document.getElementById('card-reader-working').checked ? 'Yes' : 'No'],
+                    ['Door Lock Mechanism', document.getElementById('door-lock-mechanism').checked ? 'Yes' : 'No'],
+                    ['Access Logs Updated', document.getElementById('access-logs-updated').checked ? 'Yes' : 'No'],
+                    ['User Database Backup', document.getElementById('user-database-backup').checked ? 'Yes' : 'No'],
+                    ['Sensor Calibration', document.getElementById('sensor-calibration').checked ? 'Yes' : 'No']
+                ];
+            } else if (equipmentType === 'Video Door Bell') {
+                checklistItems = [
+                    ['Video Quality Clear', document.getElementById('video-quality-clear').checked ? 'Yes' : 'No'],
+                    ['Audio Quality Clear', document.getElementById('audio-quality-clear').checked ? 'Yes' : 'No'],
+                    ['Motion Detection Working', document.getElementById('motion-detection-working').checked ? 'Yes' : 'No'],
+                    ['Night Vision Working', document.getElementById('night-vision-working').checked ? 'Yes' : 'No'],
+                    ['Mobile App Connectivity', document.getElementById('mobile-app-connectivity').checked ? 'Yes' : 'No'],
+                    ['Doorbell Chime Working', document.getElementById('doorbell-chime-working').checked ? 'Yes' : 'No']
+                ];
+            } else if (equipmentType === 'Fire Alarm') {
+                checklistItems = [
+                    ['Smoke Detectors Working', document.getElementById('smoke-detectors-working').checked ? 'Yes' : 'No'],
+                    ['Heat Detectors Working', document.getElementById('heat-detectors-working').checked ? 'Yes' : 'No'],
+                    ['Alarm Sounders Working', document.getElementById('alarm-sounders-working').checked ? 'Yes' : 'No'],
+                    ['Control Panel Functional', document.getElementById('control-panel-functional').checked ? 'Yes' : 'No'],
+                    ['Battery Backup Tested', document.getElementById('battery-backup-tested').checked ? 'Yes' : 'No'],
+                    ['Manual Call Points Working', document.getElementById('manual-call-points-working').checked ? 'Yes' : 'No']
+                ];
             }
 
             if (checklistItems.length > 0) {
