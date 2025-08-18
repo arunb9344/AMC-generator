@@ -3,494 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Report Generator - Eye Tech Securities</title>
-    
-    <!-- jsPDF and autoTable libraries -->
+    <title>Service Report Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
-    
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f9fafb;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .form-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .form-section h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 1rem;
-        }
-        .input-field {
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            padding: 0.5rem;
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .btn-primary:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-        }
-        .btn-success {
-            background-color: #10b981;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-success:hover {
-            background-color: #059669;
-        }
-        .btn-success:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-        }
-        .btn-secondary {
-            background-color: #6b7280;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-secondary:hover {
-            background-color: #4b5563;
-        }
-        #error-message {
-            color: #dc2626;
-            margin-top: 1rem;
-            display: none;
-        }
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .checklist-item input[type="checkbox"] {
-            margin-right: 0.5rem;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="form-section">
-            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Service Report Generator</h1>
-            
-            <!-- Navigation links -->
-            <div class="flex justify-center gap-4 mb-6">
-                <a href="index.html" class="btn-secondary text-center">AMC Agreement</a>
-                <a href="service-report-generator.html" class="btn-primary text-center">Service Report</a>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-6 max-w-4xl">
+        <h1 class="text-3xl font-bold text-center mb-6">Service Report Generator</h1>
+
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <div class="flex justify-around mb-6">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">AMC Agreement</button>
+                <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Service Report</button>
             </div>
 
-            <form id="service-report-form">
-                <!-- Customer Details Section -->
-                <div class="form-section">
-                    <h2>Customer Details</h2>
-                    <label for="customer-name" class="block text-sm font-medium text-gray-700">Customer Name</label>
-                    <input type="text" id="customer-name" class="input-field" required>
-                    
-                    <label for="customer-address" class="block text-sm font-medium text-gray-700">Customer Address</label>
-                    <input type="text" id="customer-address" class="input-field" required>
-                    
-                    <label for="contact-person" class="block text-sm font-medium text-gray-700">Contact Person</label>
-                    <input type="text" id="contact-person" class="input-field" required>
-                    
-                    <label for="customer-contact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
-                    <input type="text" id="customer-contact" class="input-field" required>
-                    
-                    <label for="customer-email" class="block text-sm font-medium text-gray-700">Customer Email</label>
-                    <input type="email" id="customer-email" class="input-field" required>
+            <form id="serviceReportForm" class="space-y-6">
+                <div class="border-b pb-4">
+                    <h2 class="text-xl font-semibold mb-4">Customer Details</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Customer Name</label>
+                            <input type="text" id="customerName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Customer Address</label>
+                            <input type="text" id="customerAddress" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Contact Person</label>
+                            <input type="text" id="contactPerson" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
+                            <input type="tel" id="customerContact" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Customer Email</label>
+                            <input type="email" id="customerEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Customer GST (Optional)</label>
+                            <input type="text" id="customerGST" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="sendToCustomer" class="form-checkbox h-5 w-5 text-blue-600">
+                            <span class="ml-2 text-sm text-gray-700">Send to Customer</span>
+                        </label>
+                    </div>
                 </div>
 
-                <!-- Service Details Section -->
-                <div class="form-section mt-6">
-                    <h2>Service Details</h2>
-                    <label for="service-date" class="block text-sm font-medium text-gray-700">Service Date</label>
-                    <input type="date" id="service-date" class="input-field" required>
-                    
-                    <label for="service-type" class="block text-sm font-medium text-gray-700">Service Type</label>
-                    <select id="service-type" class="input-field" required>
-                        <option value="">Select Service Type</option>
-                        <option value="Preventive Maintenance">Preventive Maintenance</option>
-                        <option value="Breakdown Service">Breakdown Service</option>
-                        <option value="Installation">Installation</option>
-                        <option value="Repair">Repair</option>
-                        <option value="Inspection">Inspection</option>
-                    </select>
-                    
-                    <label for="equipment-type" class="block text-sm font-medium text-gray-700">Equipment Type</label>
-                    <input type="text" id="equipment-type" class="input-field" placeholder="e.g., CCTV Camera, Access Control, Biometric" required>
-                    
-                    <label for="technician-name" class="block text-sm font-medium text-gray-700">Technician Name</label>
-                    <input type="text" id="technician-name" class="input-field" required>
-                </div>
-
-                <!-- Issue Description Section -->
-                <div class="form-section mt-6">
-                    <h2>Issue Description</h2>
-                    <label for="issue-description" class="block text-sm font-medium text-gray-700">Describe the issue or service performed</label>
-                    <textarea id="issue-description" class="input-field" rows="4" placeholder="Detailed description of the issue and work performed"></textarea>
-                </div>
-
-                <!-- Service Checklist Section -->
-                <div class="form-section mt-6">
-                    <h2>Service Checklist</h2>
-                    <div id="checklist-container">
-                        <div class="checklist-item">
-                            <input type="checkbox" id="check-power" name="checklist">
-                            <label for="check-power">Power supply checked</label>
+                <div class="border-b pb-4">
+                    <h2 class="text-xl font-semibold mb-4">Service Details</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Service Type</label>
+                            <select id="serviceType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                <option value="">Select Service Type</option>
+                                <option value="Maintenance Visit">Maintenance Visit</option>
+                                <option value="Breakdown Visit">Breakdown Visit</option>
+                            </select>
                         </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" id="check-connections" name="checklist">
-                            <label for="check-connections">All connections verified</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Equipment Type</label>
+                            <select id="equipmentType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                <option value="">Select Equipment Type</option>
+                                <option value="CCTV">CCTV</option>
+                                <option value="Biometrics & Access Control">Biometrics & Access Control</option>
+                                <option value="Video Door Bell">Video Door Bell</option>
+                                <option value="Fire Alarm">Fire Alarm</option>
+                            </select>
                         </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" id="check-functionality" name="checklist">
-                            <label for="check-functionality">Equipment functionality tested</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Service Date</label>
+                            <input type="date" id="serviceDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
                         </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" id="check-cleaning" name="checklist">
-                            <label for="check-cleaning">Equipment cleaned</label>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" id="check-calibration" name="checklist">
-                            <label for="check-calibration">Calibration performed (if applicable)</label>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" id="check-software" name="checklist">
-                            <label for="check-software">Software updated (if applicable)</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Technician Name</label>
+                            <input type="text" id="technicianName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
                         </div>
                     </div>
                 </div>
 
-                <!-- Technician Comments Section -->
-                <div class="form-section mt-6">
-                    <h2>Technician Comments</h2>
-                    <label for="technician-comments" class="block text-sm font-medium text-gray-700">Additional comments and recommendations</label>
-                    <textarea id="technician-comments" class="input-field" rows="4" placeholder="Any additional observations, recommendations, or follow-up actions required"></textarea>
-                </div>
-
-                <!-- Email Options Section -->
-                <div class="form-section mt-6">
-                    <h2>Email Options</h2>
-                    <div class="flex items-center mb-4">
-                        <input type="checkbox" id="send-customer-email" class="mr-2" checked>
-                        <label for="send-customer-email" class="text-sm font-medium text-gray-700">Send copy to customer</label>
+                <div class="border-b pb-4" id="cctvChecklist">
+                    <h2 class="text-xl font-semibold mb-4">CCTV Maintenance Checklist</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvCamerasLive"><span class="ml-2">Cameras Live</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvPlaybackWorking"><span class="ml-2">Playback Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvHddHealthy"><span class="ml-2">HDD Healthy</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvDateTimeAccurate"><span class="ml-2">Date/Time Accurate</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvRemoteAccess"><span class="ml-2">Remote Access</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvPowerSupply"><span class="ml-2">Power Supply</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvLensesClean"><span class="ml-2">Lenses Clean</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvCablesSecure"><span class="ml-2">Cables Secure</span></label>
                     </div>
-                    <p class="text-sm text-gray-500">Admin copy will always be sent to support@eyetechsecurities.in</p>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="flex gap-4 mt-6">
-                    <button type="button" onclick="generateServiceReport()" class="btn-primary flex-1">Generate PDF Only</button>
-                    <button type="button" onclick="generateAndEmailReport()" class="btn-success flex-1" id="email-btn">
-                        <span id="email-btn-text">Generate PDF & Send Email</span>
-                        <span id="email-btn-loading" style="display: none;">Sending...</span>
-                    </button>
+                <div class="border-b pb-4 hidden" id="biometricsChecklist">
+                    <h2 class="text-xl font-semibold mb-4">Biometrics & Access Control Checklist</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsFingerprintScanner"><span class="ml-2">Fingerprint Scanner Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsCardReader"><span class="ml-2">Card Reader Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsDoorLock"><span class="ml-2">Door Lock Mechanism</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsAccessLogs"><span class="ml-2">Access Logs Updated</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsUserDatabase"><span class="ml-2">User Database Backup</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsSensorCalibration"><span class="ml-2">Sensor Calibration</span></label>
+                    </div>
                 </div>
-                <div id="error-message"></div>
+
+                <div class="border-b pb-4 hidden" id="videoDoorbellChecklist">
+                    <h2 class="text-xl font-semibold mb-4">Video Door Bell Checklist</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoVideoQuality"><span class="ml-2">Video Quality Clear</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoAudioQuality"><span class="ml-2">Audio Quality Clear</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoMotionDetection"><span class="ml-2">Motion Detection Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoNightVision"><span class="ml-2">Night Vision Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoMobileApp"><span class="ml-2">Mobile App Connectivity</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoDoorbellChime"><span class="ml-2">Doorbell Chime Working</span></label>
+                    </div>
+                </div>
+
+                <div class="border-b pb-4 hidden" id="fireAlarmChecklist">
+                    <h2 class="text-xl font-semibold mb-4">Fire Alarm System Checklist</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireSmokeDetectors"><span class="ml-2">Smoke Detectors Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireHeatDetectors"><span class="ml-2">Heat Detectors Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireAlarmSounders"><span class="ml-2">Alarm Sounders Working</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireControlPanel"><span class="ml-2">Control Panel Functional</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireBatteryBackup"><span class="ml-2">Battery Backup Tested</span></label>
+                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireManualCallPoints"><span class="ml-2">Manual Call Points Working</span></label>
+                    </div>
+                </div>
+
+                <div class="border-b pb-4">
+                    <h2 class="text-xl font-semibold mb-4">Issue Description</h2>
+                    <textarea id="issueDescription" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" rows="4"></textarea>
+                </div>
+
+                <div class="border-b pb-4">
+                    <h2 class="text-xl font-semibold mb-4">Technician Comments</h2>
+                    <textarea id="technicianComments" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" rows="4"></textarea>
+                </div>
+
+                <div class="border-b pb-4">
+                    <h2 class="text-xl font-semibold mb-4">Email Options</h2>
+                    <div class="mt-4">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="sendToCustomer" class="form-checkbox h-5 w-5 text-blue-600">
+                            <span class="ml-2 text-sm text-gray-700">Send copy to customer</span>
+                        </label>
+                        <p class="text-sm text-gray-500 mt-2">Admin copy will always be sent to support@eyetechsecurities.in</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button type="button" id="generatePDF" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Generate PDF Only</button>
+                    <button type="button" id="sendEmail" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Generate PDF & Send Email</button>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Set today's date as default
-        document.getElementById('service-date').valueAsDate = new Date();
+        // Show/hide checklists based on equipment type
+        document.getElementById('equipmentType').addEventListener('change', function() {
+            const checklists = ['cctvChecklist', 'biometricsChecklist', 'videoDoorbellChecklist', 'fireAlarmChecklist'];
+            checklists.forEach(checklist => document.getElementById(checklist).classList.add('hidden'));
+            const selected = this.value;
+            if (selected === 'CCTV') document.getElementById('cctvChecklist').classList.remove('hidden');
+            else if (selected === 'Biometrics & Access Control') document.getElementById('biometricsChecklist').classList.remove('hidden');
+            else if (selected === 'Video Door Bell') document.getElementById('videoDoorbellChecklist').classList.remove('hidden');
+            else if (selected === 'Fire Alarm') document.getElementById('fireAlarmChecklist').classList.remove('hidden');
+        });
 
-        async function sendServiceReportEmail(pdfBlob, reportData) {
+        // Generate PDF
+        document.getElementById('generatePDF').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const margin = 10;
+            let y = 10;
+
+            // Helper function to add text with wrapping
+            function addText(text, x, y, maxWidth) {
+                const lines = doc.splitTextToSize(text, maxWidth);
+                doc.text(lines, x, y);
+                return y + (lines.length * 7); // Adjust y position based on number of lines
+            }
+
+            // Header
+            doc.setFontSize(20);
+            y = addText('Eye Tech Securities - Service Report', margin, y, 190);
+            doc.setFontSize(12);
+            y += 5;
+
+            // Customer Details
+            y = addText('Customer Details', margin, y, 190);
+            y = addText(`Name: ${document.getElementById('customerName').value}`, margin, y, 190);
+            y = addText(`Address: ${document.getElementById('customerAddress').value || 'N/A'}`, margin, y, 190);
+            y = addText(`Contact Person: ${document.getElementById('contactPerson').value || 'N/A'}`, margin, y, 190);
+            y = addText(`Contact Number: ${document.getElementById('customerContact').value || 'N/A'}`, margin, y, 190);
+            y = addText(`Email: ${document.getElementById('customerEmail').value || 'N/A'}`, margin, y, 190);
+            y = addText(`GST: ${document.getElementById('customerGST').value || 'N/A'}`, margin, y, 190);
+            y += 5;
+
+            // Service Details
+            y = addText('Service Details', margin, y, 190);
+            y = addText(`Report Number: SR${Date.now()}`, margin, y, 190);
+            y = addText(`Service Date: ${document.getElementById('serviceDate').value}`, margin, y, 190);
+            y = addText(`Service Type: ${document.getElementById('serviceType').value}`, margin, y, 190);
+            y = addText(`Equipment Type: ${document.getElementById('equipmentType').value}`, margin, y, 190);
+            y = addText(`Technician: ${document.getElementById('technicianName').value}`, margin, y, 190);
+            y += 5;
+
+            // Checklist based on equipment type
+            const equipmentType = document.getElementById('equipmentType').value;
+            let checklistItems = [];
+            if (equipmentType === 'CCTV') {
+                y = addText('CCTV Maintenance Checklist', margin, y, 190);
+                checklistItems = ['cctvCamerasLive', 'cctvPlaybackWorking', 'cctvHddHealthy', 'cctvDateTimeAccurate', 'cctvRemoteAccess', 'cctvPowerSupply', 'cctvLensesClean', 'cctvCablesSecure'];
+            } else if (equipmentType === 'Biometrics & Access Control') {
+                y = addText('Biometrics & Access Control Checklist', margin, y, 190);
+                checklistItems = ['biometricsFingerprintScanner', 'biometricsCardReader', 'biometricsDoorLock', 'biometricsAccessLogs', 'biometricsUserDatabase', 'biometricsSensorCalibration'];
+            } else if (equipmentType === 'Video Door Bell') {
+                y = addText('Video Door Bell Checklist', margin, y, 190);
+                checklistItems = ['videoVideoQuality', 'videoAudioQuality', 'videoMotionDetection', 'videoNightVision', 'videoMobileApp', 'videoDoorbellChime'];
+            } else if (equipmentType === 'Fire Alarm') {
+                y = addText('Fire Alarm System Checklist', margin, y, 190);
+                checklistItems = ['fireSmokeDetectors', 'fireHeatDetectors', 'fireAlarmSounders', 'fireControlPanel', 'fireBatteryBackup', 'fireManualCallPoints'];
+            }
+
+            checklistItems.forEach(item => {
+                const checkbox = document.querySelector(`input[name="${item}"]`);
+                const label = checkbox.nextElementSibling.textContent;
+                y = addText(`${label}: ${checkbox.checked ? '✓' : '✗'}`, margin, y, 190);
+            });
+            y += 5;
+
+            // Issue Description
+            const issueDescription = document.getElementById('issueDescription').value;
+            if (issueDescription) {
+                y = addText('Issue Description', margin, y, 190);
+                y = addText(issueDescription, margin, y, 190);
+                y += 5;
+            }
+
+            // Technician Comments
+            const technicianComments = document.getElementById('technicianComments').value;
+            if (technicianComments) {
+                y = addText('Technician Comments', margin, y, 190);
+                y = addText(technicianComments, 10, y, 190);
+            }
+
+            // Save PDF
+            doc.save(`Service_Report_SR${Date.now()}.pdf`);
+        });
+
+        // Generate PDF and Send Email
+        document.getElementById('sendEmail').addEventListener('click', async function() {
+            const formData = new FormData();
+            formData.append('customerName', document.getElementById('customerName').value);
+            formData.append('customerEmail', document.getElementById('customerEmail').value);
+            formData.append('reportNumber', `SR${Date.now()}`);
+            formData.append('serviceDate', document.getElementById('serviceDate').value);
+            formData.append('serviceType', document.getElementById('serviceType').value);
+            formData.append('equipmentType', document.getElementById('equipmentType').value);
+            formData.append('technicianName', document.getElementById('technicianName').value);
+            formData.append('issueDescription', document.getElementById('issueDescription').value);
+            formData.append('technicianComments', document.getElementById('technicianComments').value);
+            formData.append('sendToCustomer', document.getElementById('sendToCustomer').checked.toString());
+
+            // Generate PDF for email attachment
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 10;
+
+            // Helper function to add text with wrapping
+            function addText(text, x, y, maxWidth) {
+                const lines = doc.splitTextToSize(text, maxWidth);
+                doc.text(lines, x, y);
+                return y + (lines.length * 7);
+            }
+
+            // Header
+            doc.setFontSize(20);
+            y = addText('Eye Tech Securities - Service Report', 10, y, 190);
+            doc.setFontSize(12);
+            y += 5;
+
+            // Customer Details
+            y = addText('Customer Details', 10, y, 190);
+            y = addText(`Name: ${formData.get('customerName')}`, 10, y, 190);
+            y = addText(`Address: ${document.getElementById('customerAddress').value || 'N/A'}`, 10, y, 190);
+            y = addText(`Contact Person: ${document.getElementById('contactPerson').value || 'N/A'}`, 10, y, 190);
+            y = addText(`Contact Number: ${document.getElementById('customerContact').value || 'N/A'}`, 10, y, 190);
+            y = addText(`Email: ${formData.get('customerEmail') || 'N/A'}`, 10, y, 190);
+            y = addText(`GST: ${document.getElementById('customerGST').value || 'N/A'}`, 10, y, 190);
+            y += 5;
+
+            // Service Details
+            y = addText('Service Details', 10, y, 190);
+            y = addText(`Report Number: ${formData.get('reportNumber')}`, 10, y, 190);
+            y = addText(`Service Date: ${formData.get('serviceDate')}`, 10, y, 190);
+            y = addText(`Service Type: ${formData.get('serviceType')}`, 10, y, 190);
+            y = addText(`Equipment Type: ${formData.get('equipmentType')}`, 10, y, 190);
+            y = addText(`Technician: ${formData.get('technicianName')}`, 10, y, 190);
+            y += 5;
+
+            // Checklist
+            const equipmentType = formData.get('equipmentType');
+            let checklistItems = [];
+            if (equipmentType === 'CCTV') {
+                y = addText('CCTV Maintenance Checklist', 10, y, 190);
+                checklistItems = ['cctvCamerasLive', 'cctvPlaybackWorking', 'cctvHddHealthy', 'cctvDateTimeAccurate', 'cctvRemoteAccess', 'cctvPowerSupply', 'cctvLensesClean', 'cctvCablesSecure'];
+            } else if (equipmentType === 'Biometrics & Access Control') {
+                y = addText('Biometrics & Access Control Checklist', 10, y, 190);
+                checklistItems = ['biometricsFingerprintScanner', 'biometricsCardReader', 'biometricsDoorLock', 'biometricsAccessLogs', 'biometricsUserDatabase', 'biometricsSensorCalibration'];
+            } else if (equipmentType === 'Video Door Bell') {
+                y = addText('Video Door Bell Checklist', 10, y, 190);
+                checklistItems = ['videoVideoQuality', 'videoAudioQuality', 'videoMotionDetection', 'videoNightVision', 'videoMobileApp', 'videoDoorbellChime'];
+            } else if (equipmentType === 'Fire Alarm') {
+                y = addText('Fire Alarm System Checklist', 10, y, 190);
+                checklistItems = ['fireSmokeDetectors', 'fireHeatDetectors', 'fireAlarmSounders', 'fireControlPanel', 'fireBatteryBackup', 'fireManualCallPoints'];
+            }
+
+            checklistItems.forEach(item => {
+                const checkbox = document.querySelector(`input[name="${item}"]`);
+                const label = checkbox.nextElementSibling.textContent;
+                y = addText(`${label}: ${checkbox.checked ? '✓' : '✗'}`, 10, y, 190);
+            });
+            y += 5;
+
+            // Issue Description
+            const issueDescription = formData.get('issueDescription');
+            if (issueDescription) {
+                y = addText('Issue Description', 10, y, 190);
+                y = addText(issueDescription, 10, y, 190);
+                y += 5;
+            }
+
+            // Technician Comments
+            const technicianComments = formData.get('technicianComments');
+            if (technicianComments) {
+                y = addText('Technician Comments', 10, y, 190);
+                y = addText(technicianComments, 10, y, 190);
+            }
+
+            // Convert PDF to base64
+            const pdfBase64 = doc.output('datauristring').split(',')[1];
+            formData.append('pdf', pdfBase64);
+
             try {
-                const formData = new FormData();
-                formData.append('pdf', pdfBlob, `Service_Report_${reportData.reportNumber}.pdf`);
-                formData.append('customerEmail', reportData.customerEmail);
-                formData.append('customerName', reportData.customerName);
-                formData.append('reportNumber', reportData.reportNumber);
-                formData.append('serviceDate', reportData.serviceDate);
-                formData.append('serviceType', reportData.serviceType);
-                formData.append('equipmentType', reportData.equipmentType);
-                formData.append('technicianName', reportData.technicianName);
-                formData.append('issueDescription', reportData.issueDescription);
-                formData.append('technicianComments', reportData.technicianComments);
-                formData.append('sendToCustomer', document.getElementById('send-customer-email').checked);
-
                 const response = await fetch('/api/send-service-report-email', {
                     method: 'POST',
                     body: formData
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to send email');
-                }
-
                 const result = await response.json();
-                return result;
+                if (response.ok) {
+                    alert('Emails sent successfully: ' + result.emailsSent + ' email(s)');
+                    // Save PDF after successful email
+                    doc.save(`Service_Report_${formData.get('reportNumber')}.pdf`);
+                } else {
+                    alert('Error sending email: ' + result.error);
+                }
             } catch (error) {
-                console.error('Email sending error:', error);
-                throw error;
+                alert('Error sending email: ' + error.message);
             }
-        }
-
-        async function generateAndEmailReport() {
-            const emailBtn = document.getElementById('email-btn');
-            const emailBtnText = document.getElementById('email-btn-text');
-            const emailBtnLoading = document.getElementById('email-btn-loading');
-            const errorMessage = document.getElementById('error-message');
-            
-            try {
-                emailBtnText.style.display = 'none';
-                emailBtnLoading.style.display = 'inline';
-                emailBtn.disabled = true;
-                errorMessage.style.display = 'none';
-
-                // Generate PDF first
-                const { pdfBlob, reportNumber } = await generateServiceReportBlob();
-                
-                // Prepare report data for email
-                const reportData = {
-                    reportNumber: reportNumber,
-                    customerName: document.getElementById('customer-name').value,
-                    customerEmail: document.getElementById('customer-email').value,
-                    serviceDate: document.getElementById('service-date').value,
-                    serviceType: document.getElementById('service-type').value,
-                    equipmentType: document.getElementById('equipment-type').value,
-                    technicianName: document.getElementById('technician-name').value,
-                    issueDescription: document.getElementById('issue-description').value,
-                    technicianComments: document.getElementById('technician-comments').value
-                };
-
-                // Send email
-                await sendServiceReportEmail(pdfBlob, reportData);
-                
-                // Also download the PDF
-                const url = URL.createObjectURL(pdfBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Service_Report_${reportData.reportNumber}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                alert('Service report generated and emails sent successfully!');
-            } catch (error) {
-                errorMessage.textContent = `Error: ${error.message}`;
-                errorMessage.style.display = 'block';
-            } finally {
-                emailBtnText.style.display = 'inline';
-                emailBtnLoading.style.display = 'none';
-                emailBtn.disabled = false;
-            }
-        }
-
-        async function generateServiceReportBlob() {
-            const { jsPDF } = window.jspdf;
-            if (!jsPDF) {
-                throw new Error('jsPDF library failed to load. Check your internet connection or script source.');
-            }
-            
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-            // Header
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(20);
-            doc.setTextColor(31, 41, 55);
-            doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
-            doc.setFontSize(12);
-            doc.text('SERVICE REPORT', 105, 25, { align: 'center' });
-            doc.setFontSize(10);
-            doc.setTextColor(107, 114, 128);
-            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-            doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
-            doc.setDrawColor(37, 99, 235);
-            doc.setLineWidth(0.5);
-            doc.line(20, 45, 190, 45);
-
-            // Service Report Details
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(55, 65, 81);
-            const today = new Date();
-            const reportNumber = `ETS-SR-${today.getFullYear()}${(Math.floor(Math.random() * 900) + 100).toString().padStart(3, '0')}`;
-            const reportDate = today.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-            doc.text('REPORT DETAILS', 20, 55);
-            doc.line(20, 57, 60, 57);
-            doc.text(`Report No: ${reportNumber}`, 20, 65);
-            doc.text(`Generated: ${reportDate}`, 20, 70);
-            doc.text(`Service Date: ${document.getElementById('service-date').value}`, 20, 75);
-            doc.text(`Service Type: ${document.getElementById('service-type').value}`, 20, 80);
-            doc.text(`Equipment Type: ${document.getElementById('equipment-type').value}`, 20, 85);
-            doc.text(`Technician: ${document.getElementById('technician-name').value}`, 20, 90);
-
-            // Customer Details
-            doc.setFont('helvetica', 'bold');
-            doc.text('CUSTOMER DETAILS', 20, 105);
-            doc.line(20, 107, 60, 107);
-            doc.setFont('helvetica', 'normal');
-            
-            const customerName = document.getElementById('customer-name').value;
-            const customerAddress = document.getElementById('customer-address').value;
-            const contactPerson = document.getElementById('contact-person').value;
-            const customerContact = document.getElementById('customer-contact').value;
-            const customerEmail = document.getElementById('customer-email').value;
-            
-            doc.text(`Customer Name: ${customerName}`, 20, 115);
-            doc.text(`Contact Person: ${contactPerson}`, 20, 120);
-            doc.text(`Phone: ${customerContact}`, 20, 125);
-            doc.text(`Email: ${customerEmail}`, 20, 130);
-            doc.text(`Address: ${customerAddress}`, 20, 135);
-
-            let currentY = 150;
-
-            // Issue Description
-            doc.setFont('helvetica', 'bold');
-            doc.text('ISSUE DESCRIPTION', 20, currentY);
-            doc.line(20, currentY + 2, 70, currentY + 2);
-            doc.setFont('helvetica', 'normal');
-            currentY += 10;
-            
-            const issueDescription = document.getElementById('issue-description').value || 'No specific issue reported';
-            const issueLines = doc.splitTextToSize(issueDescription, 170);
-            doc.text(issueLines, 20, currentY);
-            currentY += issueLines.length * 5 + 10;
-
-            // Service Checklist
-            doc.setFont('helvetica', 'bold');
-            doc.text('SERVICE CHECKLIST', 20, currentY);
-            doc.line(20, currentY + 2, 70, currentY + 2);
-            doc.setFont('helvetica', 'normal');
-            currentY += 10;
-
-            const checklistItems = [
-                { id: 'check-power', label: 'Power supply checked' },
-                { id: 'check-connections', label: 'All connections verified' },
-                { id: 'check-functionality', label: 'Equipment functionality tested' },
-                { id: 'check-cleaning', label: 'Equipment cleaned' },
-                { id: 'check-calibration', label: 'Calibration performed (if applicable)' },
-                { id: 'check-software', label: 'Software updated (if applicable)' }
-            ];
-
-            checklistItems.forEach(item => {
-                const isChecked = document.getElementById(item.id).checked;
-                const status = isChecked ? '✓' : '✗';
-                doc.text(`${status} ${item.label}`, 20, currentY);
-                currentY += 6;
-            });
-
-            currentY += 10;
-
-            // Technician Comments
-            doc.setFont('helvetica', 'bold');
-            doc.text('TECHNICIAN COMMENTS', 20, currentY);
-            doc.line(20, currentY + 2, 80, currentY + 2);
-            doc.setFont('helvetica', 'normal');
-            currentY += 10;
-
-            const technicianComments = document.getElementById('technician-comments').value || 'No additional comments';
-            const commentLines = doc.splitTextToSize(technicianComments, 170);
-            doc.text(commentLines, 20, currentY);
-            currentY += commentLines.length * 5 + 20;
-
-            // Signature Section
-            if (currentY > 240) {
-                doc.addPage();
-                currentY = 50;
-            }
-
-            doc.setFont('helvetica', 'bold');
-            doc.text('SIGNATURES', 105, currentY, { align: 'center' });
-            currentY += 20;
-
-            // Customer and Technician signature boxes
-            const leftSignatureX = 55;
-            const rightSignatureX = 135;
-
-            doc.setFont('helvetica', 'normal');
-            doc.text('Customer', leftSignatureX, currentY, { align: 'center' });
-            doc.text('Technician', rightSignatureX, currentY, { align: 'center' });
-
-            const lineY = currentY + 20;
-            doc.setDrawColor(0, 0, 0);
-            doc.setLineWidth(0.3);
-            doc.line(leftSignatureX - 25, lineY, leftSignatureX + 25, lineY);
-            doc.line(rightSignatureX - 25, lineY, rightSignatureX + 25, lineY);
-
-            const nameY = lineY + 8;
-            doc.text(contactPerson || 'Name: ___________________', leftSignatureX, nameY, { align: 'center' });
-            doc.text(document.getElementById('technician-name').value || 'Name: ___________________', rightSignatureX, nameY, { align: 'center' });
-
-            const dateY = nameY + 8;
-            const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            doc.text(`Date: ${dateStr}`, leftSignatureX, dateY, { align: 'center' });
-            doc.text(`Date: ${dateStr}`, rightSignatureX, dateY, { align: 'center' });
-
-            // Footer
-            const totalPages = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= totalPages; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(107, 114, 128);
-                doc.text(`Page ${i} of ${totalPages}`, 190, 290, { align: 'right' });
-                doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 290, { align: 'center' });
-            }
-
-            return { pdfBlob: doc.output('blob'), reportNumber };
-        }
-
-        function generateServiceReport() {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.style.display = 'none';
-
-            generateServiceReportBlob().then(({ pdfBlob, reportNumber }) => {
-                const url = URL.createObjectURL(pdfBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Service_Report_${reportNumber}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }).catch(error => {
-                errorMessage.textContent = `Error generating PDF: ${error.message}. Please check your browser console for details.`;
-                errorMessage.style.display = 'block';
-                console.error(error);
-            });
-        }
-
-        // Load libraries on page load
-        window.onload = function() {
-            if (!window.jspdf || !window.jspdf.jsPDF) {
-                document.getElementById('error-message').textContent = 'Required libraries (jsPDF) failed to load. Please check your internet connection or try refreshing the page.';
-                document.getElementById('error-message').style.display = 'block';
-            }
-        };
+        });
     </script>
 </body>
 </html>
