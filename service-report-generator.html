@@ -347,9 +347,10 @@
             y = doc.lastAutoTable.finalY + 5;
 
             // Checklist
+            const serviceType = document.getElementById('service-type').value;
             const equipmentType = document.getElementById('equipment-type').value;
             let checklistItems = [];
-            if (equipmentType === 'CCTV') {
+            if (equipmentType === 'CCTV' && serviceType === 'Maintenance Visit') {
                 checklistItems = [
                     ['Cameras Live', document.getElementById('cameras-live').checked ? 'Yes' : 'No'],
                     ['Playback Working', document.getElementById('playback-working').checked ? 'Yes' : 'No'],
