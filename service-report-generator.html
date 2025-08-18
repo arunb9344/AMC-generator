@@ -8,42 +8,49 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
+            font-family: 'Helvetica', Arial, sans-serif;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #f5f7fa;
         }
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: #1a3c6d;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
         .tabs {
             display: flex;
             justify-content: center;
+            gap: 10px;
             margin-bottom: 20px;
         }
         .tabs a {
-            padding: 10px 20px;
-            margin: 0 5px;
+            padding: 12px 25px;
             text-decoration: none;
             color: #fff;
-            background-color: #3498db;
-            border-radius: 5px;
+            background-color: #1a3c6d;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
         .tabs a:hover {
-            background-color: #2980b9;
+            background-color: #153057;
         }
         .form-section {
             background-color: #fff;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .form-section h2 {
-            color: #2c3e50;
+            color: #1a3c6d;
+            font-size: 18px;
             margin-bottom: 15px;
+            border-bottom: 2px solid #1a3c6d;
+            padding-bottom: 5px;
         }
         .form-group {
             margin-bottom: 15px;
@@ -51,33 +58,43 @@
         .form-group label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 600;
+            color: #333;
         }
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 10px;
+            border: 1px solid #d0d4db;
+            border-radius: 5px;
+            font-size: 14px;
         }
         .checklist {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
         .checklist label {
             display: flex;
             align-items: center;
+            font-size: 14px;
+        }
+        .checklist input[type="checkbox"] {
+            margin-right: 8px;
         }
         .generate-btn {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background-color: #e74c3c;
             color: #fff;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
         .generate-btn:hover {
             background-color: #c0392b;
@@ -117,7 +134,7 @@
 
     <div class="form-section">
         <h2>Service Details</h2>
-        <div classUV class="form-group">
+        <div class="form-group">
             <label for="service-type">Service Type</label>
             <select id="service-type">
                 <option value="">Select Service Type</option>
@@ -233,144 +250,206 @@
         }
 
         function generatePDF() {
-            const doc = new jsPDF();
-            
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
             // Set document properties
             doc.setProperties({
                 title: 'Service Report',
-                author: 'Service Team',
+                author: 'TechSecure Solutions',
                 creator: 'Service Report Generator'
             });
 
-            // Header
-            doc.setFillColor(0, 102, 204);
-            doc.rect(0, 0, 210, 30, 'F');
-            doc.setFontSize(20);
+            // Company Header
+            doc.setFillColor(26, 60, 109); // Dark Blue
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(18);
             doc.setTextColor(255, 255, 255);
-            doc.text('Service Report', 105, 20, null, null, 'center');
+            doc.text('TechSecure Solutions', 10, 15);
+            doc.setFontSize(10);
+            doc.setFont('Helvetica', 'normal');
+            doc.text('1234 Security Lane, Tech City, TX 75001', 10, 23);
+            doc.text('Phone: (123) 456-7890 | Email: info@techsecure.com', 10, 29);
+            doc.text('Website: www.techsecure.com', 10, 35);
 
-            // Customer Details
-            doc.setFontSize(14);
+            // Logo Placeholder (Text-based, as images are not embedded in this context)
+            doc.setFontSize(12);
+            doc.setTextColor(255, 255, 255);
+            doc.text('[Company Logo]', 170, 20);
+
+            // Title
+            doc.setFontSize(16);
             doc.setTextColor(0, 0, 0);
-            doc.text('Customer Details', 10, 40);
+            doc.setFont('Helvetica', 'bold');
+            doc.text('Service Report', 105, 50, null, null, 'center');
+
+            // Customer Details Table
+            doc.setFontSize(12);
+            doc.setFont('Helvetica', 'bold');
+            doc.text('Customer Details', 10, 60);
+            doc.setDrawColor(26, 60, 109);
             doc.setLineWidth(0.5);
-            doc.line(10, 42, 200, 42);
+            doc.line(10, 62, 200, 62);
 
-            doc.setFontSize(10);
-            const customerDetails = [
-                `Customer Name: ${document.getElementById('customer-name').value || 'N/A'}`,
-                `Address: ${document.getElementById('customer-address').value || 'N/A'}`,
-                `Contact Person: ${document.getElementById('contact-person').value || 'N/A'}`,
-                `Contact Number: ${document.getElementById('customer-contact').value || 'N/A'}`,
-                `Email: ${document.getElementById('customer-email').value || 'N/A'}`
-            ];
-            let y = 50;
-            customerDetails.forEach(detail => {
-                doc.text(detail, 10, y);
-                y += 7;
+            doc.autoTable({
+                startY: 65,
+                head: [['Field', 'Details']],
+                body: [
+                    ['Customer Name', document.getElementById('customer-name').value || 'N/A'],
+                    ['Address', document.getElementById('customer-address').value || 'N/A'],
+                    ['Contact Person', document.getElementById('contact-person').value || 'N/A'],
+                    ['Contact Number', document.getElementById('customer-contact').value || 'N/A'],
+                    ['Email', document.getElementById('customer-email').value || 'N/A']
+                ],
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [26, 60, 109],
+                    textColor: [255, 255, 255],
+                    fontSize: 10,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    textColor: [0, 0, 0]
+                },
+                margin: { left: 10, right: 10 }
             });
 
-            // Service Details
-            doc.setFontSize(14);
-            doc.text('Service Details', 10, y + 10);
-            doc.line(10, y + 12, 200, y + 12);
-            doc.setFontSize(10);
-            y += 20;
-            const serviceDetails = [
-                `Service Type: ${document.getElementById('service-type').value || 'N/A'}`,
-                `Equipment Type: ${document.getElementById('equipment-type').value || 'N/A'}`,
-                `Service Date: ${document.getElementById('service-date').value || 'N/A'}`,
-                `Technician Name: ${document.getElementById('technician-name').value || 'N/A'}`
-            ];
-            serviceDetails.forEach(detail => {
-                doc.text(detail, 10, y);
-                y += 7;
+            let y = doc.lastAutoTable.finalY + 10;
+
+            // Service Details Table
+            doc.setFontSize(12);
+            doc.setFont('Helvetica', 'bold');
+            doc.text('Service Details', 10, y);
+            doc.line(10, y + 2, 200, y + 2);
+            doc.autoTable({
+                startY: y + 5,
+                head: [['Field', 'Details']],
+                body: [
+                    ['Service Type', document.getElementById('service-type').value || 'N/A'],
+                    ['Equipment Type', document.getElementById('equipment-type').value || 'N/A'],
+                    ['Service Date', document.getElementById('service-date').value || 'N/A'],
+                    ['Technician Name', document.getElementById('technician-name').value || 'N/A']
+                ],
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [26, 60, 109],
+                    textColor: [255, 255, 255],
+                    fontSize: 10,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    textColor: [0, 0, 0]
+                },
+                margin: { left: 10, right: 10 }
             });
+
+            y = doc.lastAutoTable.finalY + 10;
 
             // Checklist
             const equipmentType = document.getElementById('equipment-type').value;
             let checklistItems = [];
             if (equipmentType === 'CCTV') {
                 checklistItems = [
-                    `Cameras Live: ${document.getElementById('cameras-live').checked ? 'Yes' : 'No'}`,
-                    `Playback Working: ${document.getElementById('playback-working').checked ? 'Yes' : 'No'}`,
-                    `HDD Healthy: ${document.getElementById('hdd-healthy').checked ? 'Yes' : 'No'}`,
-                    `Date/Time Accurate: ${document.getElementById('date-time-accurate').checked ? 'Yes' : 'No'}`,
-                    `Remote Access: ${document.getElementById('remote-access').checked ? 'Yes' : 'No'}`,
-                    `Power Supply: ${document.getElementById('power-supply').checked ? 'Yes' : 'No'}`,
-                    `Lenses Clean: ${document.getElementById('lenses-clean').checked ? 'Yes' : 'No'}`,
-                    `Cables Secure: ${document.getElementById('cables-secure').checked ? 'Yes' : 'No'}`
+                    ['Cameras Live', document.getElementById('cameras-live').checked ? '✓' : '✗'],
+                    ['Playback Working', document.getElementById('playback-working').checked ? '✓' : '✗'],
+                    ['HDD Healthy', document.getElementById('hdd-healthy').checked ? '✓' : '✗'],
+                    ['Date/Time Accurate', document.getElementById('date-time-accurate').checked ? '✓' : '✗'],
+                    ['Remote Access', document.getElementById('remote-access').checked ? '✓' : '✗'],
+                    ['Power Supply', document.getElementById('power-supply').checked ? '✓' : '✗'],
+                    ['Lenses Clean', document.getElementById('lenses-clean').checked ? '✓' : '✗'],
+                    ['Cables Secure', document.getElementById('cables-secure').checked ? '✓' : '✗']
                 ];
             } else if (equipmentType === 'Biometrics & Access Control') {
                 checklistItems = [
-                    `Fingerprint Scanner Working: ${document.getElementById('fingerprint-working').checked ? 'Yes' : 'No'}`,
-                    `Card Reader Working: ${document.getElementById('card-reader-working').checked ? 'Yes' : 'No'}`,
-                    `Door Lock Mechanism: ${document.getElementById('door-lock-mechanism').checked ? 'Yes' : 'No'}`,
-                    `Access Logs Updated: ${document.getElementById('access-logs-updated').checked ? 'Yes' : 'No'}`,
-                    `User Database Backup: ${document.getElementById('user-database-backup').checked ? 'Yes' : 'No'}`,
-                    `Sensor Calibration: ${document.getElementById('sensor-calibration').checked ? 'Yes' : 'No'}`
+                    ['Fingerprint Scanner Working', document.getElementById('fingerprint-working').checked ? '✓' : '✗'],
+                    ['Card Reader Working', document.getElementById('card-reader-working').checked ? '✓' : '✗'],
+                    ['Door Lock Mechanism', document.getElementById('door-lock-mechanism').checked ? '✓' : '✗'],
+                    ['Access Logs Updated', document.getElementById('access-logs-updated').checked ? '✓' : '✗'],
+                    ['User Database Backup', document.getElementById('user-database-backup').checked ? '✓' : '✗'],
+                    ['Sensor Calibration', document.getElementById('sensor-calibration').checked ? '✓' : '✗']
                 ];
             } else if (equipmentType === 'Video Door Bell') {
                 checklistItems = [
-                    `Video Quality Clear: ${document.getElementById('video-quality-clear').checked ? 'Yes' : 'No'}`,
-                    `Audio Quality Clear: ${document.getElementById('audio-quality-clear').checked ? 'Yes' : 'No'}`,
-                    `Motion Detection Working: ${document.getElementById('motion-detection-working').checked ? 'Yes' : 'No'}`,
-                    `Night Vision Working: ${document.getElementById('night-vision-working').checked ? 'Yes' : 'No'}`,
-                    `Mobile App Connectivity: ${document.getElementById('mobile-app-connectivity').checked ? 'Yes' : 'No'}`,
-                    `Doorbell Chime Working: ${document.getElementById('doorbell-chime-working').checked ? 'Yes' : 'No'}`
+                    ['Video Quality Clear', document.getElementById('video-quality-clear').checked ? '✓' : '✗'],
+                    ['Audio Quality Clear', document.getElementById('audio-quality-clear').checked ? '✓' : '✗'],
+                    ['Motion Detection Working', document.getElementById('motion-detection-working').checked ? '✓' : '✗'],
+                    ['Night Vision Working', document.getElementById('night-vision-working').checked ? '✓' : '✗'],
+                    ['Mobile App Connectivity', document.getElementById('mobile-app-connectivity').checked ? '✓' : '✗'],
+                    ['Doorbell Chime Working', document.getElementById('doorbell-chime-working').checked ? '✓' : '✗']
                 ];
             } else if (equipmentType === 'Fire Alarm') {
                 checklistItems = [
-                    `Smoke Detectors Working: ${document.getElementById('smoke-detectors-working').checked ? 'Yes' : 'No'}`,
-                    `Heat Detectors Working: ${document.getElementById('heat-detectors-working').checked ? 'Yes' : 'No'}`,
-                    `Alarm Sounders Working: ${document.getElementById('alarm-sounders-working').checked ? 'Yes' : 'No'}`,
-                    `Control Panel Functional: ${document.getElementById('control-panel-functional').checked ? 'Yes' : 'No'}`,
-                    `Battery Backup Tested: ${document.getElementById('battery-backup-tested').checked ? 'Yes' : 'No'}`,
-                    `Manual Call Points Working: ${document.getElementById('manual-call-points-working').checked ? 'Yes' : 'No'}`
+                    ['Smoke Detectors Working', document.getElementById('smoke-detectors-working').checked ? '✓' : '✗'],
+                    ['Heat Detectors Working', document.getElementById('heat-detectors-working').checked ? '✓' : '✗'],
+                    ['Alarm Sounders Working', document.getElementById('alarm-sounders-working').checked ? '✓' : '✗'],
+                    ['Control Panel Functional', document.getElementById('control-panel-functional').checked ? '✓' : '✗'],
+                    ['Battery Backup Tested', document.getElementById('battery-backup-tested').checked ? '✓' : '✗'],
+                    ['Manual Call Points Working', document.getElementById('manual-call-points-working').checked ? '✓' : '✗']
                 ];
             }
 
             if (checklistItems.length > 0) {
-                doc.setFontSize(14);
-                doc.text(`${equipmentType} Checklist`, 10, y + 10);
-                doc.line(10, y + 12, 200, y + 12);
-                doc.setFontSize(10);
-                y += 20;
-                checklistItems.forEach(item => {
-                    doc.text(item, 10, y);
-                    y += 7;
+                doc.setFontSize(12);
+                doc.setFont('Helvetica', 'bold');
+                doc.text(`${equipmentType} Checklist`, 10, y);
+                doc.line(10, y + 2, 200, y + 2);
+                doc.autoTable({
+                    startY: y + 5,
+                    head: [['Item', 'Status']],
+                    body: checklistItems,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [26, 60, 109],
+                        textColor: [255, 255, 255],
+                        fontSize: 10,
+                        fontStyle: 'bold'
+                    },
+                    bodyStyles: {
+                        fontSize: 9,
+                        textColor: [0, 0, 0]
+                    },
+                    margin: { left: 10, right: 10 }
                 });
+                y = doc.lastAutoTable.finalY + 10;
             }
 
             // Issue Description
             const issueDescription = document.getElementById('issue-description').value;
             if (issueDescription) {
-                doc.setFontSize(14);
-                doc.text('Issue Description', 10, y + 10);
-                doc.line(10, y + 12, 200, y + 12);
+                doc.setFontSize(12);
+                doc.setFont('Helvetica', 'bold');
+                doc.text('Issue Description', 10, y);
+                doc.line(10, y + 2, 200, y + 2);
+                doc.setFont('Helvetica', 'normal');
                 doc.setFontSize(10);
-                y += 20;
-                doc.text(doc.splitTextToSize(issueDescription, 190), 10, y);
-                y += 7 * Math.ceil(issueDescription.length / 90) + 10;
+                doc.text(doc.splitTextToSize(issueDescription, 190), 10, y + 10);
+                y += 10 + 6 * Math.ceil(issueDescription.length / 95);
             }
 
             // Technician Comments
             const technicianComments = document.getElementById('technician-comments').value;
             if (technicianComments) {
-                doc.setFontSize(14);
-                doc.text('Technician Comments', 10, y + 10);
-                doc.line(10, y + 12, 200, y + 12);
+                doc.setFontSize(12);
+                doc.setFont('Helvetica', 'bold');
+                doc.text('Technician Comments', 10, y);
+                doc.line(10, y + 2, 200, y + 2);
+                doc.setFont('Helvetica', 'normal');
                 doc.setFontSize(10);
-                y += 20;
-                doc.text(doc.splitTextToSize(technicianComments, 190), 10, y);
+                doc.text(doc.splitTextToSize(technicianComments, 190), 10, y + 10);
+                y += 10 + 6 * Math.ceil(technicianComments.length / 95);
             }
 
             // Footer
-            doc.setFillColor(0, 102, 204);
-            doc.rect(0, 280, 210, 20, 'F');
+            doc.setFillColor(26, 60, 109);
+            doc.rect(0, 270, 210, 27, 'F');
             doc.setFontSize(8);
             doc.setTextColor(255, 255, 255);
-            doc.text('Generated by Service Report Generator', 105, 290, null, null, 'center');
+            doc.setFont('Helvetica', 'normal');
+            doc.text('TechSecure Solutions | 1234 Security Lane, Tech City, TX 75001', 10, 280);
+            doc.text('Phone: (123) 456-7890 | Email: info@techsecure.com | www.techsecure.com', 10, 287);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 293, null, null, 'center');
 
             // Save the PDF
             doc.save('Service_Report.pdf');
