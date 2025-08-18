@@ -705,58 +705,26 @@
 
         async function sendEmailWithBrevo(emailData) {
             try {
-                // Check multiple possible sources for the API key
-                let apiKey = null;
-                
-                // Try to get from window object (set by deployment environment)
-                if (typeof window !== 'undefined' && window.BREVO_API_KEY) {
-                    apiKey = window.BREVO_API_KEY;
-                }
-                
-                // Try to get from a global config object
-                if (!apiKey && typeof window !== 'undefined' && window.APP_CONFIG && window.APP_CONFIG.BREVO_API_KEY) {
-                    apiKey = window.APP_CONFIG.BREVO_API_KEY;
-                }
-                
-                // For development/testing - check if it's set in localStorage (not recommended for production)
-                if (!apiKey && typeof localStorage !== 'undefined') {
-                    apiKey = localStorage.getItem('BREVO_API_KEY');
-                }
-                
-                if (!apiKey) {
-                    throw new Error('Brevo API key not configured. Please contact administrator to set up email functionality.');
-                }
-
-                const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                const response = await fetch('/api/send-email', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'api-key': apiKey
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        sender: {
-                            name: 'Eye Tech Securities',
-                            email: 'no-reply@eyetechsecurities.in'
-                        },
-                        to: [{
-                            email: emailData.to
-                        }],
+                        to: emailData.to,
                         subject: emailData.subject,
                         htmlContent: emailData.htmlContent,
-                        attachment: [{
-                            name: emailData.attachment.name,
-                            content: emailData.attachment.content
-                        }]
+                        attachment: emailData.attachment
                     })
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(`Email sending failed: ${errorData.message || response.statusText}`);
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                return response.json();
+                return await response.json();
 
             } catch (error) {
                 console.error('Error sending email:', error);
