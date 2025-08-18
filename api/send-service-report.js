@@ -1,10 +1,13 @@
 const Brevo = require('@getbrevo/brevo');
 
 exports.handler = async (event) => {
+    console.log('Received event:', event);
+
     const { customerName, serviceType, equipmentType, customerEmail, sendToCustomer, pdfDataUri, adminEmail } = JSON.parse(event.body);
 
     if (!process.env.BREVO_API_KEY) {
-        throw new Error('BREVO_API_KEY environment variable is not set');
+        console.error('BREVO_API_KEY is not set in environment variables');
+        throw new Error('BREVO_API_KEY environment variable is not configured');
     }
 
     const apiInstance = new Brevo.TransactionalEmailsApi();
@@ -17,7 +20,8 @@ exports.handler = async (event) => {
 
     if (sendToCustomer && customerEmail) {
         sendSmtpEmail.to.push({ email: customerEmail, name: customerName });
-    } else if (!customerEmail) {
+    } else if (sendToCustomer && !customerEmail) {
+        console.error('Customer email is missing when sendToCustomer is checked');
         throw new Error('Customer email is required when sendToCustomer is checked');
     }
 
@@ -49,19 +53,30 @@ exports.handler = async (event) => {
         </html>
     `;
 
+    // Validate and prepare attachment
+    if (!pdfDataUri || !pdfDataUri.split(',').length > 1) {
+        console.error('Invalid PDF data URI:', pdfDataUri);
+        throw new Error('Invalid PDF data provided');
+    }
     sendSmtpEmail.attachment = [{
         name: `Service_Report_${customerName}.pdf`,
         content: pdfDataUri.split(',')[1]
     }];
 
     try {
+        console.log('Sending email to:', sendSmtpEmail.to);
         const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log('Email sent successfully:', response);
         return {
             statusCode: 200,
             body: JSON.stringify({ message: 'Email sent successfully', data: response })
         };
     } catch (error) {
-        console.error('Email sending error:', error.response ? error.response.body : error.message);
+        console.error('Email sending error:', {
+            message: error.message,
+            response: error.response ? error.response.body : null,
+            stack: error.stack
+        });
         throw new Error(`Failed to send email: ${error.response ? error.response.body.message : error.message}`);
     }
 };
