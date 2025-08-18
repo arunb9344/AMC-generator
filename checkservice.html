@@ -4,304 +4,418 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Service Report Generator</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .nav-tabs a {
+            padding: 10px 20px;
+            margin: 0 5px;
+            text-decoration: none;
+            color: #2c3e50;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f8f9fa;
+            transition: background 0.3s, color 0.3s;
+        }
+        .nav-tabs a:hover, .nav-tabs a.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .checklist label {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            color: #34495e;
+        }
+        .checklist input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #007bff;
+        }
+        .button-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button-group button {
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .generate-pdf {
+            background-color: #007bff;
+            color: white;
+        }
+        .generate-send {
+            background-color: #28a745;
+            color: white;
+        }
+        .button-group button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
-    <div class="container mx-auto p-4 max-w-4xl">
-        <h1 class="text-3xl font-bold text-center mb-6">Service Report Generator</h1>
-
-        <div class="flex justify-center mb-6">
-            <a href="index.html" class="px-4 py-2 bg-blue-600 text-white rounded-l-md hover:bg-blue-700">AMC Agreement</a>
-            <a href="service-report-generator.html" class="px-4 py-2 bg-gray-800 text-white rounded-r-md">Service Report</a>
+<body>
+    <div class="container">
+        <h1>Service Report Generator</h1>
+        <div class="nav-tabs">
+            <a href="#" class="active">AMC Agreement</a>
+            <a href="#">Service Report</a>
         </div>
 
-        <form id="serviceReportForm" class="bg-white p-6 rounded-lg shadow-md">
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Customer Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="customerName" class="block text-sm font-medium text-gray-700">Customer Name</label>
-                        <input type="text" id="customerName" name="customerName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="customerAddress" class="block text-sm font-medium text-gray-700">Customer Address</label>
-                        <input type="text" id="customerAddress" name="customerAddress" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="contactPerson" class="block text-sm font-medium text-gray-700">Contact Person</label>
-                        <input type="text" id="contactPerson" name="contactPerson" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="customerContact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
-                        <input type="tel" id="customerContact" name="customerContact" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="customerEmail" class="block text-sm font-medium text-gray-700">Customer Email</label>
-                        <input type="email" id="customerEmail" name="customerEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                </div>
+        <div class="section">
+            <h2>Customer Details</h2>
+            <div class="form-group">
+                <label for="customerName">Customer Name</label>
+                <input type="text" id="customerName" required>
             </div>
+            <div class="form-group">
+                <label for="customerAddress">Customer Address</label>
+                <input type="text" id="customerAddress" required>
+            </div>
+            <div class="form-group">
+                <label for="gstNumber">GST Number</label>
+                <input type="text" id="gstNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="contactPerson">Contact Person</label>
+                <input type="text" id="contactPerson" required>
+            </div>
+            <div class="form-group">
+                <label for="customerContact">Customer Contact Number</label>
+                <input type="tel" id="customerContact" required>
+            </div>
+            <div class="form-group">
+                <label for="customerEmail">Customer Email</label>
+                <input type="email" id="customerEmail" required>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="sendToCustomer" checked> Send report to customer</label>
+            </div>
+        </div>
 
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Service Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="serviceType" class="block text-sm font-medium text-gray-700">Service Type</label>
-                        <select id="serviceType" name="serviceType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Select Service Type</option>
-                            <option value="Maintenance Visit">Maintenance Visit</option>
-                            <option value="Breakdown Visit">Breakdown Visit</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="equipmentType" class="block text-sm font-medium text-gray-700">Equipment Type</label>
-                        <select id="equipmentType" name="equipmentType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Select Equipment Type</option>
-                            <option value="CCTV">CCTV</option>
-                            <option value="Biometrics & Access Control">Biometrics & Access Control</option>
-                            <option value="Video Door Bell">Video Door Bell</option>
-                            <option value="Fire Alarm">Fire Alarm</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="serviceDate" class="block text-sm font-medium text-gray-700">Service Date</label>
-                        <input type="date" id="serviceDate" name="serviceDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="technicianName" class="block text-sm font-medium text-gray-700">Technician Name</label>
-                        <input type="text" id="technicianName" name="technicianName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                </div>
+        <div class="section">
+            <h2>Service Details</h2>
+            <div class="form-group">
+                <label for="reportType">Report Type</label>
+                <select id="reportType" required>
+                    <option value="AMC Agreement">AMC Agreement</option>
+                    <option value="Service Report">Service Report</option>
+                </select>
             </div>
+            <div class="form-group">
+                <label for="serviceType">Service Type</label>
+                <select id="serviceType" required>
+                    <option value="">Select Service Type</option>
+                    <option value="Maintenance Visit">Maintenance Visit</option>
+                    <option value="Breakdown Visit">Breakdown Visit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="equipmentType">Equipment Type</label>
+                <select id="equipmentType" required onchange="toggleChecklists()">
+                    <option value="">Select Equipment Type</option>
+                    <option value="CCTV">CCTV</option>
+                    <option value="Biometrics & Access Control">Biometrics & Access Control</option>
+                    <option value="Video Door Bell">Video Door Bell</option>
+                    <option value="Fire Alarm">Fire Alarm</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="serviceDate">Service Date</label>
+                <input type="date" id="serviceDate" required>
+            </div>
+            <div class="form-group">
+                <label for="technicianName">Technician Name</label>
+                <input type="text" id="technicianName" required>
+            </div>
+        </div>
 
-            <div class="mb-6" id="cctvChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">CCTV Maintenance Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="cctvCamerasLive"> Cameras Live</label></div>
-                    <div><label><input type="checkbox" name="cctvPlaybackWorking"> Playback Working</label></div>
-                    <div><label><input type="checkbox" name="cctvHddHealthy"> HDD Healthy</label></div>
-                    <div><label><input type="checkbox" name="cctvDateTimeAccurate"> Date/Time Accurate</label></div>
-                    <div><label><input type="checkbox" name="cctvRemoteAccess"> Remote Access</label></div>
-                    <div><label><input type="checkbox" name="cctvPowerSupply"> Power Supply</label></div>
-                    <div><label><input type="checkbox" name="cctvLensesClean"> Lenses Clean</label></div>
-                    <div><label><input type="checkbox" name="cctvCablesSecure"> Cables Secure</label></div>
-                </div>
+        <div class="section" id="cctvChecklist" style="display: none;">
+            <h2>CCTV Maintenance Checklist</h2>
+            <div class="checklist">
+                <label><input type="checkbox" name="cctv" id="camerasLive"> Cameras Live</label>
+                <label><input type="checkbox" name="cctv" id="playbackWorking"> Playback Working</label>
+                <label><input type="checkbox" name="cctv" id="hddHealthy"> HDD Healthy</label>
+                <label><input type="checkbox" name="cctv" id="dateTimeAccurate"> Date/Time Accurate</label>
+                <label><input type="checkbox" name="cctv" id="remoteAccess"> Remote Access</label>
+                <label><input type="checkbox" name="cctv" id="powerSupply"> Power Supply</label>
+                <label><input type="checkbox" name="cctv" id="lensesClean"> Lenses Clean</label>
+                <label><input type="checkbox" name="cctv" id="cablesSecure"> Cables Secure</label>
             </div>
+        </div>
 
-            <div class="mb-6" id="biometricsChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">Biometrics & Access Control Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="biometricsFingerprintScanner"> Fingerprint Scanner Working</label></div>
-                    <div><label><input type="checkbox" name="biometricsCardReader"> Card Reader Working</label></div>
-                    <div><label><input type="checkbox" name="biometricsDoorLock"> Door Lock Mechanism</label></div>
-                    <div><label><input type="checkbox" name="biometricsAccessLogs"> Access Logs Updated</label></div>
-                    <div><label><input type="checkbox" name="biometricsUserDatabase"> User Database Backup</label></div>
-                    <div><label><input type="checkbox" name="biometricsSensorCalibration"> Sensor Calibration</label></div>
-                </div>
+        <div class="section" id="biometricsChecklist" style="display: none;">
+            <h2>Biometrics & Access Control Checklist</h2>
+            <div class="checklist">
+                <label><input type="checkbox" name="biometrics" id="fingerprintScanner"> Fingerprint Scanner Working</label>
+                <label><input type="checkbox" name="biometrics" id="cardReader"> Card Reader Working</label>
+                <label><input type="checkbox" name="biometrics" id="doorLock"> Door Lock Mechanism</label>
+                <label><input type="checkbox" name="biometrics" id="accessLogs"> Access Logs Updated</label>
+                <label><input type="checkbox" name="biometrics" id="userDatabase"> User Database Backup</label>
+                <label><input type="checkbox" name="biometrics" id="sensorCalibration"> Sensor Calibration</label>
             </div>
+        </div>
 
-            <div class="mb-6" id="videoDoorbellChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">Video Door Bell Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="videoDoorbellVideoQuality"> Video Quality Clear</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellAudioQuality"> Audio Quality Clear</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellMotionDetection"> Motion Detection Working</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellNightVision"> Night Vision Working</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellMobileApp"> Mobile App Connectivity</label></div>
-                    <div><label><input type="checkbox" name="videoDoorbellChime"> Doorbell Chime Working</label></div>
-                </div>
+        <div class="section" id="videoDoorBellChecklist" style="display: none;">
+            <h2>Video Door Bell Checklist</h2>
+            <div class="checklist">
+                <label><input type="checkbox" name="videoDoorBell" id="videoQuality"> Video Quality Clear</label>
+                <label><input type="checkbox" name="videoDoorBell" id="audioQuality"> Audio Quality Clear</label>
+                <label><input type="checkbox" name="videoDoorBell" id="motionDetection"> Motion Detection Working</label>
+                <label><input type="checkbox" name="videoDoorBell" id="nightVision"> Night Vision Working</label>
+                <label><input type="checkbox" name="videoDoorBell" id="mobileApp"> Mobile App Connectivity</label>
+                <label><input type="checkbox" name="videoDoorBell" id="doorbellChime"> Doorbell Chime Working</label>
             </div>
+        </div>
 
-            <div class="mb-6" id="fireAlarmChecklist" style="display: none;">
-                <h2 class="text-xl font-semibold mb-4">Fire Alarm System Checklist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label><input type="checkbox" name="fireAlarmSmokeDetectors"> Smoke Detectors Working</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmHeatDetectors"> Heat Detectors Working</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmSounders"> Alarm Sounders Working</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmControlPanel"> Control Panel Functional</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmBatteryBackup"> Battery Backup Tested</label></div>
-                    <div><label><input type="checkbox" name="fireAlarmManualCallPoints"> Manual Call Points Working</label></div>
-                </div>
+        <div class="section" id="fireAlarmChecklist" style="display: none;">
+            <h2>Fire Alarm System Checklist</h2>
+            <div class="checklist">
+                <label><input type="checkbox" name="fireAlarm" id="smokeDetectors"> Smoke Detectors Working</label>
+                <label><input type="checkbox" name="fireAlarm" id="heatDetectors"> Heat Detectors Working</label>
+                <label><input type="checkbox" name="fireAlarm" id="alarmSounders"> Alarm Sounders Working</label>
+                <label><input type="checkbox" name="fireAlarm" id="controlPanel"> Control Panel Functional</label>
+                <label><input type="checkbox" name="fireAlarm" id="batteryBackup"> Battery Backup Tested</label>
+                <label><input type="checkbox" name="fireAlarm" id="manualCallPoints"> Manual Call Points Working</label>
             </div>
+        </div>
 
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Issue Description</h2>
-                <textarea id="issueDescription" name="issueDescription" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
+        <div class="section">
+            <h2>Issue Description</h2>
+            <div class="form-group">
+                <label for="issueDescription">Issue Description</label>
+                <textarea id="issueDescription" rows="4"></textarea>
             </div>
+        </div>
 
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Technician Comments</h2>
-                <textarea id="technicianComments" name="technicianComments" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
+        <div class="section">
+            <h2>Technician Comments</h2>
+            <div class="form-group">
+                <label for="technicianComments">Technician Comments</label>
+                <textarea id="technicianComments" rows="4"></textarea>
             </div>
+        </div>
 
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4">Email Options</h2>
-                <div class="flex items-center mb-4">
-                    <input type="checkbox" id="sendToCustomer" name="sendToCustomer" class="mr-2">
-                    <label for="sendToCustomer" class="text-sm font-medium text-gray-700">Send copy to customer</label>
-                </div>
-                <p class="text-sm text-gray-600">Admin copy will always be sent to support@eyetechsecurities.in</p>
-            </div>
-
-            <div class="flex justify-end space-x-4">
-                <button type="button" id="generatePdf" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Generate PDF Only</button>
-                <button type="button" id="generateAndEmail" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Generate PDF & Send Email</button>
-            </div>
-        </form>
+        <div class="button-group">
+            <button class="generate-pdf" onclick="generatePDF()">Generate Service Report PDF</button>
+            <button class="generate-send" onclick="generateAndSend()">Generate PDF & Send Email</button>
+        </div>
     </div>
 
     <script>
-        document.getElementById('equipmentType').addEventListener('change', function() {
-            document.getElementById('cctvChecklist').style.display = this.value === 'CCTV' ? 'block' : 'none';
-            document.getElementById('biometricsChecklist').style.display = this.value === 'Biometrics & Access Control' ? 'block' : 'none';
-            document.getElementById('videoDoorbellChecklist').style.display = this.value === 'Video Door Bell' ? 'block' : 'none';
-            document.getElementById('fireAlarmChecklist').style.display = this.value === 'Fire Alarm' ? 'block' : 'none';
-        });
+        const { jsPDF } = window.jspdf;
 
-        function generatePDF(sendEmail = false) {
-            const form = document.getElementById('serviceReportForm');
-            const formData = new FormData(form);
-            const reportNumber = 'SR' + Math.floor(1000 + Math.random() * 9000);
-
-            // Ensure all form fields are included, even if empty
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
-            data.reportNumber = reportNumber;
-
-            // Add default values if fields are missing
-            data.customerEmail = data.customerEmail || '';
-            data.customerName = data.customerName || '';
-            data.serviceDate = data.serviceDate || '';
-            data.serviceType = data.serviceType || '';
-            data.equipmentType = data.equipmentType || '';
-            data.technicianName = data.technicianName || '';
-            data.issueDescription = data.issueDescription || '';
-            data.technicianComments = data.technicianComments || '';
-            data.sendToCustomer = form.querySelector('#sendToCustomer').checked ? 'true' : 'false';
-
-            const checklistHtml = {
-                'CCTV': `
-                    <h3 class="text-lg font-semibold mb-2">CCTV Maintenance Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Cameras Live: ${data.cctvCamerasLive ? '✓' : '✗'}</li>
-                        <li>Playback Working: ${data.cctvPlaybackWorking ? '✓' : '✗'}</li>
-                        <li>HDD Healthy: ${data.cctvHddHealthy ? '✓' : '✗'}</li>
-                        <li>Date/Time Accurate: ${data.cctvDateTimeAccurate ? '✓' : '✗'}</li>
-                        <li>Remote Access: ${data.cctvRemoteAccess ? '✓' : '✗'}</li>
-                        <li>Power Supply: ${data.cctvPowerSupply ? '✓' : '✗'}</li>
-                        <li>Lenses Clean: ${data.cctvLensesClean ? '✓' : '✗'}</li>
-                        <li>Cables Secure: ${data.cctvCablesSecure ? '✓' : '✗'}</li>
-                    </ul>`,
-                'Biometrics & Access Control': `
-                    <h3 class="text-lg font-semibold mb-2">Biometrics & Access Control Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Fingerprint Scanner Working: ${data.biometricsFingerprintScanner ? '✓' : '✗'}</li>
-                        <li>Card Reader Working: ${data.biometricsCardReader ? '✓' : '✗'}</li>
-                        <li>Door Lock Mechanism: ${data.biometricsDoorLock ? '✓' : '✗'}</li>
-                        <li>Access Logs Updated: ${data.biometricsAccessLogs ? '✓' : '✗'}</li>
-                        <li>User Database Backup: ${data.biometricsUserDatabase ? '✓' : '✗'}</li>
-                        <li>Sensor Calibration: ${data.biometricsSensorCalibration ? '✓' : '✗'}</li>
-                    </ul>`,
-                'Video Door Bell': `
-                    <h3 class="text-lg font-semibold mb-2">Video Door Bell Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Video Quality Clear: ${data.videoDoorbellVideoQuality ? '✓' : '✗'}</li>
-                        <li>Audio Quality Clear: ${data.videoDoorbellAudioQuality ? '✓' : '✗'}</li>
-                        <li>Motion Detection Working: ${data.videoDoorbellMotionDetection ? '✓' : '✗'}</li>
-                        <li>Night Vision Working: ${data.videoDoorbellNightVision ? '✓' : '✗'}</li>
-                        <li>Mobile App Connectivity: ${data.videoDoorbellMobileApp ? '✓' : '✗'}</li>
-                        <li>Doorbell Chime Working: ${data.videoDoorbellChime ? '✓' : '✗'}</li>
-                    </ul>`,
-                'Fire Alarm': `
-                    <h3 class="text-lg font-semibold mb-2">Fire Alarm System Checklist</h3>
-                    <ul class="list-disc pl-5">
-                        <li>Smoke Detectors Working: ${data.fireAlarmSmokeDetectors ? '✓' : '✗'}</li>
-                        <li>Heat Detectors Working: ${data.fireAlarmHeatDetectors ? '✓' : '✗'}</li>
-                        <li>Alarm Sounders Working: ${data.fireAlarmSounders ? '✓' : '✗'}</li>
-                        <li>Control Panel Functional: ${data.fireAlarmControlPanel ? '✓' : '✗'}</li>
-                        <li>Battery Backup Tested: ${data.fireAlarmBatteryBackup ? '✓' : '✗'}</li>
-                        <li>Manual Call Points Working: ${data.fireAlarmManualCallPoints ? '✓' : '✗'}</li>
-                    </ul>`
-            };
-
-            const pdfContent = `
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h1 style="text-align: center; color: #2563eb;">Eye Tech Securities</h1>
-                    <h2 style="text-align: center;">Service Report #${reportNumber}</h2>
-                    <hr style="margin: 20px 0;">
-                    <h3 class="text-lg font-semibold mb-2">Customer Details</h3>
-                    <p><strong>Name:</strong> ${data.customerName}</p>
-                    <p><strong>Address:</strong> ${data.customerAddress}</p>
-                    <p><strong>Contact Person:</strong> ${data.contactPerson}</p>
-                    <p><strong>Contact Number:</strong> ${data.customerContact}</p>
-                    <p><strong>Email:</strong> ${data.customerEmail}</p>
-                    <hr style="margin: 20px 0;">
-                    <h3 class="text-lg font-semibold mb-2">Service Details</h3>
-                    <p><strong>Service Type:</strong> ${data.serviceType}</p>
-                    <p><strong>Equipment Type:</strong> ${data.equipmentType}</p>
-                    <p><strong>Service Date:</strong> ${data.serviceDate}</p>
-                    <p><strong>Technician Name:</strong> ${data.technicianName}</p>
-                    <hr style="margin: 20px 0;">
-                    ${checklistHtml[data.equipmentType] || ''}
-                    <hr style="margin: 20px 0;">
-                    <h3 class="text-lg font-semibold mb-2">Issue Description</h3>
-                    <p>${data.issueDescription || 'No issues reported'}</p>
-                    <h3 class="text-lg font-semibold mb-2">Technician Comments</h3>
-                    <p>${data.technicianComments || 'No additional comments'}</p>
-                </div>
-            `;
-
-            const element = document.createElement('div');
-            element.innerHTML = pdfContent;
-
-            const opt = {
-                margin: 1,
-                filename: `Service_Report_${reportNumber}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().from(element).set(opt).toPdf().get('pdf').then(function (pdf) {
-                if (sendEmail) {
-                    const pdfBlob = pdf.output('blob');
-                    const formDataToSend = new FormData();
-                    formDataToSend.append('pdf', pdfBlob, `Service_Report_${reportNumber}.pdf`);
-                    formDataToSend.append('customerEmail', data.customerEmail);
-                    formDataToSend.append('customerName', data.customerName);
-                    formDataToSend.append('reportNumber', reportNumber);
-                    formDataToSend.append('serviceDate', data.serviceDate);
-                    formDataToSend.append('serviceType', data.serviceType);
-                    formDataToSend.append('equipmentType', data.equipmentType);
-                    formDataToSend.append('technicianName', data.technicianName);
-                    formDataToSend.append('issueDescription', data.issueDescription);
-                    formDataToSend.append('technicianComments', data.technicianComments);
-                    formDataToSend.append('sendToCustomer', data.sendToCustomer);
-
-                    fetch('/api/send-service-report-email', {
-                        method: 'POST',
-                        body: formDataToSend
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            alert('Service report generated and emails sent successfully!');
-                        } else {
-                            alert('Error sending emails: ' + result.error);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error sending emails: ' + error.message);
-                    });
-                } else {
-                    html2pdf().from(element).set(opt).save();
-                }
-            });
+        function toggleChecklists() {
+            const equipmentType = document.getElementById('equipmentType').value;
+            document.getElementById('cctvChecklist').style.display = equipmentType === 'CCTV' ? 'block' : 'none';
+            document.getElementById('biometricsChecklist').style.display = equipmentType === 'Biometrics & Access Control' ? 'block' : 'none';
+            document.getElementById('videoDoorBellChecklist').style.display = equipmentType === 'Video Door Bell' ? 'block' : 'none';
+            document.getElementById('fireAlarmChecklist').style.display = equipmentType === 'Fire Alarm' ? 'block' : 'none';
         }
 
-        document.getElementById('generatePdf').addEventListener('click', () => generatePDF(false));
-        document.getElementById('generateAndEmail').addEventListener('click', () => generatePDF(true));
+        function collectChecklistData(checklistId, checklistName) {
+            const checkboxes = document.querySelectorAll(`#${checklistId} input[type="checkbox"]`);
+            return Array.from(checkboxes).map(cb => ({
+                item: cb.parentElement.textContent.trim(),
+                checked: cb.checked
+            }));
+        }
+
+        function generatePDF() {
+            const doc = new jsPDF();
+            const customerName = document.getElementById('customerName').value;
+            const customerAddress = document.getElementById('customerAddress').value;
+            const gstNumber = document.getElementById('gstNumber').value;
+            const contactPerson = document.getElementById('contactPerson').value;
+            const customerContact = document.getElementById('customerContact').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+            const reportType = document.getElementById('reportType').value;
+            const serviceType = document.getElementById('serviceType').value;
+            const equipmentType = document.getElementById('equipmentType').value;
+            const serviceDate = document.getElementById('serviceDate').value;
+            const technicianName = document.getElementById('technicianName').value;
+            const issueDescription = document.getElementById('issueDescription').value;
+            const technicianComments = document.getElementById('technicianComments').value;
+
+            let checklistData = [];
+            if (equipmentType === 'CCTV') {
+                checklistData = collectChecklistData('cctvChecklist', 'CCTV Maintenance Checklist');
+            } else if (equipmentType === 'Biometrics & Access Control') {
+                checklistData = collectChecklistData('biometricsChecklist', 'Biometrics & Access Control Checklist');
+            } else if (equipmentType === 'Video Door Bell') {
+                checklistData = collectChecklistData('videoDoorBellChecklist', 'Video Door Bell Checklist');
+            } else if (equipmentType === 'Fire Alarm') {
+                checklistData = collectChecklistData('fireAlarmChecklist', 'Fire Alarm System Checklist');
+            }
+
+            let y = 20;
+            doc.setFontSize(16);
+            doc.text(`${reportType}`, 20, y);
+            y += 10;
+            doc.setFontSize(12);
+            doc.text(`Customer Name: ${customerName}`, 20, y);
+            y += 10;
+            doc.text(`Customer Address: ${customerAddress}`, 20, y);
+            y += 10;
+            doc.text(`GST Number: ${gstNumber}`, 20, y);
+            y += 10;
+            doc.text(`Contact Person: ${contactPerson}`, 20, y);
+            y += 10;
+            doc.text(`Contact Number: ${customerContact}`, 20, y);
+            y += 10;
+            doc.text(`Email: ${customerEmail}`, 20, y);
+            y += 10;
+            doc.text(`Service Type: ${serviceType}`, 20, y);
+            y += 10;
+            doc.text(`Equipment Type: ${equipmentType}`, 20, y);
+            y += 10;
+            doc.text(`Service Date: ${serviceDate}`, 20, y);
+            y += 10;
+            doc.text(`Technician Name: ${technicianName}`, 20, y);
+            y += 15;
+
+            doc.text(`${equipmentType} Checklist:`, 20, y);
+            y += 10;
+            checklistData.forEach(item => {
+                doc.text(`${item.item}: ${item.checked ? '✓' : '✗'}`, 30, y);
+                y += 10;
+            });
+
+            y += 5;
+            doc.text('Issue Description:', 20, y);
+            y += 10;
+            doc.text(issueDescription, 20, y, { maxWidth: 170 });
+            y += doc.getTextDimensions(issueDescription, { maxWidth: 170 }).h + 10;
+
+            doc.text('Technician Comments:', 20, y);
+            y += 10;
+            doc.text(technicianComments, 20, y, { maxWidth: 170 });
+
+            doc.save(`Service_Report_${customerName}.pdf`);
+            return doc.output('datauristring');
+        }
+
+        async function generateAndSend() {
+            const pdfDataUri = generatePDF();
+            const customerName = document.getElementById('customerName').value;
+            const serviceType = document.getElementById('serviceType').value;
+            const equipmentType = document.getElementById('equipmentType').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+            const sendToCustomer = document.getElementById('sendToCustomer').checked;
+
+            const emailData = {
+                customerName,
+                serviceType,
+                equipmentType,
+                customerEmail,
+                sendToCustomer,
+                pdfDataUri,
+                adminEmail: 'support@eyetechsecurities.in'
+            };
+
+            try {
+                const response = await fetch('/api/send-service-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailData)
+                });
+                if (response.ok) {
+                    alert('PDF generated and email sent successfully!');
+                } else {
+                    alert('Error sending email. PDF has been generated.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error sending email. PDF has been generated.');
+            }
+        }
+
+        // Navigation tab functionality
+        document.querySelectorAll('.nav-tabs a').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.nav-tabs a').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                // Add logic here if you need to switch between AMC Agreement and Service Report forms
+            });
+        });
     </script>
+</body>
+</html>
