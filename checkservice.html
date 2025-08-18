@@ -4,372 +4,285 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Service Report Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-gray-100 font-sans">
-    <div class="container mx-auto p-6 max-w-4xl">
+    <div class="container mx-auto p-4 max-w-4xl">
         <h1 class="text-3xl font-bold text-center mb-6">Service Report Generator</h1>
 
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-            <div class="flex justify-around mb-6">
-                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">AMC Agreement</button>
-                <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Service Report</button>
+        <div class="flex justify-center mb-6">
+            <a href="index.html" class="px-4 py-2 bg-blue-600 text-white rounded-l-md hover:bg-blue-700">AMC Agreement</a>
+            <a href="service-report-generator.html" class="px-4 py-2 bg-gray-800 text-white rounded-r-md">Service Report</a>
+        </div>
+
+        <form id="serviceReportForm" class="bg-white p-6 rounded-lg shadow-md">
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4">Customer Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="customerName" class="block text-sm font-medium text-gray-700">Customer Name</label>
+                        <input type="text" id="customerName" name="customerName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="customerAddress" class="block text-sm font-medium text-gray-700">Customer Address</label>
+                        <input type="text" id="customerAddress" name="customerAddress" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="contactPerson" class="block text-sm font-medium text-gray-700">Contact Person</label>
+                        <input type="text" id="contactPerson" name="contactPerson" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="customerContact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
+                        <input type="tel" id="customerContact" name="customerContact" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="customerEmail" class="block text-sm font-medium text-gray-700">Customer Email</label>
+                        <input type="email" id="customerEmail" name="customerEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                </div>
             </div>
 
-            <form id="serviceReportForm" class="space-y-6">
-                <div class="border-b pb-4">
-                    <h2 class="text-xl font-semibold mb-4">Customer Details</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Customer Name</label>
-                            <input type="text" id="customerName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Customer Address</label>
-                            <input type="text" id="customerAddress" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Contact Person</label>
-                            <input type="text" id="contactPerson" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
-                            <input type="tel" id="customerContact" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Customer Email</label>
-                            <input type="email" id="customerEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Customer GST (Optional)</label>
-                            <input type="text" id="customerGST" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        </div>
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4">Service Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="serviceType" class="block text-sm font-medium text-gray-700">Service Type</label>
+                        <select id="serviceType" name="serviceType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Select Service Type</option>
+                            <option value="Maintenance Visit">Maintenance Visit</option>
+                            <option value="Breakdown Visit">Breakdown Visit</option>
+                        </select>
                     </div>
-                    <div class="mt-4">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" id="sendToCustomer" class="form-checkbox h-5 w-5 text-blue-600">
-                            <span class="ml-2 text-sm text-gray-700">Send to Customer</span>
-                        </label>
+                    <div>
+                        <label for="equipmentType" class="block text-sm font-medium text-gray-700">Equipment Type</label>
+                        <select id="equipmentType" name="equipmentType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Select Equipment Type</option>
+                            <option value="CCTV">CCTV</option>
+                            <option value="Biometrics & Access Control">Biometrics & Access Control</option>
+                            <option value="Video Door Bell">Video Door Bell</option>
+                            <option value="Fire Alarm">Fire Alarm</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="serviceDate" class="block text-sm font-medium text-gray-700">Service Date</label>
+                        <input type="date" id="serviceDate" name="serviceDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="technicianName" class="block text-sm font-medium text-gray-700">Technician Name</label>
+                        <input type="text" id="technicianName" name="technicianName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
                 </div>
+            </div>
 
-                <div class="border-b pb-4">
-                    <h2 class="text-xl font-semibold mb-4">Service Details</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Service Type</label>
-                            <select id="serviceType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-                                <option value="">Select Service Type</option>
-                                <option value="Maintenance Visit">Maintenance Visit</option>
-                                <option value="Breakdown Visit">Breakdown Visit</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Equipment Type</label>
-                            <select id="equipmentType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-                                <option value="">Select Equipment Type</option>
-                                <option value="CCTV">CCTV</option>
-                                <option value="Biometrics & Access Control">Biometrics & Access Control</option>
-                                <option value="Video Door Bell">Video Door Bell</option>
-                                <option value="Fire Alarm">Fire Alarm</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Service Date</label>
-                            <input type="date" id="serviceDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Technician Name</label>
-                            <input type="text" id="technicianName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-                        </div>
-                    </div>
+            <div class="mb-6" id="cctvChecklist" style="display: none;">
+                <h2 class="text-xl font-semibold mb-4">CCTV Maintenance Checklist</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label><input type="checkbox" name="cctvCamerasLive"> Cameras Live</label></div>
+                    <div><label><input type="checkbox" name="cctvPlaybackWorking"> Playback Working</label></div>
+                    <div><label><input type="checkbox" name="cctvHddHealthy"> HDD Healthy</label></div>
+                    <div><label><input type="checkbox" name="cctvDateTimeAccurate"> Date/Time Accurate</label></div>
+                    <div><label><input type="checkbox" name="cctvRemoteAccess"> Remote Access</label></div>
+                    <div><label><input type="checkbox" name="cctvPowerSupply"> Power Supply</label></div>
+                    <div><label><input type="checkbox" name="cctvLensesClean"> Lenses Clean</label></div>
+                    <div><label><input type="checkbox" name="cctvCablesSecure"> Cables Secure</label></div>
                 </div>
+            </div>
 
-                <div class="border-b pb-4" id="cctvChecklist">
-                    <h2 class="text-xl font-semibold mb-4">CCTV Maintenance Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvCamerasLive"><span class="ml-2">Cameras Live</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvPlaybackWorking"><span class="ml-2">Playback Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvHddHealthy"><span class="ml-2">HDD Healthy</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvDateTimeAccurate"><span class="ml-2">Date/Time Accurate</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvRemoteAccess"><span class="ml-2">Remote Access</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvPowerSupply"><span class="ml-2">Power Supply</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvLensesClean"><span class="ml-2">Lenses Clean</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="cctvCablesSecure"><span class="ml-2">Cables Secure</span></label>
-                    </div>
+            <div class="mb-6" id="biometricsChecklist" style="display: none;">
+                <h2 class="text-xl font-semibold mb-4">Biometrics & Access Control Checklist</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label><input type="checkbox" name="biometricsFingerprintScanner"> Fingerprint Scanner Working</label></div>
+                    <div><label><input type="checkbox" name="biometricsCardReader"> Card Reader Working</label></div>
+                    <div><label><input type="checkbox" name="biometricsDoorLock"> Door Lock Mechanism</label></div>
+                    <div><label><input type="checkbox" name="biometricsAccessLogs"> Access Logs Updated</label></div>
+                    <div><label><input type="checkbox" name="biometricsUserDatabase"> User Database Backup</label></div>
+                    <div><label><input type="checkbox" name="biometricsSensorCalibration"> Sensor Calibration</label></div>
                 </div>
+            </div>
 
-                <div class="border-b pb-4 hidden" id="biometricsChecklist">
-                    <h2 class="text-xl font-semibold mb-4">Biometrics & Access Control Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsFingerprintScanner"><span class="ml-2">Fingerprint Scanner Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsCardReader"><span class="ml-2">Card Reader Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsDoorLock"><span class="ml-2">Door Lock Mechanism</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsAccessLogs"><span class="ml-2">Access Logs Updated</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsUserDatabase"><span class="ml-2">User Database Backup</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="biometricsSensorCalibration"><span class="ml-2">Sensor Calibration</span></label>
-                    </div>
+            <div class="mb-6" id="videoDoorbellChecklist" style="display: none;">
+                <h2 class="text-xl font-semibold mb-4">Video Door Bell Checklist</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label><input type="checkbox" name="videoDoorbellVideoQuality"> Video Quality Clear</label></div>
+                    <div><label><input type="checkbox" name="videoDoorbellAudioQuality"> Audio Quality Clear</label></div>
+                    <div><label><input type="checkbox" name="videoDoorbellMotionDetection"> Motion Detection Working</label></div>
+                    <div><label><input type="checkbox" name="videoDoorbellNightVision"> Night Vision Working</label></div>
+                    <div><label><input type="checkbox" name="videoDoorbellMobileApp"> Mobile App Connectivity</label></div>
+                    <div><label><input type="checkbox" name="videoDoorbellChime"> Doorbell Chime Working</label></div>
                 </div>
+            </div>
 
-                <div class="border-b pb-4 hidden" id="videoDoorbellChecklist">
-                    <h2 class="text-xl font-semibold mb-4">Video Door Bell Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoVideoQuality"><span class="ml-2">Video Quality Clear</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoAudioQuality"><span class="ml-2">Audio Quality Clear</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoMotionDetection"><span class="ml-2">Motion Detection Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoNightVision"><span class="ml-2">Night Vision Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoMobileApp"><span class="ml-2">Mobile App Connectivity</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="videoDoorbellChime"><span class="ml-2">Doorbell Chime Working</span></label>
-                    </div>
+            <div class="mb-6" id="fireAlarmChecklist" style="display: none;">
+                <h2 class="text-xl font-semibold mb-4">Fire Alarm System Checklist</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label><input type="checkbox" name="fireAlarmSmokeDetectors"> Smoke Detectors Working</label></div>
+                    <div><label><input type="checkbox" name="fireAlarmHeatDetectors"> Heat Detectors Working</label></div>
+                    <div><label><input type="checkbox" name="fireAlarmSounders"> Alarm Sounders Working</label></div>
+                    <div><label><input type="checkbox" name="fireAlarmControlPanel"> Control Panel Functional</label></div>
+                    <div><label><input type="checkbox" name="fireAlarmBatteryBackup"> Battery Backup Tested</label></div>
+                    <div><label><input type="checkbox" name="fireAlarmManualCallPoints"> Manual Call Points Working</label></div>
                 </div>
+            </div>
 
-                <div class="border-b pb-4 hidden" id="fireAlarmChecklist">
-                    <h2 class="text-xl font-semibold mb-4">Fire Alarm System Checklist</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireSmokeDetectors"><span class="ml-2">Smoke Detectors Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireHeatDetectors"><span class="ml-2">Heat Detectors Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireAlarmSounders"><span class="ml-2">Alarm Sounders Working</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireControlPanel"><span class="ml-2">Control Panel Functional</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireBatteryBackup"><span class="ml-2">Battery Backup Tested</span></label>
-                        <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" name="fireManualCallPoints"><span class="ml-2">Manual Call Points Working</span></label>
-                    </div>
-                </div>
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4">Issue Description</h2>
+                <textarea id="issueDescription" name="issueDescription" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
+            </div>
 
-                <div class="border-b pb-4">
-                    <h2 class="text-xl font-semibold mb-4">Issue Description</h2>
-                    <textarea id="issueDescription" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" rows="4"></textarea>
-                </div>
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4">Technician Comments</h2>
+                <textarea id="technicianComments" name="technicianComments" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
+            </div>
 
-                <div class="border-b pb-4">
-                    <h2 class="text-xl font-semibold mb-4">Technician Comments</h2>
-                    <textarea id="technicianComments" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" rows="4"></textarea>
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4">Email Options</h2>
+                <div class="flex items-center mb-4">
+                    <input type="checkbox" id="sendToCustomer" name="sendToCustomer" class="mr-2">
+                    <label for="sendToCustomer" class="text-sm font-medium text-gray-700">Send copy to customer</label>
                 </div>
+                <p class="text-sm text-gray-600">Admin copy will always be sent to support@eyetechsecurities.in</p>
+            </div>
 
-                <div class="border-b pb-4">
-                    <h2 class="text-xl font-semibold mb-4">Email Options</h2>
-                    <div class="mt-4">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" id="sendToCustomer" class="form-checkbox h-5 w-5 text-blue-600">
-                            <span class="ml-2 text-sm text-gray-700">Send copy to customer</span>
-                        </label>
-                        <p class="text-sm text-gray-500 mt-2">Admin copy will always be sent to support@eyetechsecurities.in</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-between">
-                    <button type="button" id="generatePDF" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Generate PDF Only</button>
-                    <button type="button" id="sendEmail" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Generate PDF & Send Email</button>
-                </div>
-            </form>
-        </div>
+            <div class="flex justify-end space-x-4">
+                <button type="button" id="generatePdf" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Generate PDF Only</button>
+                <button type="button" id="generateAndEmail" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Generate PDF & Send Email</button>
+            </div>
+        </form>
     </div>
 
     <script>
-        // Show/hide checklists based on equipment type
         document.getElementById('equipmentType').addEventListener('change', function() {
-            const checklists = ['cctvChecklist', 'biometricsChecklist', 'videoDoorbellChecklist', 'fireAlarmChecklist'];
-            checklists.forEach(checklist => document.getElementById(checklist).classList.add('hidden'));
-            const selected = this.value;
-            if (selected === 'CCTV') document.getElementById('cctvChecklist').classList.remove('hidden');
-            else if (selected === 'Biometrics & Access Control') document.getElementById('biometricsChecklist').classList.remove('hidden');
-            else if (selected === 'Video Door Bell') document.getElementById('videoDoorbellChecklist').classList.remove('hidden');
-            else if (selected === 'Fire Alarm') document.getElementById('fireAlarmChecklist').classList.remove('hidden');
+            document.getElementById('cctvChecklist').style.display = this.value === 'CCTV' ? 'block' : 'none';
+            document.getElementById('biometricsChecklist').style.display = this.value === 'Biometrics & Access Control' ? 'block' : 'none';
+            document.getElementById('videoDoorbellChecklist').style.display = this.value === 'Video Door Bell' ? 'block' : 'none';
+            document.getElementById('fireAlarmChecklist').style.display = this.value === 'Fire Alarm' ? 'block' : 'none';
         });
 
-        // Generate PDF
-        document.getElementById('generatePDF').addEventListener('click', function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const margin = 10;
-            let y = 10;
+        function generatePDF(sendEmail = false) {
+            const form = document.getElementById('serviceReportForm');
+            const formData = new FormData(form);
+            const reportNumber = 'SR' + Math.floor(1000 + Math.random() * 9000);
 
-            // Helper function to add text with wrapping
-            function addText(text, x, y, maxWidth) {
-                const lines = doc.splitTextToSize(text, maxWidth);
-                doc.text(lines, x, y);
-                return y + (lines.length * 7); // Adjust y position based on number of lines
-            }
-
-            // Header
-            doc.setFontSize(20);
-            y = addText('Eye Tech Securities - Service Report', margin, y, 190);
-            doc.setFontSize(12);
-            y += 5;
-
-            // Customer Details
-            y = addText('Customer Details', margin, y, 190);
-            y = addText(`Name: ${document.getElementById('customerName').value}`, margin, y, 190);
-            y = addText(`Address: ${document.getElementById('customerAddress').value || 'N/A'}`, margin, y, 190);
-            y = addText(`Contact Person: ${document.getElementById('contactPerson').value || 'N/A'}`, margin, y, 190);
-            y = addText(`Contact Number: ${document.getElementById('customerContact').value || 'N/A'}`, margin, y, 190);
-            y = addText(`Email: ${document.getElementById('customerEmail').value || 'N/A'}`, margin, y, 190);
-            y = addText(`GST: ${document.getElementById('customerGST').value || 'N/A'}`, margin, y, 190);
-            y += 5;
-
-            // Service Details
-            y = addText('Service Details', margin, y, 190);
-            y = addText(`Report Number: SR${Date.now()}`, margin, y, 190);
-            y = addText(`Service Date: ${document.getElementById('serviceDate').value}`, margin, y, 190);
-            y = addText(`Service Type: ${document.getElementById('serviceType').value}`, margin, y, 190);
-            y = addText(`Equipment Type: ${document.getElementById('equipmentType').value}`, margin, y, 190);
-            y = addText(`Technician: ${document.getElementById('technicianName').value}`, margin, y, 190);
-            y += 5;
-
-            // Checklist based on equipment type
-            const equipmentType = document.getElementById('equipmentType').value;
-            let checklistItems = [];
-            if (equipmentType === 'CCTV') {
-                y = addText('CCTV Maintenance Checklist', margin, y, 190);
-                checklistItems = ['cctvCamerasLive', 'cctvPlaybackWorking', 'cctvHddHealthy', 'cctvDateTimeAccurate', 'cctvRemoteAccess', 'cctvPowerSupply', 'cctvLensesClean', 'cctvCablesSecure'];
-            } else if (equipmentType === 'Biometrics & Access Control') {
-                y = addText('Biometrics & Access Control Checklist', margin, y, 190);
-                checklistItems = ['biometricsFingerprintScanner', 'biometricsCardReader', 'biometricsDoorLock', 'biometricsAccessLogs', 'biometricsUserDatabase', 'biometricsSensorCalibration'];
-            } else if (equipmentType === 'Video Door Bell') {
-                y = addText('Video Door Bell Checklist', margin, y, 190);
-                checklistItems = ['videoVideoQuality', 'videoAudioQuality', 'videoMotionDetection', 'videoNightVision', 'videoMobileApp', 'videoDoorbellChime'];
-            } else if (equipmentType === 'Fire Alarm') {
-                y = addText('Fire Alarm System Checklist', margin, y, 190);
-                checklistItems = ['fireSmokeDetectors', 'fireHeatDetectors', 'fireAlarmSounders', 'fireControlPanel', 'fireBatteryBackup', 'fireManualCallPoints'];
-            }
-
-            checklistItems.forEach(item => {
-                const checkbox = document.querySelector(`input[name="${item}"]`);
-                const label = checkbox.nextElementSibling.textContent;
-                y = addText(`${label}: ${checkbox.checked ? '✓' : '✗'}`, margin, y, 190);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
             });
-            y += 5;
+            data.reportNumber = reportNumber;
 
-            // Issue Description
-            const issueDescription = document.getElementById('issueDescription').value;
-            if (issueDescription) {
-                y = addText('Issue Description', margin, y, 190);
-                y = addText(issueDescription, margin, y, 190);
-                y += 5;
-            }
+            const checklistHtml = {
+                'CCTV': `
+                    <h3 class="text-lg font-semibold mb-2">CCTV Maintenance Checklist</h3>
+                    <ul class="list-disc pl-5">
+                        <li>Cameras Live: ${data.cctvCamerasLive ? '✓' : '✗'}</li>
+                        <li>Playback Working: ${data.cctvPlaybackWorking ? '✓' : '✗'}</li>
+                        <li>HDD Healthy: ${data.cctvHddHealthy ? '✓' : '✗'}</li>
+                        <li>Date/Time Accurate: ${data.cctvDateTimeAccurate ? '✓' : '✗'}</li>
+                        <li>Remote Access: ${data.cctvRemoteAccess ? '✓' : '✗'}</li>
+                        <li>Power Supply: ${data.cctvPowerSupply ? '✓' : '✗'}</li>
+                        <li>Lenses Clean: ${data.cctvLensesClean ? '✓' : '✗'}</li>
+                        <li>Cables Secure: ${data.cctvCablesSecure ? '✓' : '✗'}</li>
+                    </ul>`,
+                'Biometrics & Access Control': `
+                    <h3 class="text-lg font-semibold mb-2">Biometrics & Access Control Checklist</h3>
+                    <ul class="list-disc pl-5">
+                        <li>Fingerprint Scanner Working: ${data.biometricsFingerprintScanner ? '✓' : '✗'}</li>
+                        <li>Card Reader Working: ${data.biometricsCardReader ? '✓' : '✗'}</li>
+                        <li>Door Lock Mechanism: ${data.biometricsDoorLock ? '✓' : '✗'}</li>
+                        <li>Access Logs Updated: ${data.biometricsAccessLogs ? '✓' : '✗'}</li>
+                        <li>User Database Backup: ${data.biometricsUserDatabase ? '✓' : '✗'}</li>
+                        <li>Sensor Calibration: ${data.biometricsSensorCalibration ? '✓' : '✗'}</li>
+                    </ul>`,
+                'Video Door Bell': `
+                    <h3 class="text-lg font-semibold mb-2">Video Door Bell Checklist</h3>
+                    <ul class="list-disc pl-5">
+                        <li>Video Quality Clear: ${data.videoDoorbellVideoQuality ? '✓' : '✗'}</li>
+                        <li>Audio Quality Clear: ${data.videoDoorbellAudioQuality ? '✓' : '✗'}</li>
+                        <li>Motion Detection Working: ${data.videoDoorbellMotionDetection ? '✓' : '✗'}</li>
+                        <li>Night Vision Working: ${data.videoDoorbellNightVision ? '✓' : '✗'}</li>
+                        <li>Mobile App Connectivity: ${data.videoDoorbellMobileApp ? '✓' : '✗'}</li>
+                        <li>Doorbell Chime Working: ${data.videoDoorbellChime ? '✓' : '✗'}</li>
+                    </ul>`,
+                'Fire Alarm': `
+                    <h3 class="text-lg font-semibold mb-2">Fire Alarm System Checklist</h3>
+                    <ul class="list-disc pl-5">
+                        <li>Smoke Detectors Working: ${data.fireAlarmSmokeDetectors ? '✓' : '✗'}</li>
+                        <li>Heat Detectors Working: ${data.fireAlarmHeatDetectors ? '✓' : '✗'}</li>
+                        <li>Alarm Sounders Working: ${data.fireAlarmSounders ? '✓' : '✗'}</li>
+                        <li>Control Panel Functional: ${data.fireAlarmControlPanel ? '✓' : '✗'}</li>
+                        <li>Battery Backup Tested: ${data.fireAlarmBatteryBackup ? '✓' : '✗'}</li>
+                        <li>Manual Call Points Working: ${data.fireAlarmManualCallPoints ? '✓' : '✗'}</li>
+                    </ul>`
+            };
 
-            // Technician Comments
-            const technicianComments = document.getElementById('technicianComments').value;
-            if (technicianComments) {
-                y = addText('Technician Comments', margin, y, 190);
-                y = addText(technicianComments, 10, y, 190);
-            }
+            const pdfContent = `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h1 style="text-align: center; color: #2563eb;">Eye Tech Securities</h1>
+                    <h2 style="text-align: center;">Service Report #${reportNumber}</h2>
+                    <hr style="margin: 20px 0;">
+                    <h3 class="text-lg font-semibold mb-2">Customer Details</h3>
+                    <p><strong>Name:</strong> ${data.customerName}</p>
+                    <p><strong>Address:</strong> ${data.customerAddress}</p>
+                    <p><strong>Contact Person:</strong> ${data.contactPerson}</p>
+                    <p><strong>Contact Number:</strong> ${data.customerContact}</p>
+                    <p><strong>Email:</strong> ${data.customerEmail}</p>
+                    <hr style="margin: 20px 0;">
+                    <h3 class="text-lg font-semibold mb-2">Service Details</h3>
+                    <p><strong>Service Type:</strong> ${data.serviceType}</p>
+                    <p><strong>Equipment Type:</strong> ${data.equipmentType}</p>
+                    <p><strong>Service Date:</strong> ${data.serviceDate}</p>
+                    <p><strong>Technician Name:</strong> ${data.technicianName}</p>
+                    <hr style="margin: 20px 0;">
+                    ${checklistHtml[data.equipmentType] || ''}
+                    <hr style="margin: 20px 0;">
+                    <h3 class="text-lg font-semibold mb-2">Issue Description</h3>
+                    <p>${data.issueDescription || 'No issues reported'}</p>
+                    <h3 class="text-lg font-semibold mb-2">Technician Comments</h3>
+                    <p>${data.technicianComments || 'No additional comments'}</p>
+                </div>
+            `;
 
-            // Save PDF
-            doc.save(`Service_Report_SR${Date.now()}.pdf`);
-        });
+            const element = document.createElement('div');
+            element.innerHTML = pdfContent;
 
-        // Generate PDF and Send Email
-        document.getElementById('sendEmail').addEventListener('click', async function() {
-            const formData = new FormData();
-            formData.append('customerName', document.getElementById('customerName').value);
-            formData.append('customerEmail', document.getElementById('customerEmail').value);
-            formData.append('reportNumber', `SR${Date.now()}`);
-            formData.append('serviceDate', document.getElementById('serviceDate').value);
-            formData.append('serviceType', document.getElementById('serviceType').value);
-            formData.append('equipmentType', document.getElementById('equipmentType').value);
-            formData.append('technicianName', document.getElementById('technicianName').value);
-            formData.append('issueDescription', document.getElementById('issueDescription').value);
-            formData.append('technicianComments', document.getElementById('technicianComments').value);
-            formData.append('sendToCustomer', document.getElementById('sendToCustomer').checked.toString());
+            const opt = {
+                margin: 1,
+                filename: `Service_Report_${reportNumber}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
 
-            // Generate PDF for email attachment
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            let y = 10;
+            html2pdf().from(element).set(opt).toPdf().get('pdf').then(function (pdf) {
+                if (sendEmail) {
+                    const pdfBlob = pdf.output('blob');
+                    const formData = new FormData();
+                    formData.append('pdf', pdfBlob, `Service_Report_${reportNumber}.pdf`);
+                    for (const [key, value] of Object.entries(data)) {
+                        formData.append(key, value);
+                    }
 
-            // Helper function to add text with wrapping
-            function addText(text, x, y, maxWidth) {
-                const lines = doc.splitTextToSize(text, maxWidth);
-                doc.text(lines, x, y);
-                return y + (lines.length * 7);
-            }
-
-            // Header
-            doc.setFontSize(20);
-            y = addText('Eye Tech Securities - Service Report', 10, y, 190);
-            doc.setFontSize(12);
-            y += 5;
-
-            // Customer Details
-            y = addText('Customer Details', 10, y, 190);
-            y = addText(`Name: ${formData.get('customerName')}`, 10, y, 190);
-            y = addText(`Address: ${document.getElementById('customerAddress').value || 'N/A'}`, 10, y, 190);
-            y = addText(`Contact Person: ${document.getElementById('contactPerson').value || 'N/A'}`, 10, y, 190);
-            y = addText(`Contact Number: ${document.getElementById('customerContact').value || 'N/A'}`, 10, y, 190);
-            y = addText(`Email: ${formData.get('customerEmail') || 'N/A'}`, 10, y, 190);
-            y = addText(`GST: ${document.getElementById('customerGST').value || 'N/A'}`, 10, y, 190);
-            y += 5;
-
-            // Service Details
-            y = addText('Service Details', 10, y, 190);
-            y = addText(`Report Number: ${formData.get('reportNumber')}`, 10, y, 190);
-            y = addText(`Service Date: ${formData.get('serviceDate')}`, 10, y, 190);
-            y = addText(`Service Type: ${formData.get('serviceType')}`, 10, y, 190);
-            y = addText(`Equipment Type: ${formData.get('equipmentType')}`, 10, y, 190);
-            y = addText(`Technician: ${formData.get('technicianName')}`, 10, y, 190);
-            y += 5;
-
-            // Checklist
-            const equipmentType = formData.get('equipmentType');
-            let checklistItems = [];
-            if (equipmentType === 'CCTV') {
-                y = addText('CCTV Maintenance Checklist', 10, y, 190);
-                checklistItems = ['cctvCamerasLive', 'cctvPlaybackWorking', 'cctvHddHealthy', 'cctvDateTimeAccurate', 'cctvRemoteAccess', 'cctvPowerSupply', 'cctvLensesClean', 'cctvCablesSecure'];
-            } else if (equipmentType === 'Biometrics & Access Control') {
-                y = addText('Biometrics & Access Control Checklist', 10, y, 190);
-                checklistItems = ['biometricsFingerprintScanner', 'biometricsCardReader', 'biometricsDoorLock', 'biometricsAccessLogs', 'biometricsUserDatabase', 'biometricsSensorCalibration'];
-            } else if (equipmentType === 'Video Door Bell') {
-                y = addText('Video Door Bell Checklist', 10, y, 190);
-                checklistItems = ['videoVideoQuality', 'videoAudioQuality', 'videoMotionDetection', 'videoNightVision', 'videoMobileApp', 'videoDoorbellChime'];
-            } else if (equipmentType === 'Fire Alarm') {
-                y = addText('Fire Alarm System Checklist', 10, y, 190);
-                checklistItems = ['fireSmokeDetectors', 'fireHeatDetectors', 'fireAlarmSounders', 'fireControlPanel', 'fireBatteryBackup', 'fireManualCallPoints'];
-            }
-
-            checklistItems.forEach(item => {
-                const checkbox = document.querySelector(`input[name="${item}"]`);
-                const label = checkbox.nextElementSibling.textContent;
-                y = addText(`${label}: ${checkbox.checked ? '✓' : '✗'}`, 10, y, 190);
-            });
-            y += 5;
-
-            // Issue Description
-            const issueDescription = formData.get('issueDescription');
-            if (issueDescription) {
-                y = addText('Issue Description', 10, y, 190);
-                y = addText(issueDescription, 10, y, 190);
-                y += 5;
-            }
-
-            // Technician Comments
-            const technicianComments = formData.get('technicianComments');
-            if (technicianComments) {
-                y = addText('Technician Comments', 10, y, 190);
-                y = addText(technicianComments, 10, y, 190);
-            }
-
-            // Convert PDF to base64
-            const pdfBase64 = doc.output('datauristring').split(',')[1];
-            formData.append('pdf', pdfBase64);
-
-            try {
-                const response = await fetch('/api/send-service-report-email', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    alert('Emails sent successfully: ' + result.emailsSent + ' email(s)');
-                    // Save PDF after successful email
-                    doc.save(`Service_Report_${formData.get('reportNumber')}.pdf`);
+                    fetch('/api/send-service-report-email', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('Service report generated and emails sent successfully!');
+                        } else {
+                            alert('Error sending emails: ' + result.error);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error sending emails: ' + error.message);
+                    });
                 } else {
-                    alert('Error sending email: ' + result.error);
+                    html2pdf().from(element).set(opt).save();
                 }
-            } catch (error) {
-                alert('Error sending email: ' + error.message);
-            }
-        });
+            });
+        }
+
+        document.getElementById('generatePdf').addEventListener('click', () => generatePDF(false));
+        document.getElementById('generateAndEmail').addEventListener('click', () => generatePDF(true));
     </script>
-</body>
-</html>
