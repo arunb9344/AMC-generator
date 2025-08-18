@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Service Report Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -255,7 +256,7 @@
             // Set document properties
             doc.setProperties({
                 title: 'Service Report',
-                author: 'TechSecure Solutions',
+                author: 'Eye Tech Securities',
                 creator: 'Service Report Generator'
             });
 
@@ -265,14 +266,14 @@
             doc.setFont('Helvetica', 'bold');
             doc.setFontSize(18);
             doc.setTextColor(255, 255, 255);
-            doc.text('TechSecure Solutions', 10, 15);
+            doc.text('Eye Tech Securities', 10, 15);
             doc.setFontSize(10);
             doc.setFont('Helvetica', 'normal');
-            doc.text('1234 Security Lane, Tech City, TX 75001', 10, 23);
-            doc.text('Phone: (123) 456-7890 | Email: info@techsecure.com', 10, 29);
-            doc.text('Website: www.techsecure.com', 10, 35);
+            doc.text('No.36/80, Medavakkam Main Road, Keelkattalai', 10, 23);
+            doc.text('Chennai, Tamil Nadu 600113', 10, 29);
+            doc.text('Phone: +91916218229 | Email: eyetecsecurities@gmail.com', 10, 35);
 
-            // Logo Placeholder (Text-based, as images are not embedded in this context)
+            // Logo Placeholder
             doc.setFontSize(12);
             doc.setTextColor(255, 255, 255);
             doc.text('[Company Logo]', 170, 20);
@@ -447,9 +448,9 @@
             doc.setFontSize(8);
             doc.setTextColor(255, 255, 255);
             doc.setFont('Helvetica', 'normal');
-            doc.text('TechSecure Solutions | 1234 Security Lane, Tech City, TX 75001', 10, 280);
-            doc.text('Phone: (123) 456-7890 | Email: info@techsecure.com | www.techsecure.com', 10, 287);
-            doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 293, null, null, 'center');
+            doc.text('Eye Tech Securities | No.36/80, Medavakkam Main Road, Keelkattalai, Chennai, Tamil Nadu 600113', 10, 280);
+            doc.text('Phone: +91916218229 | Email: eyetecsecurities@gmail.com | www.eyetecsecurities.in', 10, 287);
+            doc.text(`Generated on: August 18, 2025, 07:37 PM IST`, 105, 293, null, null, 'center');
 
             // Save the PDF
             doc.save('Service_Report.pdf');
