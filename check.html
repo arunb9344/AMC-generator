@@ -14,10 +14,10 @@
                     resolve();
                     return;
                 }
-                
+
                 let scriptsLoaded = 0;
                 const totalScripts = 2;
-                
+
                 function checkComplete() {
                     scriptsLoaded++;
                     if (scriptsLoaded === totalScripts) {
@@ -30,7 +30,7 @@
                         }, 500);
                     }
                 }
-                
+
                 // Load jsPDF first
                 const script1 = document.createElement('script');
                 script1.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
@@ -106,6 +106,16 @@
         .btn-secondary:hover {
             background-color: #4b5563;
         }
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        .btn-success:hover {
+            background-color: #059669;
+        }
         #total-amount {
             font-weight: 600;
             color: #1f2937;
@@ -115,6 +125,38 @@
             color: #dc2626;
             margin-top: 1rem;
             display: none;
+        }
+        #success-message {
+            color: #10b981;
+            margin-top: 1rem;
+            display: none;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .api-key-section {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .api-key-section h3 {
+            color: #92400e;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .api-key-section p {
+            color: #92400e;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
@@ -128,25 +170,34 @@
                 <a href="index.html" class="btn-primary text-center">AMC Agreement</a>
                 <a href="service-report-generator.html" class="btn-secondary text-center">Service Report</a>
             </div>
-            
+
             <form id="amc-form">
+                <!-- API Key Configuration Section -->
+                <div class="form-section api-key-section">
+                    <h3>Email Configuration</h3>
+                    <p><strong>Important:</strong> For security, set your Brevo API key as an environment variable or use a backend service.</p>
+                    <label for="brevo-api-key" class="block text-sm font-medium text-yellow-800">Brevo API Key (for testing only)</label>
+                    <input type="password" id="brevo-api-key" class="input-field" placeholder="Enter your Brevo API key">
+                    <p class="text-xs text-yellow-700">⚠️ Never expose API keys in production. Use environment variables or backend services.</p>
+                </div>
+
                 <div class="form-section">
                     <h2>Customer Details</h2>
                     <label for="customer-name" class="block text-sm font-medium text-gray-700">Customer Name</label>
                     <input type="text" id="customer-name" class="input-field" required>
-
+                    
                     <label for="customer-address" class="block text-sm font-medium text-gray-700">Customer Address</label>
                     <input type="text" id="customer-address" class="input-field" required>
-
+                    
                     <label for="contact-person" class="block text-sm font-medium text-gray-700">Contact Person</label>
                     <input type="text" id="contact-person" class="input-field" required>
-
+                    
                     <label for="customer-contact" class="block text-sm font-medium text-gray-700">Customer Contact Number</label>
                     <input type="text" id="customer-contact" class="input-field" required>
-
+                    
                     <label for="customer-email" class="block text-sm font-medium text-gray-700">Customer Email</label>
                     <input type="email" id="customer-email" class="input-field" required>
-
+                    
                     <label for="customer-gst" class="block text-sm font-medium text-gray-700">Customer GST (Optional)</label>
                     <input type="text" id="customer-gst" class="input-field">
                 </div>
@@ -181,14 +232,31 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="generatePDF()" class="btn-primary mt-6 w-full">Generate PDF</button>
+                <!-- Email Options Section -->
+                <div class="form-section mt-6">
+                    <h2>Email Options</h2>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="send-to-customer" checked>
+                        <label for="send-to-customer" class="text-sm font-medium text-gray-700">Send copy to customer</label>
+                    </div>
+                    <p class="text-xs text-gray-500">Admin copy will always be sent to support@eyetechsecurities.in</p>
+                </div>
+
+                <div class="flex gap-4 mt-6">
+                    <button type="button" onclick="generatePDF()" class="btn-primary flex-1">Generate PDF Only</button>
+                    <button type="button" onclick="generateAndEmail()" class="btn-success flex-1">Generate PDF & Send Email</button>
+                </div>
+                
                 <div id="error-message"></div>
+                <div id="success-message"></div>
             </form>
         </div>
     </div>
 
     <script>
         let signatureImageData = null;
+        let currentPdfBlob = null;
+        let currentAmcData = null;
 
         function handleSignatureUpload(event) {
             const file = event.target.files[0];
@@ -221,6 +289,7 @@
                 <button type="button" onclick="this.parentNode.remove(); updateTotalAmount()" class="btn-secondary">Remove</button>
             `;
             container.appendChild(row);
+            
             row.querySelectorAll('input[type="number"]').forEach(input => {
                 input.addEventListener('input', updateTotalAmount);
             });
@@ -238,9 +307,56 @@
             document.getElementById('total-amount').textContent = `Total Amount: Rs.${total.toFixed(2)}`;
         }
 
+        function collectFormData() {
+            const rows = document.querySelectorAll('.particular-row');
+            let totalAmount = 0;
+            const particulars = [];
+            
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length === 4) {
+                    const amount = parseFloat(inputs[3].value || 0);
+                    totalAmount += amount;
+                    particulars.push({
+                        equipment: inputs[0].value,
+                        maintenanceVisits: inputs[1].value,
+                        breakdownVisits: inputs[2].value,
+                        amount: amount
+                    });
+                }
+            });
+
+            const today = new Date(2025, 7, 17);
+            today.setHours(14, 43, 0, 0);
+            const year = today.getFullYear();
+            const randomSuffix = Math.floor(Math.random() * 900) + 100;
+            const amcNumber = `ETS-AMC-${year}${randomSuffix.toString().padStart(3, '0')}`;
+            
+            const contractPeriod = parseInt(document.getElementById('contract-period').value);
+            const validUntil = new Date(today);
+            validUntil.setFullYear(validUntil.getFullYear() + contractPeriod);
+
+            return {
+                amcNumber,
+                customerName: document.getElementById('customer-name').value,
+                customerAddress: document.getElementById('customer-address').value,
+                contactPerson: document.getElementById('contact-person').value,
+                customerContact: document.getElementById('customer-contact').value,
+                customerEmail: document.getElementById('customer-email').value,
+                customerGST: document.getElementById('customer-gst').value,
+                contractPeriod,
+                totalAmount,
+                particulars,
+                amcDate: today.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                validUntilDate: validUntil.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            };
+        }
+
         function generatePDF() {
             const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
             errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
 
             loadLibraries().then(() => {
                 try {
@@ -248,263 +364,29 @@
                     if (!jsPDF) {
                         throw new Error('jsPDF library not available');
                     }
-                    
-                    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-                    
+
+                    const doc = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+
                     if (typeof doc.autoTable !== 'function') {
                         throw new Error('autoTable plugin not loaded properly');
                     }
 
-                    // Header
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(20);
-                    doc.setTextColor(31, 41, 55); // Gray-800
-                    doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
-                    doc.setFontSize(12);
-                    doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
-                    doc.setFontSize(10);
-                    doc.setTextColor(107, 114, 128); // Gray-500
-                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-                    doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
-                    doc.setDrawColor(37, 99, 235); // Blue-600
-                    doc.setLineWidth(0.5);
-                    doc.line(20, 45, 190, 45);
-
-                    // Agreement Details
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(55, 65, 81); // Gray-700
-                    const today = new Date(2025, 7, 17); // August 17, 2025
-                    today.setHours(14, 43, 0, 0); // Set to 02:43 PM IST
-                    const year = today.getFullYear();
-                    const randomSuffix = Math.floor(Math.random() * 900) + 100;
-                    const amcNumber = `ETS-AMC-${year}${randomSuffix.toString().padStart(3, '0')}`;
-                    const amcDate = today.toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/');
-                    const validUntil = new Date(today);
-                    validUntil.setFullYear(validUntil.getFullYear() + parseInt(document.getElementById('contract-period').value));
-                    const validUntilDate = validUntil.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/');
-                    const rows = document.querySelectorAll('.particular-row');
-                    let totalAmount = 0;
-                    rows.forEach(row => {
-                        const amountInput = row.querySelector('input[placeholder="Amount (Rs.)"]');
-                        if (amountInput && amountInput.value) {
-                            totalAmount += parseFloat(amountInput.value) || 0;
-                        }
-                    });
-
-                    doc.text('AGREEMENT DETAILS', 20, 55);
-                    doc.line(20, 57, 60, 57);
-                    doc.text(`AMC No: ${amcNumber}`, 20, 65);
-                    doc.text(`Total Amount: Rs. ${totalAmount.toFixed(2)}`, 20, 70);
-                    doc.text(`Date: ${amcDate}`, 20, 75);
-                    doc.text(`Valid Until: ${validUntilDate}`, 20, 80);
-                    const contractPeriod = parseInt(document.getElementById('contract-period').value);
-                    doc.text(`Contract Period: ${contractPeriod} Year(s)`, 20, 85);
-
-                    // Customer Details
-                    doc.setFont('helvetica', 'bold');
-                    doc.text('CUSTOMER DETAILS', 20, 95);
-                    doc.line(20, 97, 60, 97);
-                    doc.setFont('helvetica', 'normal');
-                    const customerName = document.getElementById('customer-name').value;
-                    const customerAddress = document.getElementById('customer-address').value;
-                    const contactPerson = document.getElementById('contact-person').value;
-                    const customerContact = document.getElementById('customer-contact').value;
-                    const customerEmail = document.getElementById('customer-email').value;
-                    const customerGST = document.getElementById('customer-gst').value;
-                    doc.text(`Customer Name: ${customerName}`, 20, 105);
-                    doc.text(`Email: ${customerEmail}`, 20, 110);
-                    doc.text(`Contact Person: ${contactPerson}`, 20, 115);
-                    doc.text(`Phone: ${customerContact}`, 20, 120);
-                    doc.text(`Address: ${customerAddress}`, 20, 125);
-                    if (customerGST) {
-                        doc.text(`GST: ${customerGST}`, 20, 130);
-                    }
-
-                    // Equipment Covered
-                    doc.setFont('helvetica', 'bold');
-                    doc.text('EQUIPMENT COVERED', 20, 140);
-                    doc.line(20, 142, 70, 142);
-                    const particulars = [];
-                    rows.forEach(row => {
-                        const inputs = row.querySelectorAll('input');
-                        if (inputs.length === 4) {
-                            particulars.push([
-                                inputs[0].value,
-                                inputs[1].value,
-                                inputs[2].value,
-                                `Rs. ${parseFloat(inputs[3].value || 0).toFixed(2)}`
-                            ]);
-                        }
-                    });
-                    if (particulars.length > 0) {
-                        doc.autoTable({
-                            startY: 150,
-                            head: [['S.No', 'Equipment Type', 'Maintenance Visits', 'Breakdown Visits', 'Amount']],
-                            body: particulars.map((item, index) => [index + 1, item[0], item[1], item[2], item[3]]),
-                            foot: [['', 'Total', '', '', `Rs. ${totalAmount.toFixed(2)}`]],
-                            theme: 'grid',
-                            styles: { fontSize: 10, cellPadding: 2, textColor: [55, 65, 81] },
-                            headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
-                            footStyles: { fillColor: [240, 240, 240], textColor: [55, 65, 81], fontStyle: 'bold' },
-                            columnStyles: {
-                                0: { cellWidth: 12 }, // S.No
-                                1: { cellWidth: 50 }, // Equipment Type
-                                2: { cellWidth: 32 }, // Maintenance Visits
-                                3: { cellWidth: 32 }, // Breakdown Visits
-                                4: { cellWidth: 28 }  // Amount
-                            }
-                        });
-                    }
-
-                    // Terms and Conditions
-                    let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 160;
-                    doc.setFont('helvetica', 'bold');
-                    doc.text('TERMS & CONDITIONS', 20, startY);
-                    doc.line(20, startY + 2, 70, startY + 2);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(9);
-                    const terms = [
-                        '1) The contract is applicable for ' + (contractPeriod * 12) + ' months from the agreement date.',
-                        '2) Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.',
-                        '3) Offer valid for 30 days from issue date.',
-                        '4) Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.',
-                        '5) Customer must provide ladder, water, power supply, and civil support for maintenance.',
-                        '6) Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
-                        '7) Technician access required during scheduled visits; no refund for missed appointments due to unavailability.',
-                        '8) Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
-                        '9) Contract is non-transferable and non-terminable before completion.',
-                        '10) Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
-                        '11) Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
-                        '12) Only registered complaints via proper channels are addressed during breakdown visits.',
-                        '13) Warranty-covered items replaced free; out-of-warranty items chargeable.',
-                        '14) Material replacements, spare parts, and consumables chargeable unless under warranty.',
-                        '15) Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
-                        '16) Unauthorized equipment modification voids the AMC contract.',
-                        '17) Service visits scheduled with 24-48 hours notice to customer.',
-                        '18) Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
-                        '19) Additional work beyond AMC scope chargeable per prevailing rates.',
-                        '20) Disputes subject to local court jurisdiction.',
-                        '21) This contract supersedes prior agreements; modifications require mutual written consent.',
-                        '22) Force majeure conditions may temporarily suspend service obligations.',
-                        '23) Maintenance visits non-transferable and not carried forward.',
-                        '24) 18% GST applies on total contract amount per tax regulations.'
-                    ];
-                    let currentY = startY + 10;
-                    terms.forEach((term, index) => {
-                        const lines = doc.splitTextToSize(term, 170);
-                        if (currentY + lines.length * 5 > 230) {
-                            doc.addPage();
-                            currentY = 50;
-                            doc.setFont('helvetica', 'bold');
-                            doc.setFontSize(20);
-                            doc.setTextColor(31, 41, 55);
-                            doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
-                            doc.setFontSize(12);
-                            doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
-                            doc.setFontSize(10);
-                            doc.setTextColor(107, 114, 128);
-                            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-                            doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
-                            doc.setDrawColor(37, 99, 235);
-                            doc.setLineWidth(0.5);
-                            doc.line(20, 45, 190, 45);
-                            startY = 50;
-                            doc.setFont('helvetica', 'bold');
-                            doc.setFontSize(12);
-                            doc.setTextColor(55, 65, 81);
-                            doc.text('TERMS & CONDITIONS (Continued)', 20, startY);
-                            doc.line(20, startY + 2, 90, startY + 2);
-                            doc.setFont('helvetica', 'normal');
-                            doc.setFontSize(9);
-                            currentY = startY + 10;
-                        }
-                        doc.text(lines, 20, currentY);
-                        currentY += lines.length * 5;
-                    });
-
-                    // Signature Section
-                    let signatureStartY = currentY + 15;
-                    if (signatureStartY > 240) {
-                        doc.addPage();
-                        signatureStartY = 80;
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(20);
-                        doc.setTextColor(31, 41, 55);
-                        doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
-                        doc.setFontSize(12);
-                        doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
-                        doc.setFontSize(10);
-                        doc.setTextColor(107, 114, 128);
-                        doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
-                        doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
-                        doc.setDrawColor(37, 99, 235);
-                        doc.setLineWidth(0.5);
-                        doc.line(20, 45, 190, 45);
-                    }
-
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(31, 41, 55);
-                    doc.text('AUTHORIZED SIGNATURES', 105, signatureStartY, { align: 'center' });
-
-                    const leftSignatureX = 55;
-                    const rightSignatureX = 135;
-                    const signatureBoxY = signatureStartY + 35;
-
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text('Customer', leftSignatureX, signatureBoxY, { align: 'center' });
-                    doc.text('Service Provider', rightSignatureX, signatureBoxY, { align: 'center' });
-
-                    const imgWidth = 40;
-                    const imgHeight = 20;
-                    const imgX = rightSignatureX - (imgWidth / 2);
-                    const imgY = signatureBoxY + 5; // Position below "Service Provider" text but above signature line
-                    
-                    if (signatureImageData) {
-                        try {
-                            doc.addImage(signatureImageData, 'JPEG', imgX, imgY, imgWidth, imgHeight);
-                        } catch (error) {
-                            console.warn('Could not add signature image:', error);
-                        }
-                    }
-
-                    const lineY = signatureBoxY + 30;
-                    doc.setDrawColor(0, 0, 0);
-                    doc.setLineWidth(0.3);
-                    doc.line(leftSignatureX - 25, lineY, leftSignatureX + 25, lineY);
-                    doc.line(rightSignatureX - 25, lineY, rightSignatureX + 25, lineY);
-
-                    const nameY = lineY + 8;
-                    doc.setFontSize(10);
-                    doc.setTextColor(0, 0, 0);
-                    doc.text(contactPerson || 'Name: ___________________', leftSignatureX, nameY, { align: 'center' });
-                    doc.text('Authorised Signatory', rightSignatureX, nameY, { align: 'center' });
-
-                    const companyY = nameY + 5;
-                    doc.text(customerName || 'Company: ________________', leftSignatureX, companyY, { align: 'center' });
-                    doc.text('Eye Tech Securities', rightSignatureX, companyY, { align: 'center' });
-
-                    const dateY = companyY + 8;
-                    const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    doc.text(`Date: ${dateStr}`, leftSignatureX, dateY, { align: 'center' });
-                    doc.text(`Date: ${dateStr}`, rightSignatureX, dateY, { align: 'center' });
-
-                    // Footer
-                    const totalPages = doc.internal.getNumberOfPages();
-                    for (let i = 1; i <= totalPages; i++) {
-                        doc.setPage(i);
-                        doc.setFontSize(8);
-                        doc.setTextColor(107, 114, 128);
-                        if (i < totalPages) {
-                            doc.text(`Page ${i} of ${totalPages}`, 190, 290, { align: 'right' });
-                        }
-                        doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 290, { align: 'center' });
-                    }
+                    currentAmcData = collectFormData();
+                    generatePDFContent(doc, currentAmcData);
 
                     // Save PDF
-                    doc.save(`AMC_Agreement_${amcNumber}.pdf`);
+                    doc.save(`AMC_Agreement_${currentAmcData.amcNumber}.pdf`);
+                    
+                    // Store PDF blob for email
+                    currentPdfBlob = doc.output('blob');
+                    
+                    successMessage.textContent = 'PDF generated successfully!';
+                    successMessage.style.display = 'block';
+
                 } catch (error) {
                     errorMessage.textContent = `Error generating PDF: ${error.message}. Please check your browser console for details or ensure an internet connection.`;
                     errorMessage.style.display = 'block';
@@ -515,6 +397,607 @@
                 errorMessage.style.display = 'block';
                 console.error(error);
             });
+        }
+
+        function generatePDFContent(doc, data) {
+            // Header
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor(31, 41, 55);
+            doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
+            doc.setFontSize(10);
+            doc.setTextColor(107, 114, 128);
+            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
+            doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
+            
+            doc.setDrawColor(37, 99, 235);
+            doc.setLineWidth(0.5);
+            doc.line(20, 45, 190, 45);
+
+            // Agreement Details
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(55, 65, 81);
+            
+            doc.text('AGREEMENT DETAILS', 20, 55);
+            doc.line(20, 57, 60, 57);
+            doc.text(`AMC No: ${data.amcNumber}`, 20, 65);
+            doc.text(`Total Amount: Rs. ${data.totalAmount.toFixed(2)}`, 20, 70);
+            doc.text(`Date: ${data.amcDate}`, 20, 75);
+            doc.text(`Valid Until: ${data.validUntilDate}`, 20, 80);
+            doc.text(`Contract Period: ${data.contractPeriod} Year(s)`, 20, 85);
+
+            // Customer Details
+            doc.setFont('helvetica', 'bold');
+            doc.text('CUSTOMER DETAILS', 20, 95);
+            doc.line(20, 97, 60, 97);
+            doc.setFont('helvetica', 'normal');
+            
+            doc.text(`Customer Name: ${data.customerName}`, 20, 105);
+            doc.text(`Email: ${data.customerEmail}`, 20, 110);
+            doc.text(`Contact Person: ${data.contactPerson}`, 20, 115);
+            doc.text(`Phone: ${data.customerContact}`, 20, 120);
+            doc.text(`Address: ${data.customerAddress}`, 20, 125);
+            if (data.customerGST) {
+                doc.text(`GST: ${data.customerGST}`, 20, 130);
+            }
+
+            // Equipment Covered
+            doc.setFont('helvetica', 'bold');
+            doc.text('EQUIPMENT COVERED', 20, 140);
+            doc.line(20, 142, 70, 142);
+
+            if (data.particulars.length > 0) {
+                const tableData = data.particulars.map((item, index) => [
+                    index + 1,
+                    item.equipment,
+                    item.maintenanceVisits,
+                    item.breakdownVisits,
+                    `Rs. ${item.amount.toFixed(2)}`
+                ]);
+
+                doc.autoTable({
+                    startY: 150,
+                    head: [['S.No', 'Equipment Type', 'Maintenance Visits', 'Breakdown Visits', 'Amount']],
+                    body: tableData,
+                    foot: [['', 'Total', '', '', `Rs. ${data.totalAmount.toFixed(2)}`]],
+                    theme: 'grid',
+                    styles: {
+                        fontSize: 10,
+                        cellPadding: 2,
+                        textColor: [55, 65, 81]
+                    },
+                    headStyles: {
+                        fillColor: [37, 99, 235],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    footStyles: {
+                        fillColor: [240, 240, 240],
+                        textColor: [55, 65, 81],
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 12 },
+                        1: { cellWidth: 50 },
+                        2: { cellWidth: 32 },
+                        3: { cellWidth: 32 },
+                        4: { cellWidth: 28 }
+                    }
+                });
+            }
+
+            // Terms and Conditions
+            let startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 160;
+            doc.setFont('helvetica', 'bold');
+            doc.text('TERMS & CONDITIONS', 20, startY);
+            doc.line(20, startY + 2, 70, startY + 2);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+
+            const terms = [
+                '1) The contract is applicable for ' + (data.contractPeriod * 12) + ' months from the agreement date.',
+                '2) Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.',
+                '3) Offer valid for 30 days from issue date.',
+                '4) Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.',
+                '5) Customer must provide ladder, water, power supply, and civil support for maintenance.',
+                '6) Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
+                '7) Technician access required during scheduled visits; no refund for missed appointments due to unavailability.',
+                '8) Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
+                '9) Contract is non-transferable and non-terminable before completion.',
+                '10) Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
+                '11) Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
+                '12) Only registered complaints via proper channels are addressed during breakdown visits.',
+                '13) Warranty-covered items replaced free; out-of-warranty items chargeable.',
+                '14) Material replacements, spare parts, and consumables chargeable unless under warranty.',
+                '15) Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
+                '16) Unauthorized equipment modification voids the AMC contract.',
+                '17) Service visits scheduled with 24-48 hours notice to customer.',
+                '18) Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
+                '19) Additional work beyond AMC scope chargeable per prevailing rates.',
+                '20) Disputes subject to local court jurisdiction.',
+                '21) This contract supersedes prior agreements; modifications require mutual written consent.',
+                '22) Force majeure conditions may temporarily suspend service obligations.',
+                '23) Maintenance visits non-transferable and not carried forward.',
+                '24) 18% GST applies on total contract amount per tax regulations.'
+            ];
+
+            let currentY = startY + 10;
+            terms.forEach((term, index) => {
+                const lines = doc.splitTextToSize(term, 170);
+                if (currentY + lines.length * 5 > 230) {
+                    doc.addPage();
+                    currentY = 50;
+                    // Add header to new page
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(20);
+                    doc.setTextColor(31, 41, 55);
+                    doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
+                    doc.setFontSize(12);
+                    doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
+                    doc.setFontSize(10);
+                    doc.setTextColor(107, 114, 128);
+                    doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
+                    doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
+                    doc.setDrawColor(37, 99, 235);
+                    doc.setLineWidth(0.5);
+                    doc.line(20, 45, 190, 45);
+                    
+                    startY = 50;
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(12);
+                    doc.setTextColor(55, 65, 81);
+                    doc.text('TERMS & CONDITIONS (Continued)', 20, startY);
+                    doc.line(20, startY + 2, 90, startY + 2);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(9);
+                    currentY = startY + 10;
+                }
+                doc.text(lines, 20, currentY);
+                currentY += lines.length * 5;
+            });
+
+            // Signature Section
+            let signatureStartY = currentY + 15;
+            if (signatureStartY > 240) {
+                doc.addPage();
+                signatureStartY = 80;
+                // Add header to signature page
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(20);
+                doc.setTextColor(31, 41, 55);
+                doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text('ANNUAL MAINTENANCE CONTRACT (AMC)', 105, 25, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 35, { align: 'center' });
+                doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in | GST No: 33BCMPA5207N1ZN', 105, 40, { align: 'center' });
+                doc.setDrawColor(37, 99, 235);
+                doc.setLineWidth(0.5);
+                doc.line(20, 45, 190, 45);
+            }
+
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(31, 41, 55);
+            doc.text('AUTHORIZED SIGNATURES', 105, signatureStartY, { align: 'center' });
+
+            const leftSignatureX = 55;
+            const rightSignatureX = 135;
+            const signatureBoxY = signatureStartY + 35;
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Customer', leftSignatureX, signatureBoxY, { align: 'center' });
+            doc.text('Service Provider', rightSignatureX, signatureBoxY, { align: 'center' });
+
+            // Add signature image if available
+            if (signatureImageData) {
+                try {
+                    const imgWidth = 40;
+                    const imgHeight = 20;
+                    const imgX = rightSignatureX - (imgWidth / 2);
+                    const imgY = signatureBoxY + 5;
+                    doc.addImage(signatureImageData, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+                } catch (error) {
+                    console.warn('Could not add signature image:', error);
+                }
+            }
+
+            const lineY = signatureBoxY + 30;
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.3);
+            doc.line(leftSignatureX - 25, lineY, leftSignatureX + 25, lineY);
+            doc.line(rightSignatureX - 25, lineY, rightSignatureX + 25, lineY);
+
+            const nameY = lineY + 8;
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(data.contactPerson || 'Name: ___________________', leftSignatureX, nameY, { align: 'center' });
+            doc.text('Authorised Signatory', rightSignatureX, nameY, { align: 'center' });
+
+            const companyY = nameY + 5;
+            doc.text(data.customerName || 'Company: ________________', leftSignatureX, companyY, { align: 'center' });
+            doc.text('Eye Tech Securities', rightSignatureX, companyY, { align: 'center' });
+
+            const dateY = companyY + 8;
+            const today = new Date(2025, 7, 17);
+            today.setHours(14, 43, 0, 0);
+            const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            doc.text(`Date: ${dateStr}`, leftSignatureX, dateY, { align: 'center' });
+            doc.text(`Date: ${dateStr}`, rightSignatureX, dateY, { align: 'center' });
+
+            // Footer
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(107, 114, 128);
+                if (i < totalPages) {
+                    doc.text(`Page ${i} of ${totalPages}`, 190, 290, { align: 'right' });
+                }
+                doc.text('Eye Tech Securities | No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117 | Ph: 9962835944', 105, 290, { align: 'center' });
+            }
+        }
+
+        async function generateAndEmail() {
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            const brevoApiKey = document.getElementById('brevo-api-key').value.trim();
+            
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            if (!brevoApiKey) {
+                errorMessage.textContent = 'Please enter your Brevo API key to send emails.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            const generateButton = document.querySelector('button[onclick="generateAndEmail()"]');
+            const originalText = generateButton.textContent;
+            generateButton.textContent = 'Processing...';
+            generateButton.classList.add('loading');
+
+            try {
+                // First generate PDF
+                await loadLibraries();
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    throw new Error('jsPDF library not available');
+                }
+
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                if (typeof doc.autoTable !== 'function') {
+                    throw new Error('autoTable plugin not loaded properly');
+                }
+
+                currentAmcData = collectFormData();
+                generatePDFContent(doc, currentAmcData);
+                currentPdfBlob = doc.output('blob');
+
+                // Convert PDF to base64 for email attachment
+                const pdfBase64 = await blobToBase64(currentPdfBlob);
+
+                // Send emails
+                await sendEmails(brevoApiKey, currentAmcData, pdfBase64);
+
+                // Also save PDF locally
+                doc.save(`AMC_Agreement_${currentAmcData.amcNumber}.pdf`);
+
+                successMessage.textContent = 'PDF generated and emails sent successfully!';
+                successMessage.style.display = 'block';
+
+            } catch (error) {
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.display = 'block';
+                console.error(error);
+            } finally {
+                // Reset button state
+                generateButton.textContent = originalText;
+                generateButton.classList.remove('loading');
+            }
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        async function sendEmails(apiKey, amcData, pdfBase64) {
+            const sendToCustomer = document.getElementById('send-to-customer').checked;
+            const adminEmail = 'support@eyetechsecurities.in';
+            
+            const emailPromises = [];
+
+            // Always send to admin
+            emailPromises.push(sendEmail(apiKey, {
+                to: adminEmail,
+                subject: `New AMC Agreement Generated - ${amcData.amcNumber}`,
+                htmlContent: generateAdminEmailTemplate(amcData),
+                attachment: {
+                    name: `AMC_Agreement_${amcData.amcNumber}.pdf`,
+                    content: pdfBase64
+                }
+            }));
+
+            // Send to customer if checkbox is checked
+            if (sendToCustomer && amcData.customerEmail) {
+                emailPromises.push(sendEmail(apiKey, {
+                    to: amcData.customerEmail,
+                    subject: `Your AMC Agreement - ${amcData.amcNumber} | Eye Tech Securities`,
+                    htmlContent: generateCustomerEmailTemplate(amcData),
+                    attachment: {
+                        name: `AMC_Agreement_${amcData.amcNumber}.pdf`,
+                        content: pdfBase64
+                    }
+                }));
+            }
+
+            await Promise.all(emailPromises);
+        }
+
+        async function sendEmail(apiKey, emailData) {
+            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'api-key': apiKey
+                },
+                body: JSON.stringify({
+                    sender: {
+                        name: 'Eye Tech Securities',
+                        email: 'no-reply@eyetechsecurities.in'
+                    },
+                    to: [{
+                        email: emailData.to
+                    }],
+                    subject: emailData.subject,
+                    htmlContent: emailData.htmlContent,
+                    attachment: [{
+                        name: emailData.attachment.name,
+                        content: emailData.attachment.content
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Email sending failed: ${errorData.message || response.statusText}`);
+            }
+
+            return response.json();
+        }
+
+        function generateCustomerEmailTemplate(amcData) {
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>AMC Agreement - Eye Tech Securities</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h1 style="margin: 0; font-size: 24px;">EYE TECH SECURITIES</h1>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">Annual Maintenance Contract</p>
+                    </div>
+                    
+                    <div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #e9ecef;">
+                        <h2 style="color: #2563eb; margin-top: 0;">Dear ${amcData.contactPerson},</h2>
+                        
+                        <p>Thank you for choosing Eye Tech Securities for your security system maintenance needs. We are pleased to confirm your Annual Maintenance Contract.</p>
+                        
+                        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2563eb;">
+                            <h3 style="margin-top: 0; color: #2563eb;">Contract Details</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">AMC Number:</td>
+                                    <td style="padding: 5px 0;">${amcData.amcNumber}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Contract Period:</td>
+                                    <td style="padding: 5px 0;">${amcData.contractPeriod} Year(s)</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Total Amount:</td>
+                                    <td style="padding: 5px 0; font-weight: bold; color: #10b981;">Rs. ${amcData.totalAmount.toFixed(2)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Valid From:</td>
+                                    <td style="padding: 5px 0;">${amcData.amcDate}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Valid Until:</td>
+                                    <td style="padding: 5px 0;">${amcData.validUntilDate}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin-top: 0; color: #2563eb;">Equipment Covered</h3>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                ${amcData.particulars.map(item => `<li>${item.equipment} - ${item.maintenanceVisits} maintenance visits, ${item.breakdownVisits} breakdown visits</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin-top: 0; color: #1976d2;">What's Included</h3>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                <li>Regular preventive maintenance visits</li>
+                                <li>Breakdown support during working hours</li>
+                                <li>System cleaning and calibration</li>
+                                <li>Software updates and health checks</li>
+                                <li>Technical support via phone and email</li>
+                            </ul>
+                        </div>
+                        
+                        <p><strong>Important:</strong> Please keep this agreement and the attached PDF for your records. For any service requests or queries, please contact us using the details below.</p>
+                        
+                        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+                            <h3 style="margin-top: 0; color: #2563eb;">Contact Information</h3>
+                            <p style="margin: 5px 0;"><strong>Phone:</strong> 9962835944</p>
+                            <p style="margin: 5px 0;"><strong>Email:</strong> support@eyetechsecurities.in</p>
+                            <p style="margin: 5px 0;"><strong>Address:</strong> No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117</p>
+                        </div>
+                        
+                        <p>Thank you for your business. We look forward to serving you!</p>
+                        
+                        <p style="margin-top: 30px;">
+                            Best regards,<br>
+                            <strong>Eye Tech Securities Team</strong>
+                        </p>
+                    </div>
+                    
+                    <div style="background-color: #6b7280; color: white; padding: 15px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px;">
+                        <p style="margin: 0;">This is an automated email. Please do not reply to this email address.</p>
+                        <p style="margin: 5px 0 0 0;">© 2025 Eye Tech Securities. All rights reserved.</p>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+
+        function generateAdminEmailTemplate(amcData) {
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>New AMC Agreement Generated</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background-color: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h1 style="margin: 0; font-size: 24px;">NEW AMC AGREEMENT</h1>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">Admin Notification</p>
+                    </div>
+                    
+                    <div style="background-color: #f8f9fa; padding: 20px; border: 1px solid #e9ecef;">
+                        <h2 style="color: #dc2626; margin-top: 0;">New AMC Agreement Generated</h2>
+                        
+                        <p>A new AMC agreement has been generated through the online system. Please find the details below:</p>
+                        
+                        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #dc2626;">
+                            <h3 style="margin-top: 0; color: #dc2626;">Agreement Details</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">AMC Number:</td>
+                                    <td style="padding: 5px 0;">${amcData.amcNumber}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Generated On:</td>
+                                    <td style="padding: 5px 0;">${amcData.amcDate}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Contract Period:</td>
+                                    <td style="padding: 5px 0;">${amcData.contractPeriod} Year(s)</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Total Amount:</td>
+                                    <td style="padding: 5px 0; font-weight: bold; color: #10b981;">Rs. ${amcData.totalAmount.toFixed(2)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin-top: 0; color: #dc2626;">Customer Information</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Customer Name:</td>
+                                    <td style="padding: 5px 0;">${amcData.customerName}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Contact Person:</td>
+                                    <td style="padding: 5px 0;">${amcData.contactPerson}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Email:</td>
+                                    <td style="padding: 5px 0;">${amcData.customerEmail}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Phone:</td>
+                                    <td style="padding: 5px 0;">${amcData.customerContact}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; font-weight: bold;">Address:</td>
+                                    <td style="padding: 5px 0;">${amcData.customerAddress}</td>
+                                </tr>
+                                ${amcData.customerGST ? `<tr><td style="padding: 5px 0; font-weight: bold;">GST:</td><td style="padding: 5px 0;">${amcData.customerGST}</td></tr>` : ''}
+                            </table>
+                        </div>
+                        
+                        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin-top: 0; color: #dc2626;">Equipment Details</h3>
+                            <table style="width: 100%; border-collapse: collapse; border: 1px solid #e9ecef;">
+                                <thead>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <th style="padding: 8px; border: 1px solid #e9ecef; text-align: left;">Equipment</th>
+                                        <th style="padding: 8px; border: 1px solid #e9ecef; text-align: center;">Maintenance</th>
+                                        <th style="padding: 8px; border: 1px solid #e9ecef; text-align: center;">Breakdown</th>
+                                        <th style="padding: 8px; border: 1px solid #e9ecef; text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${amcData.particulars.map(item => `
+                                        <tr>
+                                            <td style="padding: 8px; border: 1px solid #e9ecef;">${item.equipment}</td>
+                                            <td style="padding: 8px; border: 1px solid #e9ecef; text-align: center;">${item.maintenanceVisits}</td>
+                                            <td style="padding: 8px; border: 1px solid #e9ecef; text-align: center;">${item.breakdownVisits}</td>
+                                            <td style="padding: 8px; border: 1px solid #e9ecef; text-align: right;">Rs. ${item.amount.toFixed(2)}</td>
+                                        </tr>
+                                    `).join('')}
+                                    <tr style="background-color: #f8f9fa; font-weight: bold;">
+                                        <td colspan="3" style="padding: 8px; border: 1px solid #e9ecef; text-align: right;">Total:</td>
+                                        <td style="padding: 8px; border: 1px solid #e9ecef; text-align: right; color: #10b981;">Rs. ${amcData.totalAmount.toFixed(2)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="background-color: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                            <h3 style="margin-top: 0; color: #92400e;">Action Required</h3>
+                            <ul style="margin: 0; padding-left: 20px; color: #92400e;">
+                                <li>Review the agreement details</li>
+                                <li>Add to CRM/tracking system</li>
+                                <li>Schedule initial maintenance visits</li>
+                                <li>Update customer database</li>
+                                <li>File the signed agreement</li>
+                            </ul>
+                        </div>
+                        
+                        <p style="margin-top: 30px;">
+                            <strong>System Generated Email</strong><br>
+                            AMC Agreement Generator<br>
+                            Eye Tech Securities
+                        </p>
+                    </div>
+                    
+                    <div style="background-color: #6b7280; color: white; padding: 15px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px;">
+                        <p style="margin: 0;">This is an automated admin notification.</p>
+                        <p style="margin: 5px 0 0 0;">© 2025 Eye Tech Securities. All rights reserved.</p>
+                    </div>
+                </body>
+                </html>
+            `;
         }
 
         // Add one particular row by default
