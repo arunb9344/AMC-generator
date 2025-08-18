@@ -12,27 +12,27 @@
             font-family: 'Helvetica', Arial, sans-serif;
             max-width: 1000px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 20px;
             background-color: #f5f7fa;
         }
         h1 {
             text-align: center;
             color: #1a3c6d;
-            font-size: 22px;
-            margin-bottom: 15px;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
         .tabs {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
         .tabs a {
-            padding: 10px 20px;
+            padding: 12px 25px;
             text-decoration: none;
             color: #fff;
             background-color: #1a3c6d;
-            border-radius: 5px;
+            border-radius: 6px;
             font-weight: bold;
             transition: background-color 0.3s;
         }
@@ -42,15 +42,15 @@
         .form-section {
             background-color: #fff;
             padding: 15px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .form-section h2 {
             color: #1a3c6d;
-            font-size: 14px;
+            font-size: 15px;
             margin-bottom: 10px;
-            border-bottom: 1px solid #1a3c6d;
+            border-bottom: 2px solid #1a3c6d;
             padding-bottom: 3px;
         }
         .form-group {
@@ -66,9 +66,9 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 6px;
+            padding: 7px;
             border: 1px solid #d0d4db;
-            border-radius: 3px;
+            border-radius: 4px;
             font-size: 12px;
         }
         .checklist {
@@ -87,13 +87,13 @@
         .generate-btn {
             display: block;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #e74c3c;
             color: #fff;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: bold;
             transition: background-color 0.3s;
         }
@@ -261,7 +261,7 @@
             });
 
             // Company Header
-            doc.setFillColor(26, 60, 109); // Dark Blue
+            doc.setFillColor(26, 60, 109);
             doc.rect(0, 0, 210, 25, 'F');
             doc.setFont('Helvetica', 'bold');
             doc.setFontSize(14);
@@ -269,8 +269,9 @@
             doc.text('Eye Tech Securities', 10, 15);
             doc.setFontSize(8);
             doc.setFont('Helvetica', 'normal');
-            doc.text('No.36/80, Medavakkam Main Road, Keelkattalai, Chennai, Tamil Nadu 600113', 10, 20);
-            doc.text('Phone: +91916218229 | Email: eyetecsecurities@gmail.com', 10, 24);
+            doc.text('No.36/80, Medavakkam Main Road, Keelkattalai', 10, 20);
+            doc.text('Chennai, Tamil Nadu 600113', 10, 24);
+            doc.text('Phone: +91916218229 | Email: eyetecsecurities@gmail.com', 10, 28);
 
             // Title
             doc.setFontSize(12);
@@ -278,73 +279,29 @@
             doc.setFont('Helvetica', 'bold');
             doc.text('Service Report', 105, 35, null, null, 'center');
 
-            // Customer Details Table
+            // Service Details Table
             doc.setFontSize(9);
             doc.setFont('Helvetica', 'bold');
-            doc.text('Customer Details', 10, 45);
+            doc.text('Service Details', 10, 45);
             doc.setDrawColor(26, 60, 109);
-            doc.setLineWidth(0.2);
+            doc.setLineWidth(0.3);
             doc.line(10, 47, 200, 47);
-
             doc.autoTable({
                 startY: 50,
                 head: [['Field', 'Details']],
                 body: [
-                    ['Customer Name', document.getElementById('customer-name').value || 'N/A'],
-                    ['Address', document.getElementById('customer-address').value || 'N/A'],
-                    ['Contact Person', document.getElementById('contact-person').value || 'N/A'],
-                    ['Contact Number', document.getElementById('customer-contact').value || 'N/A'],
-                    ['Email', document.getElementById('customer-email').value || 'N/A']
-                ],
-                theme: 'grid',
-                headStyles: {
-                    fillColor: [26, 60, 109],
-                    textColor: [255, 255, 255],
-                    fontSize: 7,
-                    fontStyle: 'bold'
-                },
-                bodyStyles: {
-                    fontSize: 6,
-                    textColor: [0, 0, 0]
-                },
-                margin: { left: 10, right: 10 },
-                tableWidth: 180,
-                rowPageBreak: 'avoid'
-            });
-
-            let y = doc.lastAutoTable.finalY + 3;
-
-            // Service Details Table
-            doc.setFontSize(9);
-            doc.setFont('Helvetica', 'bold');
-            doc.text('Service Details', 10, y);
-            doc.line(10, y + 2, 200, y + 2);
-            doc.autoTable({
-                startY: y + 3,
-                head: [['Field', 'Details']],
-                body: [
-                    ['Service Type', document.getElementById('service-type').value || 'N/A'],
                     ['Equipment Type', document.getElementById('equipment-type').value || 'N/A'],
                     ['Service Date', document.getElementById('service-date').value || 'N/A'],
                     ['Technician Name', document.getElementById('technician-name').value || 'N/A']
                 ],
                 theme: 'grid',
-                headStyles: {
-                    fillColor: [26, 60, 109],
-                    textColor: [255, 255, 255],
-                    fontSize: 7,
-                    fontStyle: 'bold'
-                },
-                bodyStyles: {
-                    fontSize: 6,
-                    textColor: [0, 0, 0]
-                },
+                headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 7, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 7, textColor: [0, 0, 0] },
                 margin: { left: 10, right: 10 },
-                tableWidth: 180,
-                rowPageBreak: 'avoid'
+                tableWidth: 180
             });
 
-            y = doc.lastAutoTable.finalY + 3;
+            let y = doc.lastAutoTable.finalY + 5;
 
             // Checklist
             const equipmentType = document.getElementById('equipment-type').value;
@@ -395,64 +352,48 @@
                 doc.text(`${equipmentType} Checklist`, 10, y);
                 doc.line(10, y + 2, 200, y + 2);
                 doc.autoTable({
-                    startY: y + 3,
+                    startY: y + 5,
                     head: [['Item', 'Status']],
                     body: checklistItems,
                     theme: 'grid',
-                    headStyles: {
-                        fillColor: [26, 60, 109],
-                        textColor: [255, 255, 255],
-                        fontSize: 6,
-                        fontStyle: 'bold'
-                    },
-                    bodyStyles: {
-                        fontSize: 5,
-                        textColor: [0, 0, 0]
-                    },
+                    headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 7, fontStyle: 'bold' },
+                    bodyStyles: { fontSize: 6, textColor: [0, 0, 0] },
                     margin: { left: 10, right: 10 },
-                    tableWidth: 180,
-                    rowPageBreak: 'avoid'
+                    tableWidth: 180
                 });
-                y = doc.lastAutoTable.finalY + 3;
+                y = doc.lastAutoTable.finalY + 5;
             }
 
-            // Issue Description
-            const issueDescription = document.getElementById('issue-description').value;
-            if (issueDescription) {
-                doc.setFontSize(9);
-                doc.setFont('Helvetica', 'bold');
-                doc.text('Issue Description', 10, y);
-                doc.line(10, y + 2, 200, y + 2);
-                doc.setFont('Helvetica', 'normal');
-                doc.setFontSize(6);
-                const textLines = doc.splitTextToSize(issueDescription, 180);
-                doc.text(textLines, 10, y + 4, { maxWidth: 180 });
-                y += 4 + 4 * Math.min(textLines.length, 3); // Limit to 3 lines to fit page
-            }
+            // Issue Description and Technician Comments Table
+            const issueDescription = document.getElementById('issue-description').value || 'N/A';
+            const technicianComments = document.getElementById('technician-comments').value || 'N/A';
+            doc.setFontSize(9);
+            doc.setFont('Helvetica', 'bold');
+            doc.text('Additional Notes', 10, y);
+            doc.line(10, y + 2, 200, y + 2);
+            doc.autoTable({
+                startY: y + 5,
+                head: [['Section', 'Details']],
+                body: [
+                    ['Issue Description', issueDescription],
+                    ['Technician Comments', technicianComments]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 7, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 6, textColor: [0, 0, 0] },
+                columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 130 } },
+                margin: { left: 10, right: 10 },
+                tableWidth: 180
+            });
 
-            // Technician Comments
-            const technicianComments = document.getElementById('technician-comments').value;
-            if (technicianComments) {
-                doc.setFontSize(9);
-                doc.setFont('Helvetica', 'bold');
-                doc.text('Technician Comments', 10, y);
-                doc.line(10, y + 2, 200, y + 2);
-                doc.setFont('Helvetica', 'normal');
-                doc.setFontSize(6);
-                const textLines = doc.splitTextToSize(technicianComments, 180);
-                doc.text(textLines, 10, y + 4, { maxWidth: 180 });
-                y += 4 + 4 * Math.min(textLines.length, 3); // Limit to 3 lines to fit page
-            }
-
-            // Footer (adjusted to avoid overlap)
-            const footerY = Math.min(y + 10, 260); // Ensure footer starts before page end
+            // Footer
             doc.setFillColor(26, 60, 109);
-            doc.rect(0, footerY, 210, 27, 'F');
+            doc.rect(0, 270, 210, 27, 'F');
             doc.setFontSize(7);
             doc.setTextColor(255, 255, 255);
             doc.setFont('Helvetica', 'normal');
-            doc.text('Eye Tech Securities | No.36/80, Medavakkam Main Road, Keelkattalai, Chennai, Tamil Nadu 600113', 10, footerY + 5);
-            doc.text('Phone: +91916218229 | Email: eyetecsecurities@gmail.com | www.eyetecsecurities.in', 10, footerY + 10);
+            doc.text('Eye Tech Securities | No.36/80, Medavakkam Main Road, Keelkattalai, Chennai, Tamil Nadu 600113', 10, 280);
+            doc.text('Phone: +91916218229 | Email: eyetecsecurities@gmail.com | www.eyetecsecurities.in', 10, 287);
 
             // Save the PDF
             doc.save('Service_Report.pdf');
