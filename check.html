@@ -436,91 +436,160 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Header
-            doc.setFontSize(20);
+            // Company header with elegant styling
+            doc.setFillColor(44, 62, 80); // Dark blue background
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            doc.setTextColor(255, 255, 255); // White text
+            doc.setFontSize(24);
             doc.setFont(undefined, 'bold');
-            doc.text('EYE TECH SECURITIES', 105, 20, { align: 'center' });
+            doc.text('EYE TECH SECURITIES', 105, 18, { align: 'center' });
             
-            doc.setFontSize(12);
+            doc.setFontSize(14);
             doc.setFont(undefined, 'normal');
-            doc.text('AMC QUOTATION', 105, 30, { align: 'center' });
+            doc.text('Professional CCTV Maintenance Services', 105, 26, { align: 'center' });
             
-            // Quotation details
+            // Reset text color for body
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(52, 152, 219); // Blue accent
+            doc.text('AMC QUOTATION', 105, 50, { align: 'center' });
+            
+            // Decorative line under title
+            doc.setDrawColor(52, 152, 219);
+            doc.setLineWidth(0.5);
+            doc.line(70, 53, 140, 53);
+            
+            // Reset text color
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFillColor(248, 249, 250); // Light gray background
+            doc.rect(15, 60, 180, 25, 'F');
+            doc.setDrawColor(224, 230, 237);
+            doc.rect(15, 60, 180, 25);
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('QUOTATION DETAILS', 20, 68);
+            
             doc.setFontSize(10);
-            doc.text(`Quotation No: QTN/${new Date(data.quotationDate).getFullYear()}/${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`, 20, 45);
-            doc.text(`Date: ${new Date(data.quotationDate).toLocaleDateString('en-IN')}`, 20, 52);
-            doc.text('Valid for: 30 days from issue date', 20, 59);
+            doc.setFont(undefined, 'normal');
+            const quotationNo = `QTN/${new Date(data.quotationDate).getFullYear()}/${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+            doc.text(`Quotation No: ${quotationNo}`, 20, 75);
+            doc.text(`Date: ${new Date(data.quotationDate).toLocaleDateString('en-IN')}`, 20, 81);
+            doc.text('Valid for: 30 days from issue date', 120, 75);
+            doc.text('Payment Terms: 30 days', 120, 81);
             
-            // Customer details
+            let currentY = 95;
+            doc.setFillColor(44, 62, 80);
+            doc.rect(15, currentY, 180, 8, 'F');
+            doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
-            doc.text('CUSTOMER DETAILS:', 20, 75);
+            doc.text('CUSTOMER DETAILS', 20, currentY + 5);
             
+            // Reset colors and add customer info
+            doc.setTextColor(0, 0, 0);
+            currentY += 15;
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
-            doc.text(`Name: ${data.customerName}`, 20, 85);
-            doc.text(`Phone: ${data.customerPhone}`, 20, 92);
+            
+            doc.text(`Name: ${data.customerName}`, 20, currentY);
+            doc.text(`Phone: ${data.customerPhone}`, 20, currentY + 7);
             if (data.customerEmail) {
-                doc.text(`Email: ${data.customerEmail}`, 20, 99);
+                doc.text(`Email: ${data.customerEmail}`, 20, currentY + 14);
+                currentY += 7;
             }
             
-            // Handle address with line wrapping
+            // Handle address with better formatting
             const addressLines = doc.splitTextToSize(`Address: ${data.customerAddress}`, 170);
-            let currentY = data.customerEmail ? 106 : 99;
+            currentY += 14;
             addressLines.forEach(line => {
                 doc.text(line, 20, currentY);
                 currentY += 7;
             });
             
             if (data.customerGST) {
-                doc.text(`GST: ${data.customerGST}`, 20, currentY);
+                doc.text(`GST Number: ${data.customerGST}`, 20, currentY);
                 currentY += 7;
             }
             
-            // Quotation details
-            currentY += 10;
+            currentY += 15;
+            doc.setFillColor(44, 62, 80);
+            doc.rect(15, currentY, 180, 8, 'F');
+            doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
-            doc.text('QUOTATION DETAILS:', 20, currentY);
+            doc.text('QUOTATION BREAKDOWN', 20, currentY + 5);
             
+            // Table header with elegant styling
             currentY += 15;
+            doc.setFillColor(248, 249, 250);
+            doc.rect(15, currentY, 180, 10, 'F');
+            doc.setDrawColor(224, 230, 237);
+            doc.rect(15, currentY, 180, 10);
+            
+            doc.setTextColor(44, 62, 80);
             doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
-            
-            // Table header
-            doc.rect(20, currentY, 170, 8);
             doc.setFont(undefined, 'bold');
-            doc.text('Description', 25, currentY + 5);
-            doc.text('Qty', 100, currentY + 5);
-            doc.text('Rate', 125, currentY + 5);
-            doc.text('Amount', 160, currentY + 5);
+            doc.text('DESCRIPTION', 20, currentY + 6);
+            doc.text('QTY', 110, currentY + 6);
+            doc.text('RATE', 135, currentY + 6);
+            doc.text('AMOUNT', 165, currentY + 6);
             
-            currentY += 8;
+            // Table content with better spacing
+            currentY += 10;
+            doc.setDrawColor(224, 230, 237);
+            doc.rect(15, currentY, 180, 12);
             
-            // Table content
-            doc.rect(20, currentY, 170, 8);
+            doc.setTextColor(0, 0, 0);
             doc.setFont(undefined, 'normal');
-            doc.text(`AMC Service - ${data.packageName}`, 25, currentY + 5);
-            doc.text(data.numberOfCameras, 100, currentY + 5);
-            doc.text(`₹${data.rate}`, 125, currentY + 5);
-            doc.text(`₹${data.subtotal.toLocaleString()}`, 160, currentY + 5);
+            doc.text(`AMC Service - ${data.packageName}`, 20, currentY + 6);
+            doc.text(`${data.numberOfCameras} Cameras`, 20, currentY + 9);
+            doc.text(data.numberOfCameras.toString(), 110, currentY + 7);
+            doc.text(`Rs. ${data.rate}`, 135, currentY + 7);
+            doc.text(`Rs. ${data.subtotal.toLocaleString()}`, 165, currentY + 7);
             
-            currentY += 15;
+            currentY += 25;
+            doc.setDrawColor(52, 152, 219);
+            doc.setLineWidth(0.5);
+            doc.line(120, currentY, 195, currentY);
             
-            // Totals
-            doc.text(`Subtotal: ₹${data.subtotal.toLocaleString()}`, 130, currentY);
-            doc.text(`GST (18%): ₹${data.gst.toLocaleString()}`, 130, currentY + 7);
-            doc.setFont(undefined, 'bold');
-            doc.text(`Total: ₹${data.total.toLocaleString()}`, 130, currentY + 14);
+            currentY += 5;
+            doc.setFontSize(11);
+            doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 130, currentY);
+            doc.text(`GST (18%): Rs. ${data.gst.toLocaleString()}`, 130, currentY + 8);
             
-            // Terms and conditions
-            currentY += 30;
+            // Total with emphasis
+            doc.setFillColor(52, 152, 219);
+            doc.rect(125, currentY + 12, 70, 10, 'F');
+            doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
-            doc.text('TERMS & CONDITIONS:', 20, currentY);
+            doc.text(`TOTAL: Rs. ${data.total.toLocaleString()}`, 130, currentY + 19);
             
-            currentY += 10;
-            doc.setFontSize(8);
+            // Reset colors
+            doc.setTextColor(0, 0, 0);
+            
+            currentY += 35;
+            if (currentY > 250) {
+                doc.addPage();
+                currentY = 20;
+            }
+            
+            doc.setFillColor(44, 62, 80);
+            doc.rect(15, currentY, 180, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('TERMS & CONDITIONS', 20, currentY + 5);
+            
+            // Terms content with better formatting
+            currentY += 15;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(9);
             doc.setFont(undefined, 'normal');
             
             const terms = [
@@ -550,7 +619,7 @@
                 '24) 18% GST applies on total contract amount per tax regulations.'
             ];
             
-            terms.forEach(term => {
+            terms.forEach((term, index) => {
                 if (currentY > 270) {
                     doc.addPage();
                     currentY = 20;
@@ -558,25 +627,40 @@
                 const termLines = doc.splitTextToSize(term, 170);
                 termLines.forEach(line => {
                     doc.text(line, 20, currentY);
-                    currentY += 4;
+                    currentY += 4.5;
                 });
-                currentY += 2;
+                currentY += 1;
             });
             
-            // Footer
-            if (currentY > 250) {
+            if (currentY > 240) {
                 doc.addPage();
                 currentY = 20;
             }
             
-            currentY += 10;
+            currentY += 20;
+            
+            // Signature section with elegant design
+            doc.setDrawColor(224, 230, 237);
+            doc.setLineWidth(0.5);
+            doc.line(20, currentY, 80, currentY);
+            doc.line(130, currentY, 190, currentY);
+            
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
-            doc.text('Eye Tech Securities', 20, currentY);
-            doc.setFont(undefined, 'normal');
-            doc.text('Authorized Signatory', 20, currentY + 7);
+            doc.text('Customer Signature', 20, currentY + 8);
+            doc.text('Eye Tech Securities', 130, currentY + 8);
             
-            // Save PDF
+            doc.setFont(undefined, 'normal');
+            doc.text('Date: ___________', 20, currentY + 15);
+            doc.text('Authorized Signatory', 130, currentY + 15);
+            
+            currentY += 25;
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('This is a computer-generated quotation and does not require a physical signature.', 105, currentY, { align: 'center' });
+            doc.text('For queries, contact Eye Tech Securities at your convenience.', 105, currentY + 5, { align: 'center' });
+            
+            // Save PDF with better filename
             const fileName = `AMC_Quotation_${data.customerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
             doc.save(fileName);
         }
