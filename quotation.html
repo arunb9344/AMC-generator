@@ -332,6 +332,18 @@
                         <span>GST (18%):</span>
                         <span id="displayGST">Rs.0</span>
                     </div>
+                    <div class="calculation-row">
+                        <span>Calculated Total:</span>
+                        <span id="displayCalculatedTotal">Rs.0</span>
+                    </div>
+                    <div class="calculation-row">
+                        <span>Final Amount:</span>
+                        <input type="number" id="finalAmount" style="width: 120px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: right;" placeholder="0">
+                    </div>
+                    <div class="calculation-row" id="discountRow" style="display: none; color: #e74c3c;">
+                        <span>Discount Applied:</span>
+                        <span id="displayDiscount">Rs.0</span>
+                    </div>
                     <div class="calculation-row total">
                         <span>Total Amount:</span>
                         <span id="displayTotal">Rs.0</span>
@@ -390,7 +402,7 @@
                 const rate = rates[packageType.value];
                 const subtotal = cameras * rate;
                 const gst = Math.round(subtotal * 0.18);
-                const total = subtotal + gst;
+                const calculatedTotal = subtotal + gst;
                 
                 // Update display
                 document.getElementById('displayCameras').textContent = cameras;
@@ -398,13 +410,43 @@
                 document.getElementById('displayRate').textContent = `Rs.${rate}`;
                 document.getElementById('displaySubtotal').textContent = `Rs.${subtotal.toLocaleString()}`;
                 document.getElementById('displayGST').textContent = `Rs.${gst.toLocaleString()}`;
-                document.getElementById('displayTotal').textContent = `Rs.${total.toLocaleString()}`;
+                document.getElementById('displayCalculatedTotal').textContent = `Rs.${calculatedTotal.toLocaleString()}`;
+                
+                const finalAmountInput = document.getElementById('finalAmount');
+                if (!finalAmountInput.value) {
+                    finalAmountInput.value = calculatedTotal;
+                }
+                
+                updateFinalAmount();
                 
                 document.getElementById('calculationSection').style.display = 'block';
             } else {
                 document.getElementById('calculationSection').style.display = 'none';
             }
         }
+
+        function updateFinalAmount() {
+            const calculatedTotal = parseInt(document.getElementById('displayCalculatedTotal').textContent.replace(/[^\d]/g, '')) || 0;
+            const finalAmount = parseInt(document.getElementById('finalAmount').value) || 0;
+            
+            if (finalAmount > 0) {
+                const discount = calculatedTotal - finalAmount;
+                
+                if (discount > 0) {
+                    document.getElementById('displayDiscount').textContent = `Rs.${discount.toLocaleString()}`;
+                    document.getElementById('discountRow').style.display = 'flex';
+                } else {
+                    document.getElementById('discountRow').style.display = 'none';
+                }
+                
+                document.getElementById('displayTotal').textContent = `Rs.${finalAmount.toLocaleString()}`;
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+                document.getElementById('displayTotal').textContent = `Rs.${calculatedTotal.toLocaleString()}`;
+            }
+        }
+
+        document.getElementById('finalAmount').addEventListener('input', updateFinalAmount);
 
         function collectFormData() {
             const formData = new FormData(document.getElementById('quotationForm'));
@@ -420,12 +462,18 @@
             const rate = rates[data.package];
             const subtotal = cameras * rate;
             const gst = Math.round(subtotal * 0.18);
-            const total = subtotal + gst;
+            const calculatedTotal = subtotal + gst;
+            
+            const finalAmount = parseInt(document.getElementById('finalAmount').value) || calculatedTotal;
+            const discount = calculatedTotal - finalAmount;
             
             data.rate = rate;
             data.subtotal = subtotal;
             data.gst = gst;
-            data.total = total;
+            data.calculatedTotal = calculatedTotal;
+            data.finalAmount = finalAmount;
+            data.discount = discount > 0 ? discount : 0;
+            data.total = finalAmount;
             data.packageName = data.package === 'residential' ? 'Residential Package' : 'Commercial Package';
             
             return data;
@@ -581,6 +629,13 @@
             doc.setFontSize(11);
             doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 130, currentY);
             doc.text(`GST (18%): Rs. ${data.gst.toLocaleString()}`, 130, currentY + 8);
+            
+            if (data.discount > 0) {
+                doc.setTextColor(231, 76, 60); // Red color for discount
+                doc.text(`Discount: Rs. ${data.discount.toLocaleString()}`, 130, currentY + 16);
+                currentY += 8;
+                doc.setTextColor(0, 0, 0); // Reset color
+            }
             
             // Total with emphasis
             doc.setFillColor(52, 152, 219);
