@@ -436,18 +436,23 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Company header with elegant styling
             doc.setFillColor(44, 62, 80); // Dark blue background
-            doc.rect(0, 0, 210, 35, 'F');
+            doc.rect(0, 0, 210, 45, 'F');
             
             doc.setTextColor(255, 255, 255); // White text
             doc.setFontSize(24);
             doc.setFont(undefined, 'bold');
-            doc.text('EYE TECH SECURITIES', 105, 18, { align: 'center' });
+            doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
             
-            doc.setFontSize(14);
+            doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
-            doc.text('Professional CCTV Maintenance Services', 105, 26, { align: 'center' });
+            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 23, { align: 'center' });
+            doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in', 105, 29, { align: 'center' });
+            doc.text('GST No: 33BCMPA5207N1ZN', 105, 35, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Professional CCTV Maintenance Services', 105, 41, { align: 'center' });
             
             // Reset text color for body
             doc.setTextColor(0, 0, 0);
@@ -455,34 +460,34 @@
             doc.setFontSize(18);
             doc.setFont(undefined, 'bold');
             doc.setTextColor(52, 152, 219); // Blue accent
-            doc.text('AMC QUOTATION', 105, 50, { align: 'center' });
+            doc.text('AMC QUOTATION', 105, 60, { align: 'center' });
             
             // Decorative line under title
             doc.setDrawColor(52, 152, 219);
             doc.setLineWidth(0.5);
-            doc.line(70, 53, 140, 53);
+            doc.line(70, 63, 140, 63);
             
             // Reset text color
             doc.setTextColor(0, 0, 0);
             
             doc.setFillColor(248, 249, 250); // Light gray background
-            doc.rect(15, 60, 180, 25, 'F');
+            doc.rect(15, 70, 180, 25, 'F');
             doc.setDrawColor(224, 230, 237);
-            doc.rect(15, 60, 180, 25);
+            doc.rect(15, 70, 180, 25);
             
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
-            doc.text('QUOTATION DETAILS', 20, 68);
+            doc.text('QUOTATION DETAILS', 20, 78);
             
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
             const quotationNo = `QTN/${new Date(data.quotationDate).getFullYear()}/${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
-            doc.text(`Quotation No: ${quotationNo}`, 20, 75);
-            doc.text(`Date: ${new Date(data.quotationDate).toLocaleDateString('en-IN')}`, 20, 81);
-            doc.text('Valid for: 30 days from issue date', 120, 75);
-            doc.text('Payment Terms: 30 days', 120, 81);
+            doc.text(`Quotation No: ${quotationNo}`, 20, 85);
+            doc.text(`Date: ${new Date(data.quotationDate).toLocaleDateString('en-IN')}`, 20, 91);
+            doc.text('Valid for: 30 days from issue date', 120, 85);
+            doc.text('Payment Terms: 30 days', 120, 91);
             
-            let currentY = 95;
+            let currentY = 105;
             doc.setFillColor(44, 62, 80);
             doc.rect(15, currentY, 180, 8, 'F');
             doc.setTextColor(255, 255, 255);
