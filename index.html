@@ -397,15 +397,20 @@
             doc.text(`Email: ${data.customerEmail}`, 20, 110);
             doc.text(`Contact Person: ${data.contactPerson}`, 20, 115);
             doc.text(`Phone: ${data.customerContact}`, 20, 120);
-            doc.text(`Address: ${data.customerAddress}`, 20, 125);
+            
+            doc.text('Address:', 20, 125);
+            const addressLines = doc.splitTextToSize(data.customerAddress, 150);
+            doc.text(addressLines, 45, 125);
+            
+            const nextY = 125 + (addressLines.length * 5);
             if (data.customerGST) {
-                doc.text(`GST: ${data.customerGST}`, 20, 130);
+                doc.text(`GST: ${data.customerGST}`, 20, nextY);
             }
 
-            // Equipment Covered
+            const equipmentY = data.customerGST ? nextY + 10 : nextY + 5;
             doc.setFont('helvetica', 'bold');
-            doc.text('EQUIPMENT COVERED', 20, 140);
-            doc.line(20, 142, 70, 142);
+            doc.text('EQUIPMENT COVERED', 20, equipmentY);
+            doc.line(20, equipmentY + 2, 70, equipmentY + 2);
 
             if (data.particulars.length > 0) {
                 const tableData = data.particulars.map((item, index) => [
@@ -417,7 +422,7 @@
                 ]);
 
                 doc.autoTable({
-                    startY: 150,
+                    startY: equipmentY + 10,
                     head: [['S.No', 'Equipment Type', 'Maintenance Visits', 'Breakdown Visits', 'Amount']],
                     body: tableData,
                     foot: [['', 'Total', '', '', `Rs. ${data.totalAmount.toFixed(2)}`]],
@@ -990,7 +995,8 @@
                     <input type="text" id="customer-name" class="input-field" required>
                     
                     <label for="customer-address" class="block text-sm font-medium text-gray-700">Customer Address</label>
-                    <input type="text" id="customer-address" class="input-field" required>
+                    <!-- Changed from input to textarea for better address input -->
+                    <textarea id="customer-address" class="input-field" rows="3" required placeholder="Enter complete address with proper line breaks"></textarea>
                     
                     <label for="contact-person" class="block text-sm font-medium text-gray-700">Contact Person</label>
                     <input type="text" id="contact-person" class="input-field" required>
