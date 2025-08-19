@@ -289,14 +289,22 @@
                         <div class="package-card" onclick="selectPackage('residential')">
                             <input type="radio" id="residential" name="package" value="residential">
                             <h3>Residential Package</h3>
-                            <div class="package-price">₹800 per camera</div>
-                            <div class="package-original-price">₹1000 per camera</div>
+                            <div class="package-price">Rs.800 per camera</div>
+                            <div class="package-original-price">Rs.1000 per camera</div>
+                            <div style="margin-top: 15px; font-size: 0.9rem; color: #34495e;">
+                                <div><strong>Maintenance Visits:</strong> 2</div>
+                                <div><strong>Breakdown Visits:</strong> 4</div>
+                            </div>
                         </div>
                         <div class="package-card" onclick="selectPackage('commercial')">
                             <input type="radio" id="commercial" name="package" value="commercial">
                             <h3>Commercial Package</h3>
-                            <div class="package-price">₹1300 per camera</div>
-                            <div class="package-original-price">₹1500 per camera</div>
+                            <div class="package-price">Rs.1300 per camera</div>
+                            <div class="package-original-price">Rs.1500 per camera</div>
+                            <div style="margin-top: 15px; font-size: 0.9rem; color: #34495e;">
+                                <div><strong>Maintenance Visits:</strong> 4</div>
+                                <div><strong>Breakdown Visits:</strong> 10</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -314,19 +322,19 @@
                     </div>
                     <div class="calculation-row">
                         <span>Rate per Camera:</span>
-                        <span id="displayRate">₹0</span>
+                        <span id="displayRate">Rs.0</span>
                     </div>
                     <div class="calculation-row">
                         <span>Subtotal:</span>
-                        <span id="displaySubtotal">₹0</span>
+                        <span id="displaySubtotal">Rs.0</span>
                     </div>
                     <div class="calculation-row">
                         <span>GST (18%):</span>
-                        <span id="displayGST">₹0</span>
+                        <span id="displayGST">Rs.0</span>
                     </div>
                     <div class="calculation-row total">
                         <span>Total Amount:</span>
-                        <span id="displayTotal">₹0</span>
+                        <span id="displayTotal">Rs.0</span>
                     </div>
                 </div>
 
@@ -387,10 +395,10 @@
                 // Update display
                 document.getElementById('displayCameras').textContent = cameras;
                 document.getElementById('displayPackage').textContent = packageNames[packageType.value];
-                document.getElementById('displayRate').textContent = `₹${rate}`;
-                document.getElementById('displaySubtotal').textContent = `₹${subtotal.toLocaleString()}`;
-                document.getElementById('displayGST').textContent = `₹${gst.toLocaleString()}`;
-                document.getElementById('displayTotal').textContent = `₹${total.toLocaleString()}`;
+                document.getElementById('displayRate').textContent = `Rs.${rate}`;
+                document.getElementById('displaySubtotal').textContent = `Rs.${subtotal.toLocaleString()}`;
+                document.getElementById('displayGST').textContent = `Rs.${gst.toLocaleString()}`;
+                document.getElementById('displayTotal').textContent = `Rs.${total.toLocaleString()}`;
                 
                 document.getElementById('calculationSection').style.display = 'block';
             } else {
@@ -547,17 +555,24 @@
             // Table content with better spacing
             currentY += 10;
             doc.setDrawColor(224, 230, 237);
-            doc.rect(15, currentY, 180, 12);
+            doc.rect(15, currentY, 180, 20); // Increased height to accommodate visit details
             
             doc.setTextColor(0, 0, 0);
             doc.setFont(undefined, 'normal');
             doc.text(`AMC Service - ${data.packageName}`, 20, currentY + 6);
-            doc.text(`${data.numberOfCameras} Cameras`, 20, currentY + 9);
-            doc.text(data.numberOfCameras.toString(), 110, currentY + 7);
-            doc.text(`Rs. ${data.rate}`, 135, currentY + 7);
-            doc.text(`Rs. ${data.subtotal.toLocaleString()}`, 165, currentY + 7);
+            doc.text(`${data.numberOfCameras} Cameras`, 20, currentY + 10);
             
-            currentY += 25;
+            const visitDetails = data.package === 'residential' 
+                ? 'Maintenance: 2 visits, Breakdown: 4 visits'
+                : 'Maintenance: 4 visits, Breakdown: 10 visits';
+            doc.text(visitDetails, 20, currentY + 14);
+            
+            doc.text(data.numberOfCameras.toString(), 110, currentY + 10);
+            doc.text(`Rs. ${data.rate}`, 135, currentY + 10);
+            doc.text(`Rs. ${data.subtotal.toLocaleString()}`, 165, currentY + 10);
+            
+            currentY += 35; // Adjusted spacing for larger content area
+            
             doc.setDrawColor(52, 152, 219);
             doc.setLineWidth(0.5);
             doc.line(120, currentY, 195, currentY);
