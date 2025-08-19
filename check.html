@@ -283,14 +283,15 @@
                 }
             });
 
-            const today = new Date(2025, 7, 17);
-            today.setHours(14, 43, 0, 0);
-            const year = today.getFullYear();
+            const agreementDateInput = document.getElementById('agreement-date').value;
+            const agreementDate = agreementDateInput ? new Date(agreementDateInput) : new Date();
+            
+            const year = agreementDate.getFullYear();
             const randomSuffix = Math.floor(Math.random() * 900) + 100;
             const amcNumber = `ETS-AMC-${year}${randomSuffix.toString().padStart(3, '0')}`;
             
             const contractPeriod = parseInt(document.getElementById('contract-period').value);
-            const validUntil = new Date(today);
+            const validUntil = new Date(agreementDate);
             validUntil.setFullYear(validUntil.getFullYear() + contractPeriod);
 
             return {
@@ -304,7 +305,7 @@
                 contractPeriod,
                 totalAmount,
                 particulars,
-                amcDate: today.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                amcDate: agreementDate.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
                 validUntilDate: validUntil.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
             };
         }
@@ -955,6 +956,11 @@
         });
 
         window.onload = function() {
+            // Set default agreement date to today
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0];
+            document.getElementById('agreement-date').value = todayString;
+            
             loadLibraries().then(() => {
                 document.getElementById('error-message').style.display = 'none';
                 console.log('Libraries loaded successfully');
@@ -999,8 +1005,12 @@
                     <input type="text" id="customer-gst" class="input-field">
                 </div>
 
-                <div class="form-section mt-6">
-                    <h2>Contract Details</h2>
+                <!-- Added Agreement Date section -->
+                <div class="form-section">
+                    <h2>Agreement Details</h2>
+                    <label for="agreement-date" class="block text-sm font-medium text-gray-700">Agreement Date</label>
+                    <input type="date" id="agreement-date" class="input-field" required>
+                    
                     <label for="contract-period" class="block text-sm font-medium text-gray-700">Contract Period (Years)</label>
                     <select id="contract-period" class="input-field" required>
                         <option value="1">1 Year</option>
