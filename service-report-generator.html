@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Service Report Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -113,23 +113,23 @@
         <h2>Customer Details</h2>
         <div class="form-group">
             <label for="customer-name">Customer Name</label>
-            <input type="text" id="customer-name" placeholder="Enter customer name">
+            <input type="text" id="customer-name" placeholder="Enter customer name" />
         </div>
         <div class="form-group">
             <label for="customer-address">Customer Address</label>
-            <input type="text" id="customer-address" placeholder="Enter customer address">
+            <input type="text" id="customer-address" placeholder="Enter customer address" />
         </div>
         <div class="form-group">
             <label for="contact-person">Contact Person</label>
-            <input type="text" id="contact-person" placeholder="Enter contact person">
+            <input type="text" id="contact-person" placeholder="Enter contact person" />
         </div>
         <div class="form-group">
             <label for="customer-contact">Customer Contact Number</label>
-            <input type="text" id="customer-contact" placeholder="Enter contact number">
+            <input type="text" id="customer-contact" placeholder="Enter contact number" />
         </div>
         <div class="form-group">
             <label for="customer-email">Customer Email</label>
-            <input type="email" id="customer-email" placeholder="Enter email address">
+            <input type="email" id="customer-email" placeholder="Enter email address" />
         </div>
     </div>
 
@@ -155,11 +155,11 @@
         </div>
         <div class="form-group">
             <label for="service-date">Service Date</label>
-            <input type="date" id="service-date">
+            <input type="date" id="service-date" />
         </div>
         <div class="form-group">
             <label for="technician-name">Technician Name</label>
-            <input type="text" id="technician-name" placeholder="Enter technician name">
+            <input type="text" id="technician-name" placeholder="Enter technician name" />
         </div>
     </div>
 
@@ -246,23 +246,27 @@
             checklists.forEach(checklist => {
                 document.getElementById(checklist).style.display = 'none';
             });
-            if (equipmentType && (serviceType === 'Maintenance Visit' || checklist === `${equipmentType.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}-checklist`)) {
+
+            // For Biometric Breakdown Visit, don't show any checklist
+            if (equipmentType === 'Biometrics & Access Control' && serviceType === 'Breakdown Visit') {
+                return;
+            }
+
+            if (equipmentType) {
                 document.getElementById(equipmentType.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-') + '-checklist').style.display = 'block';
             }
         }
 
         function generatePDF() {
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-            // Set document properties
             doc.setProperties({
                 title: 'Service Report',
                 author: 'Eye Tech Securities',
                 creator: 'Service Report Generator'
             });
 
-            // Company Header
-            doc.setFillColor(26, 60, 109); // Dark Blue
+            // Header
+            doc.setFillColor(26, 60, 109);
             doc.rect(0, 0, 210, 30, 'F');
             doc.setFont('Helvetica', 'bold');
             doc.setFontSize(16);
@@ -280,14 +284,11 @@
             doc.setFont('Helvetica', 'bold');
             doc.text('Service Report', 105, 40, null, null, 'center');
 
-            // Customer Details Table
+            // Customer Details
             doc.setFontSize(10);
             doc.setFont('Helvetica', 'bold');
             doc.text('Customer Details', 10, 50);
-            doc.setDrawColor(26, 60, 109);
-            doc.setLineWidth(0.3);
             doc.line(10, 52, 200, 52);
-
             doc.autoTable({
                 startY: 55,
                 head: [['Field', 'Details']],
@@ -299,25 +300,17 @@
                     ['Email', document.getElementById('customer-email').value || 'N/A']
                 ],
                 theme: 'grid',
-                headStyles: {
-                    fillColor: [26, 60, 109],
-                    textColor: [255, 255, 255],
-                    fontSize: 8,
-                    fontStyle: 'bold'
-                },
-                bodyStyles: {
-                    fontSize: 8,
-                    textColor: [0, 0, 0]
-                },
+                headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 8, textColor: [0, 0, 0] },
                 margin: { left: 10, right: 10 },
                 tableWidth: 180
             });
 
             let y = doc.lastAutoTable.finalY + 5;
 
-            // Service Details Table
-            doc.setFontSize(10);
+            // Service Details
             doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(10);
             doc.text('Service Details', 10, y);
             doc.line(10, y + 2, 200, y + 2);
             doc.autoTable({
@@ -330,16 +323,8 @@
                     ['Technician Name', document.getElementById('technician-name').value || 'N/A']
                 ],
                 theme: 'grid',
-                headStyles: {
-                    fillColor: [26, 60, 109],
-                    textColor: [255, 255, 255],
-                    fontSize: 8,
-                    fontStyle: 'bold'
-                },
-                bodyStyles: {
-                    fontSize: 8,
-                    textColor: [0, 0, 0]
-                },
+                headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 8, textColor: [0, 0, 0] },
                 margin: { left: 10, right: 10 },
                 tableWidth: 180
             });
@@ -350,49 +335,52 @@
             const serviceType = document.getElementById('service-type').value;
             const equipmentType = document.getElementById('equipment-type').value;
             let checklistItems = [];
-            if (equipmentType === 'CCTV' && serviceType === 'Maintenance Visit') {
-                checklistItems = [
-                    ['Cameras Live', document.getElementById('cameras-live').checked ? 'Yes' : 'No'],
-                    ['Playback Working', document.getElementById('playback-working').checked ? 'Yes' : 'No'],
-                    ['HDD Healthy', document.getElementById('hdd-healthy').checked ? 'Yes' : 'No'],
-                    ['Date/Time Accurate', document.getElementById('date-time-accurate').checked ? 'Yes' : 'No'],
-                    ['Remote Access', document.getElementById('remote-access').checked ? 'Yes' : 'No'],
-                    ['Power Supply', document.getElementById('power-supply').checked ? 'Yes' : 'No'],
-                    ['Lenses Clean', document.getElementById('lenses-clean').checked ? 'Yes' : 'No'],
-                    ['Cables Secure', document.getElementById('cables-secure').checked ? 'Yes' : 'No']
-                ];
-            } else if (equipmentType === 'Biometrics & Access Control') {
-                checklistItems = [
-                    ['Fingerprint Scanner Working', document.getElementById('fingerprint-working').checked ? 'Yes' : 'No'],
-                    ['Card Reader Working', document.getElementById('card-reader-working').checked ? 'Yes' : 'No'],
-                    ['Door Lock Mechanism', document.getElementById('door-lock-mechanism').checked ? 'Yes' : 'No'],
-                    ['Access Logs Updated', document.getElementById('access-logs-updated').checked ? 'Yes' : 'No'],
-                    ['User Database Backup', document.getElementById('user-database-backup').checked ? 'Yes' : 'No'],
-                    ['Sensor Calibration', document.getElementById('sensor-calibration').checked ? 'Yes' : 'No']
-                ];
-            } else if (equipmentType === 'Video Door Bell') {
-                checklistItems = [
-                    ['Video Quality Clear', document.getElementById('video-quality-clear').checked ? 'Yes' : 'No'],
-                    ['Audio Quality Clear', document.getElementById('audio-quality-clear').checked ? 'Yes' : 'No'],
-                    ['Motion Detection Working', document.getElementById('motion-detection-working').checked ? 'Yes' : 'No'],
-                    ['Night Vision Working', document.getElementById('night-vision-working').checked ? 'Yes' : 'No'],
-                    ['Mobile App Connectivity', document.getElementById('mobile-app-connectivity').checked ? 'Yes' : 'No'],
-                    ['Doorbell Chime Working', document.getElementById('doorbell-chime-working').checked ? 'Yes' : 'No']
-                ];
-            } else if (equipmentType === 'Fire Alarm') {
-                checklistItems = [
-                    ['Smoke Detectors Working', document.getElementById('smoke-detectors-working').checked ? 'Yes' : 'No'],
-                    ['Heat Detectors Working', document.getElementById('heat-detectors-working').checked ? 'Yes' : 'No'],
-                    ['Alarm Sounders Working', document.getElementById('alarm-sounders-working').checked ? 'Yes' : 'No'],
-                    ['Control Panel Functional', document.getElementById('control-panel-functional').checked ? 'Yes' : 'No'],
-                    ['Battery Backup Tested', document.getElementById('battery-backup-tested').checked ? 'Yes' : 'No'],
-                    ['Manual Call Points Working', document.getElementById('manual-call-points-working').checked ? 'Yes' : 'No']
-                ];
+
+            if (!(equipmentType === 'Biometrics & Access Control' && serviceType === 'Breakdown Visit')) {
+                if (equipmentType === 'CCTV' && serviceType === 'Maintenance Visit') {
+                    checklistItems = [
+                        ['Cameras Live', document.getElementById('cameras-live').checked ? 'Yes' : 'No'],
+                        ['Playback Working', document.getElementById('playback-working').checked ? 'Yes' : 'No'],
+                        ['HDD Healthy', document.getElementById('hdd-healthy').checked ? 'Yes' : 'No'],
+                        ['Date/Time Accurate', document.getElementById('date-time-accurate').checked ? 'Yes' : 'No'],
+                        ['Remote Access', document.getElementById('remote-access').checked ? 'Yes' : 'No'],
+                        ['Power Supply', document.getElementById('power-supply').checked ? 'Yes' : 'No'],
+                        ['Lenses Clean', document.getElementById('lenses-clean').checked ? 'Yes' : 'No'],
+                        ['Cables Secure', document.getElementById('cables-secure').checked ? 'Yes' : 'No']
+                    ];
+                } else if (equipmentType === 'Biometrics & Access Control') {
+                    checklistItems = [
+                        ['Fingerprint Scanner Working', document.getElementById('fingerprint-working').checked ? 'Yes' : 'No'],
+                        ['Card Reader Working', document.getElementById('card-reader-working').checked ? 'Yes' : 'No'],
+                        ['Door Lock Mechanism', document.getElementById('door-lock-mechanism').checked ? 'Yes' : 'No'],
+                        ['Access Logs Updated', document.getElementById('access-logs-updated').checked ? 'Yes' : 'No'],
+                        ['User Database Backup', document.getElementById('user-database-backup').checked ? 'Yes' : 'No'],
+                        ['Sensor Calibration', document.getElementById('sensor-calibration').checked ? 'Yes' : 'No']
+                    ];
+                } else if (equipmentType === 'Video Door Bell') {
+                    checklistItems = [
+                        ['Video Quality Clear', document.getElementById('video-quality-clear').checked ? 'Yes' : 'No'],
+                        ['Audio Quality Clear', document.getElementById('audio-quality-clear').checked ? 'Yes' : 'No'],
+                        ['Motion Detection Working', document.getElementById('motion-detection-working').checked ? 'Yes' : 'No'],
+                        ['Night Vision Working', document.getElementById('night-vision-working').checked ? 'Yes' : 'No'],
+                        ['Mobile App Connectivity', document.getElementById('mobile-app-connectivity').checked ? 'Yes' : 'No'],
+                        ['Doorbell Chime Working', document.getElementById('doorbell-chime-working').checked ? 'Yes' : 'No']
+                    ];
+                } else if (equipmentType === 'Fire Alarm') {
+                    checklistItems = [
+                        ['Smoke Detectors Working', document.getElementById('smoke-detectors-working').checked ? 'Yes' : 'No'],
+                        ['Heat Detectors Working', document.getElementById('heat-detectors-working').checked ? 'Yes' : 'No'],
+                        ['Alarm Sounders Working', document.getElementById('alarm-sounders-working').checked ? 'Yes' : 'No'],
+                        ['Control Panel Functional', document.getElementById('control-panel-functional').checked ? 'Yes' : 'No'],
+                        ['Battery Backup Tested', document.getElementById('battery-backup-tested').checked ? 'Yes' : 'No'],
+                        ['Manual Call Points Working', document.getElementById('manual-call-points-working').checked ? 'Yes' : 'No']
+                    ];
+                }
             }
 
             if (checklistItems.length > 0) {
-                doc.setFontSize(10);
                 doc.setFont('Helvetica', 'bold');
+                doc.setFontSize(10);
                 doc.text(`${equipmentType} Checklist`, 10, y);
                 doc.line(10, y + 2, 200, y + 2);
                 doc.autoTable({
@@ -400,27 +388,19 @@
                     head: [['Item', 'Status']],
                     body: checklistItems,
                     theme: 'grid',
-                    headStyles: {
-                        fillColor: [26, 60, 109],
-                        textColor: [255, 255, 255],
-                        fontSize: 8,
-                        fontStyle: 'bold'
-                    },
-                    bodyStyles: {
-                        fontSize: 8,
-                        textColor: [0, 0, 0]
-                    },
+                    headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+                    bodyStyles: { fontSize: 8, textColor: [0, 0, 0] },
                     margin: { left: 10, right: 10 },
                     tableWidth: 180
                 });
                 y = doc.lastAutoTable.finalY + 5;
             }
 
-            // Issue Description and Technician Comments Table
+            // Issue Description and Technician Comments
             const issueDescription = document.getElementById('issue-description').value || 'N/A';
             const technicianComments = document.getElementById('technician-comments').value || 'N/A';
-            doc.setFontSize(10);
             doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(10);
             doc.text('Additional Notes', 10, y);
             doc.line(10, y + 2, 200, y + 2);
             doc.autoTable({
@@ -431,16 +411,8 @@
                     ['Technician Comments', technicianComments]
                 ],
                 theme: 'grid',
-                headStyles: {
-                    fillColor: [26, 60, 109],
-                    textColor: [255, 255, 255],
-                    fontSize: 8,
-                    fontStyle: 'bold'
-                },
-                bodyStyles: {
-                    fontSize: 8,
-                    textColor: [0, 0, 0]
-                },
+                headStyles: { fillColor: [26, 60, 109], textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 8, textColor: [0, 0, 0] },
                 margin: { left: 10, right: 10 },
                 tableWidth: 180
             });
@@ -454,7 +426,7 @@
             doc.text('Eye Tech Securities | No.36/80, Medavakkam Main Road, Keelkattalai, Chennai, Tamil Nadu 600113', 10, 280);
             doc.text('Phone: +919962835944 | Email: support@eyetechsecurities.in | www.eyetechsecurities.in', 10, 287);
 
-            // Save the PDF
+            // Save PDF
             doc.save('Service_Report.pdf');
         }
     </script>
