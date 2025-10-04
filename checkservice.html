@@ -3,442 +3,779 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Report Generator</title>
+    <title>AMC Quotation Generator - Eye Tech Securities</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
         .container {
             max-width: 900px;
-            margin: auto;
+            margin: 0 auto;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        .nav-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .nav-tabs a {
-            padding: 10px 20px;
-            margin: 0 5px;
-            text-decoration: none;
-            color: #2c3e50;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #f8f9fa;
-            transition: background 0.3s, color 0.3s;
-        }
-        .nav-tabs a:hover, .nav-tabs a.active {
-            background: #007bff;
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            border-color: #007bff;
+            padding: 30px;
+            text-align: center;
         }
-        .section {
-            margin-bottom: 25px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background: #fafafa;
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
         }
-        .section h2 {
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
             color: #2c3e50;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 5px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-weight: 600;
         }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: #34495e;
+            font-size: 0.95rem;
         }
+
         .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-            transition: border-color 0.3s;
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
         }
+
+        .form-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
         .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #007bff;
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
+
         .form-group textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
-        .checklist {
+
+        .package-selection {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
         }
-        .checklist label {
-            display: flex;
-            align-items: center;
-            font-size: 0.9em;
-            color: #34495e;
-        }
-        .checklist input[type="checkbox"] {
-            margin-right: 8px;
-            accent-color: #007bff;
-        }
-        .button-group {
+
+        .package-card {
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
-            margin-top: 20px;
-        }
-        .button-group button {
-            padding: 12px 25px;
-            margin: 0 10px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
             cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
         }
-        .generate-pdf {
-            background-color: #007bff;
-            color: white;
-        }
-        .generate-send {
-            background-color: #28a745;
-            color: white;
-        }
-        .button-group button:hover {
-            opacity: 0.9;
+
+        .package-card:hover {
+            border-color: #3498db;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .package-card.selected {
+            border-color: #3498db;
+            background: #ebf3fd;
+        }
+
+        .package-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .package-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 5px;
+        }
+
+        .package-original-price {
+            text-decoration: line-through;
+            color: #e74c3c;
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+
+        .package-card input[type="radio"] {
+            display: none;
+        }
+
+        .calculation-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+
+        .calculation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .calculation-row.total {
+            border-top: 2px solid #3498db;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .package-selection {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Service Report Generator</h1>
-        <div class="nav-tabs">
-            <a href="#" class="active">AMC Agreement</a>
-            <a href="#">Service Report</a>
+        <div class="header">
+            <h1>AMC Quotation Generator</h1>
+            <p>Eye Tech Securities - Professional CCTV Maintenance Services</p>
         </div>
 
-        <div class="section">
-            <h2>Customer Details</h2>
-            <div class="form-group">
-                <label for="customerName">Customer Name</label>
-                <input type="text" id="customerName" required>
-            </div>
-            <div class="form-group">
-                <label for="customerAddress">Customer Address</label>
-                <input type="text" id="customerAddress" required>
-            </div>
-            <div class="form-group">
-                <label for="gstNumber">GST Number</label>
-                <input type="text" id="gstNumber" required>
-            </div>
-            <div class="form-group">
-                <label for="contactPerson">Contact Person</label>
-                <input type="text" id="contactPerson" required>
-            </div>
-            <div class="form-group">
-                <label for="customerContact">Customer Contact Number</label>
-                <input type="tel" id="customerContact" required>
-            </div>
-            <div class="form-group">
-                <label for="customerEmail">Customer Email</label>
-                <input type="email" id="customerEmail" required>
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="sendToCustomer" checked> Send report to customer</label>
-            </div>
-        </div>
+        <div class="form-container">
+            <form id="quotationForm">
+                <!-- Customer Details -->
+                <div class="form-section">
+                    <h2 class="section-title">Customer Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="customerName">Customer Name *</label>
+                            <input type="text" id="customerName" name="customerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Phone Number *</label>
+                            <input type="tel" id="customerPhone" name="customerPhone" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerAddress">Address *</label>
+                        <textarea id="customerAddress" name="customerAddress" rows="3" required></textarea>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="customerEmail">Email</label>
+                            <input type="email" id="customerEmail" name="customerEmail">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerGST">GST Number</label>
+                            <input type="text" id="customerGST" name="customerGST">
+                        </div>
+                    </div>
+                </div>
 
-        <div class="section">
-            <h2>Service Details</h2>
-            <div class="form-group">
-                <label for="reportType">Report Type</label>
-                <select id="reportType" required>
-                    <option value="AMC Agreement">AMC Agreement</option>
-                    <option value="Service Report">Service Report</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="serviceType">Service Type</label>
-                <select id="serviceType" required>
-                    <option value="">Select Service Type</option>
-                    <option value="Maintenance Visit">Maintenance Visit</option>
-                    <option value="Breakdown Visit">Breakdown Visit</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="equipmentType">Equipment Type</label>
-                <select id="equipmentType" required onchange="toggleChecklists()">
-                    <option value="">Select Equipment Type</option>
-                    <option value="CCTV">CCTV</option>
-                    <option value="Biometrics & Access Control">Biometrics & Access Control</option>
-                    <option value="Video Door Bell">Video Door Bell</option>
-                    <option value="Fire Alarm">Fire Alarm</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="serviceDate">Service Date</label>
-                <input type="date" id="serviceDate" required>
-            </div>
-            <div class="form-group">
-                <label for="technicianName">Technician Name</label>
-                <input type="text" id="technicianName" required>
-            </div>
-        </div>
+                <!-- Quotation Details -->
+                <div class="form-section">
+                    <h2 class="section-title">Quotation Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="quotationDate">Quotation Date *</label>
+                            <input type="date" id="quotationDate" name="quotationDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="numberOfCameras">Number of Cameras *</label>
+                            <input type="number" id="numberOfCameras" name="numberOfCameras" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="includeGST">
+                                <input type="checkbox" id="includeGST" name="includeGST" checked> Include GST (18%)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="includeConnector">
+                                <input type="checkbox" id="includeConnector" name="includeConnector" checked> Include Free Connector Replacement
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="section" id="cctvChecklist" style="display: none;">
-            <h2>CCTV Maintenance Checklist</h2>
-            <div class="checklist">
-                <label><input type="checkbox" name="cctv" id="camerasLive"> Cameras Live</label>
-                <label><input type="checkbox" name="cctv" id="playbackWorking"> Playback Working</label>
-                <label><input type="checkbox" name="cctv" id="hddHealthy"> HDD Healthy</label>
-                <label><input type="checkbox" name="cctv" id="dateTimeAccurate"> Date/Time Accurate</label>
-                <label><input type="checkbox" name="cctv" id="remoteAccess"> Remote Access</label>
-                <label><input type="checkbox" name="cctv" id="powerSupply"> Power Supply</label>
-                <label><input type="checkbox" name="cctv" id="lensesClean"> Lenses Clean</label>
-                <label><input type="checkbox" name="cctv" id="cablesSecure"> Cables Secure</label>
-            </div>
-        </div>
+                <!-- Package Selection -->
+                <div class="form-section">
+                    <h2 class="section-title">Select Package</h2>
+                    <div class="package-selection">
+                        <div class="package-card" onclick="selectPackage('residential')">
+                            <input type="radio" id="residential" name="package" value="residential">
+                            <h3>Residential Package</h3>
+                            <div class="package-price">Rs.800 per camera</div>
+                            <div class="package-original-price">Rs.1000 per camera</div>
+                            <div style="margin-top: 15px; font-size: 0.9rem; color: #34495e;">
+                                <div><strong>Maintenance Visits:</strong> 2</div>
+                                <div><strong>Breakdown Visits:</strong> 4</div>
+                            </div>
+                        </div>
+                        <div class="package-card" onclick="selectPackage('commercial')">
+                            <input type="radio" id="commercial" name="package" value="commercial">
+                            <h3>Commercial Package</h3>
+                            <div class="package-price">Rs.1300 per camera</div>
+                            <div class="package-original-price">Rs.1500 per camera</div>
+                            <div style="margin-top: 15px; font-size: 0.9rem; color: #34495e;">
+                                <div><strong>Maintenance Visits:</strong> 4</div>
+                                <div><strong>Breakdown Visits:</strong> 10</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="section" id="biometricsChecklist" style="display: none;">
-            <h2>Biometrics & Access Control Checklist</h2>
-            <div class="checklist">
-                <label><input type="checkbox" name="biometrics" id="fingerprintScanner"> Fingerprint Scanner Working</label>
-                <label><input type="checkbox" name="biometrics" id="cardReader"> Card Reader Working</label>
-                <label><input type="checkbox" name="biometrics" id="doorLock"> Door Lock Mechanism</label>
-                <label><input type="checkbox" name="biometrics" id="accessLogs"> Access Logs Updated</label>
-                <label><input type="checkbox" name="biometrics" id="userDatabase"> User Database Backup</label>
-                <label><input type="checkbox" name="biometrics" id="sensorCalibration"> Sensor Calibration</label>
-            </div>
-        </div>
+                <!-- Calculation Display -->
+                <div class="calculation-section" id="calculationSection" style="display: none;">
+                    <h3 style="margin-bottom: 20px; color: #2c3e50;">Quotation Summary</h3>
+                    <div class="calculation-row">
+                        <span>Number of Cameras:</span>
+                        <span id="displayCameras">0</span>
+                    </div>
+                    <div class="calculation-row">
+                        <span>Package Selected:</span>
+                        <span id="displayPackage">-</span>
+                    </div>
+                    <div class="calculation-row">
+                        <span>Rate per Camera:</span>
+                        <span id="displayRate">Rs.0</span>
+                    </div>
+                    <div class="calculation-row">
+                        <span>Subtotal:</span>
+                        <span id="displaySubtotal">Rs.0</span>
+                    </div>
+                    <div class="calculation-row">
+                        <span>GST (18%):</span>
+                        <span id="displayGST">Rs.0</span>
+                    </div>
+                    <div class="calculation-row">
+                        <span>Calculated Total:</span>
+                        <span id="displayCalculatedTotal">Rs.0</span>
+                    </div>
+                    <div class="calculation-row">
+                        <span>Final Amount:</span>
+                        <input type="number" id="finalAmount" style="width: 120px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: right;" placeholder="0">
+                    </div>
+                    <div class="calculation-row" id="discountRow" style="display: none; color: #e74c3c;">
+                        <span>Discount Applied:</span>
+                        <span id="displayDiscount">Rs.0</span>
+                    </div>
+                    <div class="calculation-row total">
+                        <span>Total Amount:</span>
+                        <span id="displayTotal">Rs.0</span>
+                    </div>
+                </div>
 
-        <div class="section" id="videoDoorBellChecklist" style="display: none;">
-            <h2>Video Door Bell Checklist</h2>
-            <div class="checklist">
-                <label><input type="checkbox" name="videoDoorBell" id="videoQuality"> Video Quality Clear</label>
-                <label><input type="checkbox" name="videoDoorBell" id="audioQuality"> Audio Quality Clear</label>
-                <label><input type="checkbox" name="videoDoorBell" id="motionDetection"> Motion Detection Working</label>
-                <label><input type="checkbox" name="videoDoorBell" id="nightVision"> Night Vision Working</label>
-                <label><input type="checkbox" name="videoDoorBell" id="mobileApp"> Mobile App Connectivity</label>
-                <label><input type="checkbox" name="videoDoorBell" id="doorbellChime"> Doorbell Chime Working</label>
-            </div>
-        </div>
-
-        <div class="section" id="fireAlarmChecklist" style="display: none;">
-            <h2>Fire Alarm System Checklist</h2>
-            <div class="checklist">
-                <label><input type="checkbox" name="fireAlarm" id="smokeDetectors"> Smoke Detectors Working</label>
-                <label><input type="checkbox" name="fireAlarm" id="heatDetectors"> Heat Detectors Working</label>
-                <label><input type="checkbox" name="fireAlarm" id="alarmSounders"> Alarm Sounders Working</label>
-                <label><input type="checkbox" name="fireAlarm" id="controlPanel"> Control Panel Functional</label>
-                <label><input type="checkbox" name="fireAlarm" id="batteryBackup"> Battery Backup Tested</label>
-                <label><input type="checkbox" name="fireAlarm" id="manualCallPoints"> Manual Call Points Working</label>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>Issue Description</h2>
-            <div class="form-group">
-                <label for="issueDescription">Issue Description</label>
-                <textarea id="issueDescription" rows="4"></textarea>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>Technician Comments</h2>
-            <div class="form-group">
-                <label for="technicianComments">Technician Comments</label>
-                <textarea id="technicianComments" rows="4"></textarea>
-            </div>
-        </div>
-
-        <div class="button-group">
-            <button class="generate-pdf" onclick="generatePDF()">Generate Service Report PDF</button>
-            <button class="generate-send" onclick="generateAndSend()">Generate PDF & Send Email</button>
+                <div class="btn-container">
+                    <button type="button" class="btn" onclick="generateQuotationPDF()">Generate Quotation PDF</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        const { jsPDF } = window.jspdf;
+        // Set today's date as default
+        document.getElementById('quotationDate').valueAsDate = new Date();
 
-        function toggleChecklists() {
-            const equipmentType = document.getElementById('equipmentType').value;
-            document.getElementById('cctvChecklist').style.display = equipmentType === 'CCTV' ? 'block' : 'none';
-            document.getElementById('biometricsChecklist').style.display = equipmentType === 'Biometrics & Access Control' ? 'block' : 'none';
-            document.getElementById('videoDoorBellChecklist').style.display = equipmentType === 'Video Door Bell' ? 'block' : 'none';
-            document.getElementById('fireAlarmChecklist').style.display = equipmentType === 'Fire Alarm' ? 'block' : 'none';
-        }
-
-        function collectChecklistData(checklistId, checklistName) {
-            const checkboxes = document.querySelectorAll(`#${checklistId} input[type="checkbox"]`);
-            return Array.from(checkboxes).map(cb => ({
-                item: cb.parentElement.textContent.trim(),
-                checked: cb.checked
-            }));
-        }
-
-        async function generatePDF() {
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
+        // Package selection
+        function selectPackage(packageType) {
+            // Remove selected class from all cards
+            document.querySelectorAll('.package-card').forEach(card => {
+                card.classList.remove('selected');
             });
-
-            // Add logo or header
-            doc.setFillColor(0, 102, 204);
-            doc.rect(0, 0, 210, 40, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(20);
-            doc.text('EyeTech Securities', 105, 25, { align: 'center' });
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            doc.text('Service Report', 105, 35, { align: 'center' });
-
-            const customerName = document.getElementById('customerName').value;
-            const customerAddress = document.getElementById('customerAddress').value;
-            const gstNumber = document.getElementById('gstNumber').value;
-            const contactPerson = document.getElementById('contactPerson').value;
-            const customerContact = document.getElementById('customerContact').value;
-            const customerEmail = document.getElementById('customerEmail').value;
-            const reportType = document.getElementById('reportType').value;
-            const serviceType = document.getElementById('serviceType').value;
-            const equipmentType = document.getElementById('equipmentType').value;
-            const serviceDate = document.getElementById('serviceDate').value;
-            const technicianName = document.getElementById('technicianName').value;
-            const issueDescription = document.getElementById('issueDescription').value;
-            const technicianComments = document.getElementById('technicianComments').value;
-
-            let checklistData = [];
-            if (equipmentType === 'CCTV') {
-                checklistData = collectChecklistData('cctvChecklist', 'CCTV Maintenance Checklist');
-            } else if (equipmentType === 'Biometrics & Access Control') {
-                checklistData = collectChecklistData('biometricsChecklist', 'Biometrics & Access Control Checklist');
-            } else if (equipmentType === 'Video Door Bell') {
-                checklistData = collectChecklistData('videoDoorBellChecklist', 'Video Door Bell Checklist');
-            } else if (equipmentType === 'Fire Alarm') {
-                checklistData = collectChecklistData('fireAlarmChecklist', 'Fire Alarm System Checklist');
-            }
-
-            let y = 50;
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Report Type: ${reportType}`, 20, y);
-            y += 10;
-            doc.text(`Customer Name: ${customerName}`, 20, y);
-            y += 10;
-            doc.text(`Address: ${customerAddress}`, 20, y);
-            y += 10;
-            doc.text(`GST Number: ${gstNumber}`, 20, y);
-            y += 10;
-            doc.text(`Contact Person: ${contactPerson}`, 20, y);
-            y += 10;
-            doc.text(`Contact: ${customerContact}`, 20, y);
-            y += 10;
-            doc.text(`Email: ${customerEmail}`, 20, y);
-            y += 10;
-            doc.text(`Service Type: ${serviceType}`, 20, y);
-            y += 10;
-            doc.text(`Equipment Type: ${equipmentType}`, 20, y);
-            y += 10;
-            doc.text(`Service Date: ${serviceDate}`, 20, y);
-            y += 10;
-            doc.text(`Technician: ${technicianName}`, 20, y);
-            y += 15;
-
-            doc.setFillColor(0, 102, 204);
-            doc.rect(20, y - 5, 170, 0.5, 'F');
-            doc.text(`${equipmentType} Checklist`, 20, y);
-            y += 10;
-            checklistData.forEach(item => {
-                doc.text(`${item.item}: ${item.checked ? '✓' : '✗'}`, 30, y);
-                y += 8;
-            });
-
-            y += 5;
-            doc.setFillColor(0, 102, 204);
-            doc.rect(20, y - 5, 170, 0.5, 'F');
-            doc.text('Issue Description', 20, y);
-            y += 10;
-            doc.setFontSize(10);
-            doc.text(issueDescription, 20, y, { maxWidth: 170, align: 'justify' });
-            y += 20;
-
-            doc.text('Technician Comments', 20, y);
-            y += 10;
-            doc.text(technicianComments, 20, y, { maxWidth: 170, align: 'justify' });
-
-            doc.setFontSize(8);
-            doc.text(`Generated on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`, 20, 290);
-
-            doc.save(`Service_Report_${customerName}.pdf`);
-            return doc.output('datauristring');
+            
+            // Add selected class to clicked card
+            event.currentTarget.classList.add('selected');
+            
+            // Select the radio button
+            document.getElementById(packageType).checked = true;
+            
+            // Update calculation
+            updateCalculation();
         }
 
-        async function generateAndSend() {
-            const pdfDataUri = await generatePDF();
-            const customerName = document.getElementById('customerName').value;
-            const serviceType = document.getElementById('serviceType').value;
-            const equipmentType = document.getElementById('equipmentType').value;
-            const customerEmail = document.getElementById('customerEmail').value;
-            const sendToCustomer = document.getElementById('sendToCustomer').checked;
-
-            const emailData = {
-                customerName,
-                serviceType,
-                equipmentType,
-                customerEmail,
-                sendToCustomer,
-                pdfDataUri,
-                adminEmail: 'support@eyetechsecurities.in'
-            };
-
-            try {
-                const response = await fetch('/api/send-service-report', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(emailData)
-                });
-                if (response.ok) {
-                    alert('PDF generated and email sent successfully!');
-                } else {
-                    const errorText = await response.text();
-                    alert(`Error sending email: ${errorText}. PDF has been generated.`);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(`Error sending email: ${error.message}. PDF has been generated.`);
-            }
-        }
-
-        document.querySelectorAll('.nav-tabs a').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.querySelectorAll('.nav-tabs a').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-            });
+        // Update calculation when inputs change
+        document.getElementById('numberOfCameras').addEventListener('input', updateCalculation);
+        document.querySelectorAll('input[name="package"]').forEach(radio => {
+            radio.addEventListener('change', updateCalculation);
         });
+        document.getElementById('includeGST').addEventListener('change', updateCalculation);
+
+        function updateCalculation() {
+            const cameras = parseInt(document.getElementById('numberOfCameras').value) || 0;
+            const packageType = document.querySelector('input[name="package"]:checked');
+            const includeGST = document.getElementById('includeGST').checked;
+            
+            if (cameras > 0 && packageType) {
+                const rates = {
+                    residential: 800,
+                    commercial: 1300
+                };
+                
+                const packageNames = {
+                    residential: 'Residential Package',
+                    commercial: 'Commercial Package'
+                };
+                
+                const rate = rates[packageType.value];
+                const subtotal = cameras * rate;
+                const gst = includeGST ? Math.round(subtotal * 0.18) : 0;
+                const calculatedTotal = subtotal + gst;
+                
+                // Update display
+                document.getElementById('displayCameras').textContent = cameras;
+                document.getElementById('displayPackage').textContent = packageNames[packageType.value];
+                document.getElementById('displayRate').textContent = `Rs.${rate}`;
+                document.getElementById('displaySubtotal').textContent = `Rs.${subtotal.toLocaleString()}`;
+                document.getElementById('displayGST').textContent = `Rs.${gst.toLocaleString()}`;
+                document.getElementById('displayCalculatedTotal').textContent = `Rs.${calculatedTotal.toLocaleString()}`;
+                
+                const finalAmountInput = document.getElementById('finalAmount');
+                if (!finalAmountInput.value) {
+                    finalAmountInput.value = calculatedTotal;
+                }
+                
+                updateFinalAmount();
+                
+                document.getElementById('calculationSection').style.display = 'block';
+            } else {
+                document.getElementById('calculationSection').style.display = 'none';
+            }
+        }
+
+        function updateFinalAmount() {
+            const calculatedTotal = parseInt(document.getElementById('displayCalculatedTotal').textContent.replace(/[^\d]/g, '')) || 0;
+            const finalAmount = parseInt(document.getElementById('finalAmount').value) || 0;
+            
+            if (finalAmount > 0) {
+                const discount = calculatedTotal - finalAmount;
+                
+                if (discount > 0) {
+                    document.getElementById('displayDiscount').textContent = `Rs.${discount.toLocaleString()}`;
+                    document.getElementById('discountRow').style.display = 'flex';
+                } else {
+                    document.getElementById('discountRow').style.display = 'none';
+                }
+                
+                document.getElementById('displayTotal').textContent = `Rs.${finalAmount.toLocaleString()}`;
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+                document.getElementById('displayTotal').textContent = `Rs.${calculatedTotal.toLocaleString()}`;
+            }
+        }
+
+        document.getElementById('finalAmount').addEventListener('input', updateFinalAmount);
+
+        function collectFormData() {
+            const formData = new FormData(document.getElementById('quotationForm'));
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Add calculated values
+            const cameras = parseInt(data.numberOfCameras) || 0;
+            const includeGST = document.getElementById('includeGST').checked;
+            const includeConnector = document.getElementById('includeConnector').checked;
+            const rates = { residential: 800, commercial: 1300 };
+            const rate = rates[data.package];
+            const subtotal = cameras * rate;
+            const gst = includeGST ? Math.round(subtotal * 0.18) : 0;
+            const calculatedTotal = subtotal + gst;
+            
+            const finalAmount = parseInt(document.getElementById('finalAmount').value) || calculatedTotal;
+            const discount = calculatedTotal - finalAmount;
+            
+            data.includeGST = includeGST;
+            data.includeConnector = includeConnector;
+            data.rate = rate;
+            data.subtotal = subtotal;
+            data.gst = gst;
+            data.calculatedTotal = calculatedTotal;
+            data.finalAmount = finalAmount;
+            data.discount = discount > 0 ? discount : 0;
+            data.total = finalAmount;
+            data.packageName = data.package === 'residential' ? 'Residential Package' : 'Commercial Package';
+            
+            return data;
+        }
+
+        function generateQuotationPDF() {
+            const data = collectFormData();
+            
+            // Validation
+            if (!data.customerName || !data.customerPhone || !data.customerAddress || 
+                !data.quotationDate || !data.numberOfCameras || !data.package) {
+                alert('Please fill in all required fields and select a package.');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFillColor(44, 62, 80); // Dark blue background
+            doc.rect(0, 0, 210, 45, 'F');
+            
+            doc.setTextColor(255, 255, 255); // White text
+            doc.setFontSize(24);
+            doc.setFont(undefined, 'bold');
+            doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 23, { align: 'center' });
+            doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in', 105, 29, { align: 'center' });
+            doc.text('GST No: 33BCMPA5207N1ZN', 105, 35, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Professional CCTV Maintenance Services', 105, 41, { align: 'center' });
+            
+            // Reset text color for body
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(52, 152, 219); // Blue accent
+            doc.text('AMC QUOTATION', 105, 60, { align: 'center' });
+            
+            // Decorative line under title
+            doc.setDrawColor(52, 152, 219);
+            doc.setLineWidth(0.5);
+            doc.line(70, 63, 140, 63);
+            
+            // Reset text color
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFillColor(248, 249, 250); // Light gray background
+            doc.rect(15, 70, 180, 25, 'F');
+            doc.setDrawColor(224, 230, 237);
+            doc.rect(15, 70, 180, 25);
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('QUOTATION DETAILS', 20, 78);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            const quotationNo = `QTN/${new Date(data.quotationDate).getFullYear()}/${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+            doc.text(`Quotation No: ${quotationNo}`, 20, 85);
+            doc.text(`Date: ${new Date(data.quotationDate).toLocaleDateString('en-IN')}`, 20, 91);
+            doc.text('Valid for: 30 days from issue date', 120, 85);
+            doc.text('Payment Terms: 30 days', 120, 91);
+            
+            let currentY = 105;
+            doc.setFillColor(44, 62, 80);
+            doc.rect(15, currentY, 180, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('CUSTOMER DETAILS', 20, currentY + 5);
+            
+            // Reset colors and add customer info
+            doc.setTextColor(0, 0, 0);
+            currentY += 15;
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            
+            doc.text(`Name: ${data.customerName}`, 20, currentY);
+            doc.text(`Phone: ${data.customerPhone}`, 20, currentY + 7);
+            if (data.customerEmail) {
+                doc.text(`Email: ${data.customerEmail}`, 20, currentY + 14);
+                currentY += 7;
+            }
+            
+            // Handle address with better formatting
+            const addressLines = doc.splitTextToSize(`Address: ${data.customerAddress}`, 170);
+            currentY += 14;
+            addressLines.forEach(line => {
+                doc.text(line, 20, currentY);
+                currentY += 7;
+            });
+            
+            if (data.customerGST) {
+                doc.text(`GST Number: ${data.customerGST}`, 20, currentY);
+                currentY += 7;
+            }
+            
+            currentY += 15;
+            doc.setFillColor(44, 62, 80);
+            doc.rect(15, currentY, 180, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('QUOTATION BREAKDOWN', 20, currentY + 5);
+            
+            // Table header with elegant styling
+            currentY += 15;
+            doc.setFillColor(248, 249, 250);
+            doc.rect(15, currentY, 180, 10, 'F');
+            doc.setDrawColor(224, 230, 237);
+            doc.rect(15, currentY, 180, 10);
+            
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('DESCRIPTION', 20, currentY + 6);
+            doc.text('QTY', 110, currentY + 6);
+            doc.text('RATE', 135, currentY + 6);
+            doc.text('AMOUNT', 165, currentY + 6);
+            
+            // Table content with better spacing
+            currentY += 10;
+            doc.setDrawColor(224, 230, 237);
+            doc.rect(15, currentY, 180, 20); // Increased height to accommodate visit details
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'normal');
+            doc.text(`AMC Service - ${data.packageName}`, 20, currentY + 6);
+            doc.text(`${data.numberOfCameras} Cameras`, 20, currentY + 10);
+            
+            const visitDetails = data.package === 'residential' 
+                ? 'Maintenance: 2 visits, Breakdown: 4 visits'
+                : 'Maintenance: 4 visits, Breakdown: 10 visits';
+            doc.text(visitDetails, 20, currentY + 14);
+            
+            doc.text(data.numberOfCameras.toString(), 110, currentY + 10);
+            doc.text(`Rs. ${data.rate}`, 135, currentY + 10);
+            doc.text(`Rs. ${data.subtotal.toLocaleString()}`, 165, currentY + 10);
+            
+            currentY += 35; // Adjusted spacing for larger content area
+            
+            doc.setDrawColor(52, 152, 219);
+            doc.setLineWidth(0.5);
+            doc.line(120, currentY, 195, currentY);
+            
+            let summaryStartY = currentY + 5;
+            doc.setFontSize(11);
+            doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 130, summaryStartY);
+            
+            let nextSummaryY = summaryStartY + 8;
+            if (data.includeGST && data.gst > 0) {
+                doc.text(`GST (18%): Rs. ${data.gst.toLocaleString()}`, 130, nextSummaryY);
+                nextSummaryY += 8;
+            }
+            
+            let discountY = nextSummaryY;
+            if (data.discount > 0) {
+                doc.setTextColor(231, 76, 60); // Red color for discount
+                doc.text(`Discount: Rs. ${data.discount.toLocaleString()}`, 130, discountY);
+                discountY += 8;
+                doc.setTextColor(0, 0, 0); // Reset color
+            }
+            
+            let totalY = discountY + 4;
+            // Total with emphasis
+            doc.setFillColor(52, 152, 219);
+            doc.rect(125, totalY, 70, 10, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTAL: Rs. ${data.total.toLocaleString()}`, 130, totalY + 6);
+            
+            // Reset colors
+            doc.setTextColor(0, 0, 0);
+            
+            currentY = totalY + 15;
+            if (currentY > 250) {
+                doc.addPage();
+                currentY = 20;
+            }
+            
+            doc.setFillColor(44, 62, 80);
+            doc.rect(15, currentY, 180, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('TERMS & CONDITIONS', 20, currentY + 5);
+            
+            // Terms content with better formatting
+            currentY += 15;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            
+            const termTexts = [
+                "The contract is applicable for 12 months from the agreement date.",
+                "Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.",
+                "Offer valid for 30 days from issue date.",
+                "Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.",
+                "Customer must provide ladder, water, power supply, and civil support for maintenance.",
+                "Missing/stolen items during the contract are customer's liability, not covered under AMC.",
+                "Technician access required during scheduled visits; no refund for missed appointments due to unavailability.",
+                "Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.",
+                "Contract is non-transferable and non-terminable before completion.",
+                "Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.",
+                "Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.",
+                "Only registered complaints via proper channels are addressed during breakdown visits.",
+                "Warranty-covered items replaced free; out-of-warranty items chargeable.",
+                "Material replacements, spare parts, and consumables chargeable unless under warranty.",
+                "Connector replacement (Rs. 500/camera) included in first maintenance visit only.",
+                "Unauthorized equipment modification voids the AMC contract.",
+                "Service visits scheduled with 24-48 hours notice to customer.",
+                "Customer responsible for data backup; Eye Tech Securities not liable for data loss.",
+                "Additional work beyond AMC scope chargeable per prevailing rates.",
+                "Disputes subject to local court jurisdiction.",
+                "This contract supersedes prior agreements; modifications require mutual written consent.",
+                "Force majeure conditions may temporarily suspend service obligations.",
+                "Maintenance visits non-transferable and not carried forward.",
+                "18% GST applies on total contract amount per tax regulations."
+            ];
+            
+            let terms = termTexts.slice(0, 14); // Terms 1-14
+            if (data.includeConnector) {
+                terms.push(termTexts[14]); // Include 15th term
+            }
+            terms = terms.concat(termTexts.slice(15)); // Terms 16-24
+            
+            terms.forEach((term, index) => {
+                if (currentY > 270) {
+                    doc.addPage();
+                    currentY = 20;
+                }
+                const numberedTerm = `${index + 1}) ${term}`;
+                const termLines = doc.splitTextToSize(numberedTerm, 170);
+                termLines.forEach(line => {
+                    doc.text(line, 20, currentY);
+                    currentY += 4.5;
+                });
+                currentY += 1;
+            });
+            
+            if (currentY > 240) {
+                doc.addPage();
+                currentY = 20;
+            }
+            
+            currentY += 20;
+            
+            // Signature section with elegant design
+            doc.setDrawColor(224, 230, 237);
+            doc.setLineWidth(0.5);
+            doc.line(20, currentY, 80, currentY);
+            doc.line(130, currentY, 190, currentY);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('Customer Signature', 20, currentY + 8);
+            doc.text('Eye Tech Securities', 130, currentY + 8);
+            
+            doc.setFont(undefined, 'normal');
+            doc.text('Date: ___________', 20, currentY + 15);
+            doc.text('Authorized Signatory', 130, currentY + 15);
+            
+            currentY += 25;
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('This is a computer-generated quotation and does not require a physical signature.', 105, currentY, { align: 'center' });
+            doc.text('For queries, contact Eye Tech Securities at your convenience.', 105, currentY + 5, { align: 'center' });
+            
+            // Save PDF with better filename
+            const fileName = `AMC_Quotation_${data.customerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+        }
     </script>
 </body>
 </html>
