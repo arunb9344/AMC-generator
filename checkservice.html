@@ -231,6 +231,15 @@
             .form-container {
                 padding: 20px;
             }
+
+            #particularsTable {
+                font-size: 0.8rem;
+            }
+
+            #particularsTable th,
+            #particularsTable td {
+                padding: 5px;
+            }
         }
     </style>
 </head>
@@ -318,6 +327,8 @@
                                 <th>Description</th>
                                 <th>Qty</th>
                                 <th>Rate</th>
+                                <th>Maintenance Visits</th>
+                                <th>Breakdown Visits</th>
                                 <th>Amount</th>
                                 <th>Action</th>
                             </tr>
@@ -373,6 +384,8 @@
                 <td><input type="text" placeholder="Description" class="desc-input" required></td>
                 <td><input type="number" placeholder="Qty" class="qty-input" min="1" value="1" required></td>
                 <td><input type="number" placeholder="Rate" class="rate-input" min="0" required></td>
+                <td><input type="number" placeholder="Maintenance Visits" class="maintenance-input" min="0" value="0"></td>
+                <td><input type="number" placeholder="Breakdown Visits" class="breakdown-input" min="0" value="0"></td>
                 <td class="amount-cell">Rs. 0</td>
                 <td><button type="button" class="btn" style="background: #e74c3c; padding: 5px 10px; font-size: 0.8rem;" onclick="removeParticular(this)">Remove</button></td>
             `;
@@ -439,9 +452,11 @@
                 const desc = row.querySelector('.desc-input').value;
                 const qty = row.querySelector('.qty-input').value;
                 const rate = row.querySelector('.rate-input').value;
+                const maintenance = row.querySelector('.maintenance-input').value;
+                const breakdown = row.querySelector('.breakdown-input').value;
                 const amount = parseInt(row.querySelector('.amount-cell').textContent.replace(/[^\d]/g, '')) || 0;
                 if (desc) {
-                    data.particulars.push({ desc, qty, rate, amount });
+                    data.particulars.push({ desc, qty, rate, maintenance, breakdown, amount });
                 }
             });
             data.totalAmount = totalAmount;
@@ -547,24 +562,36 @@
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
             doc.text('DESCRIPTION', 20, currentY + 6);
-            doc.text('QTY', 110, currentY + 6);
-            doc.text('RATE', 135, currentY + 6);
-            doc.text('AMOUNT', 165, currentY + 6);
+            doc.text('QTY', 90, currentY + 6);
+            doc.text('RATE', 110, currentY + 6);
+            doc.text('MAINTENANCE', 140, currentY + 6);
+            doc.text('BREAKDOWN', 160, currentY + 6);
+            doc.text('AMOUNT', 175, currentY + 6);
             currentY += 12;
 
             data.particulars.forEach(part => {
+                if (currentY > 250) {
+                    doc.addPage();
+                    currentY = 20;
+                }
                 doc.setDrawColor(224, 230, 237);
-                doc.rect(15, currentY, 180, 8);
+                doc.rect(15, currentY, 180, 12);
                 doc.setTextColor(0, 0, 0);
                 doc.setFont(undefined, 'normal');
-                const descLines = doc.splitTextToSize(part.desc, 80);
+                let fullDesc = part.desc;
+                if (parseInt(part.maintenance) > 0 || parseInt(part.breakdown) > 0) {
+                    fullDesc += ` - Maintenance: ${part.maintenance} visits, Breakdown: ${part.breakdown} visits`;
+                }
+                const descLines = doc.splitTextToSize(fullDesc, 70);
                 descLines.forEach((line, idx) => {
                     doc.text(line, 20, currentY + (idx * 4) + 4);
                 });
-                doc.text(part.qty, 110, currentY + 4);
-                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 135, currentY + 4);
-                doc.text(`Rs. ${part.amount.toLocaleString()}`, 165, currentY + 4);
-                currentY += 12;
+                doc.text(part.qty, 90, currentY + 4);
+                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 110, currentY + 4);
+                doc.text(part.maintenance, 140, currentY + 4);
+                doc.text(part.breakdown, 160, currentY + 4);
+                doc.text(`Rs. ${part.amount.toLocaleString()}`, 175, currentY + 4);
+                currentY += 16;
             });
 
             // Total
