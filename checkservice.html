@@ -325,10 +325,9 @@
                             <tr>
                                 <th>Description</th>
                                 <th>Qty</th>
-                                <th>Rate</th>
+                                <th>Total Amount</th>
                                 <th>Maintenance Visits</th>
                                 <th>Breakdown Visits</th>
-                                <th>Amount</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -382,10 +381,9 @@
             row.innerHTML = `
                 <td><input type="text" placeholder="Description" class="desc-input" required></td>
                 <td><input type="number" placeholder="Qty" class="qty-input" min="1" value="1" required></td>
-                <td><input type="number" placeholder="Rate" class="rate-input" min="0" required></td>
+                <td><input type="number" placeholder="Total Amount" class="totalAmount-input" min="0" required></td>
                 <td><input type="number" placeholder="Maintenance Visits" class="maintenance-input" min="0" value="0"></td>
                 <td><input type="number" placeholder="Breakdown Visits" class="breakdown-input" min="0" value="0"></td>
-                <td class="amount-cell">Rs. 0</td>
                 <td><button type="button" class="btn" style="background: #e74c3c; padding: 5px 10px; font-size: 0.8rem;" onclick="removeParticular(this)">Remove</button></td>
             `;
             tbody.appendChild(row);
@@ -394,18 +392,13 @@
         }
 
         function attachEventListeners(row) {
-            const qtyInput = row.querySelector('.qty-input');
-            const rateInput = row.querySelector('.rate-input');
-            qtyInput.addEventListener('input', updateRowAmount);
-            rateInput.addEventListener('input', updateRowAmount);
+            const totalAmountInput = row.querySelector('.totalAmount-input');
+            totalAmountInput.addEventListener('input', updateRowAmount);
         }
 
         function updateRowAmount() {
             const row = this.closest('tr');
-            const qty = parseInt(row.querySelector('.qty-input').value) || 0;
-            const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
-            const amount = qty * rate;
-            row.querySelector('.amount-cell').textContent = `Rs. ${amount.toLocaleString()}`;
+            const total = parseFloat(row.querySelector('.totalAmount-input').value) || 0;
             updateTotal();
         }
 
@@ -417,8 +410,8 @@
         function updateTotal() {
             totalAmount = 0;
             document.querySelectorAll('#particularsTable tbody tr').forEach(row => {
-                const amountText = row.querySelector('.amount-cell').textContent.replace(/[^\d]/g, '');
-                totalAmount += parseInt(amountText) || 0;
+                const totalText = row.querySelector('.totalAmount-input').value;
+                totalAmount += parseFloat(totalText) || 0;
             });
             document.getElementById('totalAmount').textContent = `Total Amount: Rs. ${totalAmount.toLocaleString()}`;
         }
@@ -450,12 +443,12 @@
             document.querySelectorAll('#particularsTable tbody tr').forEach(row => {
                 const desc = row.querySelector('.desc-input').value;
                 const qty = row.querySelector('.qty-input').value;
-                const rate = row.querySelector('.rate-input').value;
+                const totalAmount = row.querySelector('.totalAmount-input').value;
                 const maintenance = row.querySelector('.maintenance-input').value;
                 const breakdown = row.querySelector('.breakdown-input').value;
-                const amount = parseInt(row.querySelector('.amount-cell').textContent.replace(/[^\d]/g, '')) || 0;
+                const amount = parseFloat(totalAmount) || 0;
                 if (desc) {
-                    data.particulars.push({ desc, qty, rate, maintenance, breakdown, amount });
+                    data.particulars.push({ desc, qty, totalAmount, maintenance, breakdown, amount });
                 }
             });
             data.totalAmount = totalAmount;
@@ -564,20 +557,21 @@
             doc.setTextColor(255, 255, 255);
             doc.text('PARTICULARS', 20, currentY + 5);
             currentY += 15;
+            const headerHeight = 20;
             doc.setFillColor(248, 249, 250);
-            doc.rect(15, currentY, 180, 12, 'F');
+            doc.rect(15, currentY, 180, headerHeight, 'F');
             doc.setDrawColor(224, 230, 237);
-            doc.rect(15, currentY, 180, 12);
+            doc.rect(15, currentY, 180, headerHeight);
             doc.setTextColor(44, 62, 80);
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             doc.setFont(undefined, 'bold');
             doc.text('DESCRIPTION', 20, currentY + 6);
-            doc.text('QTY', 100, currentY + 6);
-            doc.text('RATE', 115, currentY + 6);
-            doc.text('MAINT', 135, currentY + 6);
-            doc.text('BREAK', 150, currentY + 6);
-            doc.text('AMOUNT', 165, currentY + 6);
-            currentY += 14;
+            const maintLines = doc.splitTextToSize('Maintenance Visits', 20);
+            maintLines.forEach((l, i) => doc.text(l, 115, currentY + 6 + i * 4));
+            const breakLines = doc.splitTextToSize('Breakdown Visits', 20);
+            breakLines.forEach((l, i) => doc.text(l, 135, currentY + 6 + i * 4));
+            doc.text('AMOUNT', 155, currentY + 6);
+            currentY += headerHeight + 2;
 
             data.particulars.forEach(part => {
                 if (currentY > 250) {
@@ -585,25 +579,24 @@
                     currentY = 20;
                 }
                 doc.setDrawColor(224, 230, 237);
-                let fullDesc = part.desc;
+                let fullDesc = `${part.desc} (${part.qty})`;
                 if (parseInt(part.maintenance) > 0 || parseInt(part.breakdown) > 0) {
                     fullDesc += ` - Maintenance: ${part.maintenance} visits, Breakdown: ${part.breakdown} visits`;
                 }
-                const descLines = doc.splitTextToSize(fullDesc, 75);
+                const descLines = doc.splitTextToSize(fullDesc, 90);
                 let numLines = Math.max(1, descLines.length);
                 let rowHeight = 10 + numLines * 6;
                 doc.rect(15, currentY, 180, rowHeight);
                 doc.setTextColor(0, 0, 0);
+                doc.setFontSize(9);
                 doc.setFont(undefined, 'normal');
                 descLines.forEach((line, idx) => {
                     doc.text(line, 20, currentY + 4 + idx * 6);
                 });
                 let textY = currentY + rowHeight - 4;
-                doc.text(part.qty, 100, textY);
-                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 115, textY);
-                doc.text(part.maintenance, 135, textY);
-                doc.text(part.breakdown, 150, textY);
-                doc.text(`Rs. ${part.amount.toLocaleString()}`, 165, textY);
+                doc.text(part.maintenance, 115, textY);
+                doc.text(part.breakdown, 135, textY);
+                doc.text(`Rs. ${part.amount.toLocaleString()}`, 155, textY);
                 currentY += rowHeight + 2;
             });
 
