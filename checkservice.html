@@ -301,16 +301,6 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="maintenanceVisits">Number of Maintenance Visits *</label>
-                            <input type="number" id="maintenanceVisits" name="maintenanceVisits" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="breakdownVisits">Number of Breakdown Visits *</label>
-                            <input type="number" id="breakdownVisits" name="breakdownVisits" min="1" required>
-                        </div>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
                             <label for="includeConnector">
                                 <input type="checkbox" id="includeConnector" name="includeConnector" checked> Include Free Connector Replacement
                             </label>
@@ -454,15 +444,6 @@
                     data.particulars.push({ desc, qty, rate, amount });
                 }
             });
-            data.maintenanceVisits = parseInt(document.getElementById('maintenanceVisits').value) || 0;
-            data.breakdownVisits = parseInt(document.getElementById('breakdownVisits').value) || 0;
-            // Add maintenance and breakdown as particulars with rate 0
-            if (data.maintenanceVisits > 0) {
-                data.particulars.push({ desc: 'Maintenance Visits', qty: data.maintenanceVisits, rate: 0, amount: 0 });
-            }
-            if (data.breakdownVisits > 0) {
-                data.particulars.push({ desc: 'Breakdown Visits', qty: data.breakdownVisits, rate: 0, amount: 0 });
-            }
             data.totalAmount = totalAmount;
             data.includeConnector = document.getElementById('includeConnector').checked;
             data.signatureDataUrl = document.querySelector('#signaturePreview img') ? document.querySelector('#signaturePreview img').src : null;
@@ -471,7 +452,7 @@
 
         function generateAgreementPDF() {
             const data = collectFormData();
-            if (!data.customerName || !data.customerAddress || !data.customerContact || !data.agreementDate || !data.contractPeriod || data.maintenanceVisits === 0 || data.breakdownVisits === 0 || data.particulars.length === 0) {
+            if (!data.customerName || !data.customerAddress || !data.customerContact || !data.agreementDate || !data.contractPeriod || data.particulars.length === 0) {
                 alert('Please fill in all required fields and add at least one particular.');
                 return;
             }
@@ -572,23 +553,6 @@
             currentY += 12;
 
             data.particulars.forEach(part => {
-                if (currentY > 270) {
-                    doc.addPage();
-                    currentY = 20;
-                    // Re-add header if new page
-                    doc.setFillColor(248, 249, 250);
-                    doc.rect(15, currentY, 180, 10, 'F');
-                    doc.setDrawColor(224, 230, 237);
-                    doc.rect(15, currentY, 180, 10);
-                    doc.setTextColor(44, 62, 80);
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('DESCRIPTION', 20, currentY + 6);
-                    doc.text('QTY', 110, currentY + 6);
-                    doc.text('RATE', 135, currentY + 6);
-                    doc.text('AMOUNT', 165, currentY + 6);
-                    currentY += 12;
-                }
                 doc.setDrawColor(224, 230, 237);
                 doc.rect(15, currentY, 180, 8);
                 doc.setTextColor(0, 0, 0);
@@ -597,17 +561,13 @@
                 descLines.forEach((line, idx) => {
                     doc.text(line, 20, currentY + (idx * 4) + 4);
                 });
-                doc.text(part.qty.toString(), 110, currentY + 4);
+                doc.text(part.qty, 110, currentY + 4);
                 doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 135, currentY + 4);
                 doc.text(`Rs. ${part.amount.toLocaleString()}`, 165, currentY + 4);
                 currentY += 12;
             });
 
             // Total
-            if (currentY > 250) {
-                doc.addPage();
-                currentY = 20;
-            }
             doc.setDrawColor(52, 152, 219);
             doc.line(120, currentY, 195, currentY);
             currentY += 5;
