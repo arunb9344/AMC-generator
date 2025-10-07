@@ -526,28 +526,39 @@
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
             doc.text('CUSTOMER DETAILS', 20, currentY + 5);
-            currentY += 15;
+            let lineY = currentY + 15;
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
-            doc.text(`Name: ${data.customerName}`, 20, currentY);
-            if (data.contactPerson) doc.text(`Contact Person: ${data.contactPerson}`, 20, currentY + 7);
-            doc.text(`Phone: ${data.customerContact}`, 20, currentY + 14);
-            if (data.customerEmail) doc.text(`Email: ${data.customerEmail}`, 20, currentY + 21);
-            currentY += 7;
+            doc.text(`Name: ${data.customerName}`, 20, lineY);
+            lineY += 7;
+            if (data.contactPerson) {
+                doc.text(`Contact Person: ${data.contactPerson}`, 20, lineY);
+                lineY += 7;
+            }
+            doc.text(`Phone: ${data.customerContact}`, 20, lineY);
+            lineY += 7;
+            if (data.customerEmail) {
+                doc.text(`Email: ${data.customerEmail}`, 20, lineY);
+                lineY += 7;
+            }
+            lineY += 7; // space before address
             const addressLines = doc.splitTextToSize(`Address: ${data.customerAddress}`, 170);
-            currentY += 7;
             addressLines.forEach(line => {
-                doc.text(line, 20, currentY);
-                currentY += 7;
+                doc.text(line, 20, lineY);
+                lineY += 7;
             });
             if (data.customerGST) {
-                doc.text(`GST Number: ${data.customerGST}`, 20, currentY);
-                currentY += 7;
+                doc.text(`GST Number: ${data.customerGST}`, 20, lineY);
+                lineY += 7;
             }
-            currentY += 10;
+            currentY = lineY + 10;
 
             // Particulars Table
+            if (currentY > 250) {
+                doc.addPage();
+                currentY = 20;
+            }
             doc.setFillColor(44, 62, 80);
             doc.rect(15, currentY, 180, 8, 'F');
             doc.setTextColor(255, 255, 255);
@@ -562,10 +573,10 @@
             doc.setFont(undefined, 'bold');
             doc.text('DESCRIPTION', 20, currentY + 6);
             doc.text('QTY', 100, currentY + 6);
-            doc.text('RATE', 120, currentY + 6);
-            doc.text('MAINTENANCE', 150, currentY + 6);
-            doc.text('BREAKDOWN', 170, currentY + 6);
-            doc.text('AMOUNT', 185, currentY + 6);
+            doc.text('RATE', 115, currentY + 6);
+            doc.text('MAINT', 135, currentY + 6);
+            doc.text('BREAK', 150, currentY + 6);
+            doc.text('AMOUNT', 165, currentY + 6);
             currentY += 14;
 
             data.particulars.forEach(part => {
@@ -574,30 +585,35 @@
                     currentY = 20;
                 }
                 doc.setDrawColor(224, 230, 237);
-                const rowHeight = 18;
-                doc.rect(15, currentY, 180, rowHeight);
-                doc.setTextColor(0, 0, 0);
-                doc.setFont(undefined, 'normal');
                 let fullDesc = part.desc;
                 if (parseInt(part.maintenance) > 0 || parseInt(part.breakdown) > 0) {
                     fullDesc += ` - Maintenance: ${part.maintenance} visits, Breakdown: ${part.breakdown} visits`;
                 }
-                const descLines = doc.splitTextToSize(fullDesc, 80);
+                const descLines = doc.splitTextToSize(fullDesc, 75);
+                let numLines = Math.max(1, descLines.length);
+                let rowHeight = 10 + numLines * 6;
+                doc.rect(15, currentY, 180, rowHeight);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont(undefined, 'normal');
                 descLines.forEach((line, idx) => {
-                    doc.text(line, 20, currentY + 4 + idx * 5);
+                    doc.text(line, 20, currentY + 4 + idx * 6);
                 });
-                const textY = currentY + 14;
+                let textY = currentY + rowHeight - 4;
                 doc.text(part.qty, 100, textY);
-                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 120, textY);
-                doc.text(part.maintenance, 150, textY);
-                doc.text(part.breakdown, 170, textY);
-                doc.text(`Rs. ${part.amount.toLocaleString()}`, 185, textY);
+                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 115, textY);
+                doc.text(part.maintenance, 135, textY);
+                doc.text(part.breakdown, 150, textY);
+                doc.text(`Rs. ${part.amount.toLocaleString()}`, 165, textY);
                 currentY += rowHeight + 2;
             });
 
             // Total
+            if (currentY > 250) {
+                doc.addPage();
+                currentY = 20;
+            }
             doc.setDrawColor(52, 152, 219);
-            doc.line(160, currentY, 210, currentY);
+            doc.line(160, currentY, 195, currentY);
             currentY += 5;
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
