@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Quotation Generator - Eye Tech Securities</title>
+    <title>AMC Agreement Generator - Eye Tech Securities</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
@@ -41,9 +41,21 @@
             font-weight: 700;
         }
 
-        .header p {
-            font-size: 1.1rem;
+        .header nav {
+            margin-top: 15px;
+        }
+
+        .header nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
             opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .header nav a:hover {
+            opacity: 1;
+            text-decoration: underline;
         }
 
         .form-container {
@@ -112,79 +124,63 @@
             min-height: 80px;
         }
 
-        .package-selection {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        #particularsTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        #particularsTable th,
+        #particularsTable td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        #particularsTable th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .total-amount {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
             margin-top: 15px;
         }
 
-        .package-card {
-            border: 2px solid #e0e6ed;
-            border-radius: 12px;
-            padding: 20px;
+        .signature-upload {
+            position: relative;
+            display: inline-block;
+            width: 200px;
+            height: 100px;
+            border: 2px dashed #e0e6ed;
+            border-radius: 8px;
             text-align: center;
+            line-height: 100px;
             cursor: pointer;
-            transition: all 0.3s ease;
             background: #f8f9fa;
         }
 
-        .package-card:hover {
-            border-color: #3498db;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .signature-upload img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
         }
 
-        .package-card.selected {
-            border-color: #3498db;
-            background: #ebf3fd;
-        }
-
-        .package-card h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
-        }
-
-        .package-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #27ae60;
-            margin-bottom: 5px;
-        }
-
-        .package-original-price {
-            text-decoration: line-through;
-            color: #e74c3c;
-            font-size: 1.1rem;
-            opacity: 0.7;
-        }
-
-        .package-card input[type="radio"] {
-            display: none;
-        }
-
-        .calculation-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin: 25px 0;
-        }
-
-        .calculation-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .calculation-row.total {
-            border-top: 2px solid #3498db;
-            padding-top: 15px;
-            font-weight: bold;
-            font-size: 1.3rem;
-            color: #2c3e50;
+        .remove-signature {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
         }
 
         .btn {
@@ -199,6 +195,7 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-right: 10px;
         }
 
         .btn:hover {
@@ -215,11 +212,14 @@
             margin-top: 30px;
         }
 
+        .email-options {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
         @media (max-width: 768px) {
-            .package-selection {
-                grid-template-columns: 1fr;
-            }
-            
             .form-grid {
                 grid-template-columns: 1fr;
             }
@@ -237,12 +237,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>AMC Quotation Generator</h1>
-            <p>Eye Tech Securities - Professional CCTV Maintenance Services</p>
+            <h1>AMC Agreement Generator</h1>
+            <nav>
+                <a href="#">AMC Agreement</a>
+                <a href="#">Service Report</a>
+                <a href="#">Quotation</a>
+            </nav>
         </div>
 
         <div class="form-container">
-            <form id="quotationForm">
+            <form id="agreementForm">
                 <!-- Customer Details -->
                 <div class="form-section">
                     <h2 class="section-title">Customer Details</h2>
@@ -252,45 +256,50 @@
                             <input type="text" id="customerName" name="customerName" required>
                         </div>
                         <div class="form-group">
-                            <label for="customerPhone">Phone Number *</label>
-                            <input type="tel" id="customerPhone" name="customerPhone" required>
+                            <label for="contactPerson">Contact Person</label>
+                            <input type="text" id="contactPerson" name="contactPerson">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="customerAddress">Address *</label>
+                        <label for="customerAddress">Customer Address *</label>
                         <textarea id="customerAddress" name="customerAddress" rows="3" required></textarea>
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="customerEmail">Email</label>
-                            <input type="email" id="customerEmail" name="customerEmail">
+                            <label for="customerContact">Customer Contact Number *</label>
+                            <input type="tel" id="customerContact" name="customerContact" required>
                         </div>
                         <div class="form-group">
-                            <label for="customerGST">GST Number</label>
-                            <input type="text" id="customerGST" name="customerGST">
+                            <label for="customerEmail">Customer Email</label>
+                            <input type="email" id="customerEmail" name="customerEmail">
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerGST">Customer GST (Optional)</label>
+                        <input type="text" id="customerGST" name="customerGST">
                     </div>
                 </div>
 
-                <!-- Quotation Details -->
+                <!-- Agreement Details -->
                 <div class="form-section">
-                    <h2 class="section-title">Quotation Details</h2>
+                    <h2 class="section-title">Agreement Details</h2>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="quotationDate">Quotation Date *</label>
-                            <input type="date" id="quotationDate" name="quotationDate" required>
+                            <label for="agreementDate">Agreement Date *</label>
+                            <input type="date" id="agreementDate" name="agreementDate" required>
                         </div>
                         <div class="form-group">
-                            <label for="numberOfCameras">Number of Cameras *</label>
-                            <input type="number" id="numberOfCameras" name="numberOfCameras" min="1" required>
+                            <label for="contractPeriod">Contract Period (Years)</label>
+                            <select id="contractPeriod" name="contractPeriod" required>
+                                <option value="1">1 Year</option>
+                                <option value="2">2 Years</option>
+                                <option value="3">3 Years</option>
+                                <option value="4">4 Years</option>
+                                <option value="5">5 Years</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label for="includeGST">
-                                <input type="checkbox" id="includeGST" name="includeGST" checked> Include GST (18%)
-                            </label>
-                        </div>
                         <div class="form-group">
                             <label for="includeConnector">
                                 <input type="checkbox" id="includeConnector" name="includeConnector" checked> Include Free Connector Replacement
@@ -299,76 +308,51 @@
                     </div>
                 </div>
 
-                <!-- Package Selection -->
+                <!-- Particulars -->
                 <div class="form-section">
-                    <h2 class="section-title">Select Package</h2>
-                    <div class="package-selection">
-                        <div class="package-card" onclick="selectPackage('residential')">
-                            <input type="radio" id="residential" name="package" value="residential">
-                            <h3>Residential Package</h3>
-                            <div class="package-price">Rs.800 per camera</div>
-                            <div class="package-original-price">Rs.1000 per camera</div>
-                            <div style="margin-top: 15px; font-size: 0.9rem; color: #34495e;">
-                                <div><strong>Maintenance Visits:</strong> 2</div>
-                                <div><strong>Breakdown Visits:</strong> 4</div>
-                            </div>
-                        </div>
-                        <div class="package-card" onclick="selectPackage('commercial')">
-                            <input type="radio" id="commercial" name="package" value="commercial">
-                            <h3>Commercial Package</h3>
-                            <div class="package-price">Rs.1300 per camera</div>
-                            <div class="package-original-price">Rs.1500 per camera</div>
-                            <div style="margin-top: 15px; font-size: 0.9rem; color: #34495e;">
-                                <div><strong>Maintenance Visits:</strong> 4</div>
-                                <div><strong>Breakdown Visits:</strong> 10</div>
-                            </div>
+                    <h2 class="section-title">Particulars</h2>
+                    <button type="button" class="btn" onclick="addParticular()" style="background: #27ae60; margin-bottom: 15px;">Add Particular</button>
+                    <table id="particularsTable">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="total-amount" id="totalAmount">Total Amount: Rs. 0</div>
+                </div>
+
+                <!-- Signature -->
+                <div class="form-section">
+                    <h2 class="section-title">Signature</h2>
+                    <div class="form-group">
+                        <label for="signatureImage">Upload Signature Image (Optional)</label>
+                        <input type="file" id="signatureImage" name="signatureImage" accept="image/*" style="display: none;" onchange="previewSignature(this)">
+                        <div id="signaturePreview" class="signature-upload" onclick="document.getElementById('signatureImage').click()">
+                            Click to upload signature
                         </div>
                     </div>
                 </div>
 
-                <!-- Calculation Display -->
-                <div class="calculation-section" id="calculationSection" style="display: none;">
-                    <h3 style="margin-bottom: 20px; color: #2c3e50;">Quotation Summary</h3>
-                    <div class="calculation-row">
-                        <span>Number of Cameras:</span>
-                        <span id="displayCameras">0</span>
-                    </div>
-                    <div class="calculation-row">
-                        <span>Package Selected:</span>
-                        <span id="displayPackage">-</span>
-                    </div>
-                    <div class="calculation-row">
-                        <span>Rate per Camera:</span>
-                        <span id="displayRate">Rs.0</span>
-                    </div>
-                    <div class="calculation-row">
-                        <span>Subtotal:</span>
-                        <span id="displaySubtotal">Rs.0</span>
-                    </div>
-                    <div class="calculation-row">
-                        <span>GST (18%):</span>
-                        <span id="displayGST">Rs.0</span>
-                    </div>
-                    <div class="calculation-row">
-                        <span>Calculated Total:</span>
-                        <span id="displayCalculatedTotal">Rs.0</span>
-                    </div>
-                    <div class="calculation-row">
-                        <span>Final Amount:</span>
-                        <input type="number" id="finalAmount" style="width: 120px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: right;" placeholder="0">
-                    </div>
-                    <div class="calculation-row" id="discountRow" style="display: none; color: #e74c3c;">
-                        <span>Discount Applied:</span>
-                        <span id="displayDiscount">Rs.0</span>
-                    </div>
-                    <div class="calculation-row total">
-                        <span>Total Amount:</span>
-                        <span id="displayTotal">Rs.0</span>
+                <!-- Email Options -->
+                <div class="form-section">
+                    <h2 class="section-title">Email Options</h2>
+                    <div class="email-options">
+                        <label>
+                            <input type="checkbox" id="sendToCustomer" name="sendToCustomer" checked> Send copy to customer
+                        </label>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">Admin copy will always be sent to support@eyetechsecurities.in</p>
                     </div>
                 </div>
 
                 <div class="btn-container">
-                    <button type="button" class="btn" onclick="generateQuotationPDF()">Generate Quotation PDF</button>
+                    <button type="button" class="btn" onclick="generateAgreementPDF()">Generate PDF Only</button>
+                    <button type="button" class="btn" onclick="generateAndEmail()">Generate PDF & Send Email</button>
                 </div>
             </form>
         </div>
@@ -376,245 +360,189 @@
 
     <script>
         // Set today's date as default
-        document.getElementById('quotationDate').valueAsDate = new Date();
+        document.getElementById('agreementDate').valueAsDate = new Date();
 
-        // Package selection
-        function selectPackage(packageType) {
-            // Remove selected class from all cards
-            document.querySelectorAll('.package-card').forEach(card => {
-                card.classList.remove('selected');
+        let particularCounter = 0;
+        let totalAmount = 0;
+
+        function addParticular() {
+            particularCounter++;
+            const tbody = document.querySelector('#particularsTable tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" placeholder="Description" class="desc-input" required></td>
+                <td><input type="number" placeholder="Qty" class="qty-input" min="1" value="1" required></td>
+                <td><input type="number" placeholder="Rate" class="rate-input" min="0" required></td>
+                <td class="amount-cell">Rs. 0</td>
+                <td><button type="button" class="btn" style="background: #e74c3c; padding: 5px 10px; font-size: 0.8rem;" onclick="removeParticular(this)">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            attachEventListeners(row);
+            updateTotal();
+        }
+
+        function attachEventListeners(row) {
+            const qtyInput = row.querySelector('.qty-input');
+            const rateInput = row.querySelector('.rate-input');
+            qtyInput.addEventListener('input', updateRowAmount);
+            rateInput.addEventListener('input', updateRowAmount);
+        }
+
+        function updateRowAmount() {
+            const row = this.closest('tr');
+            const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+            const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+            const amount = qty * rate;
+            row.querySelector('.amount-cell').textContent = `Rs. ${amount.toLocaleString()}`;
+            updateTotal();
+        }
+
+        function removeParticular(button) {
+            button.closest('tr').remove();
+            updateTotal();
+        }
+
+        function updateTotal() {
+            totalAmount = 0;
+            document.querySelectorAll('#particularsTable tbody tr').forEach(row => {
+                const amountText = row.querySelector('.amount-cell').textContent.replace(/[^\d]/g, '');
+                totalAmount += parseInt(amountText) || 0;
             });
-            
-            // Add selected class to clicked card
-            event.currentTarget.classList.add('selected');
-            
-            // Select the radio button
-            document.getElementById(packageType).checked = true;
-            
-            // Update calculation
-            updateCalculation();
+            document.getElementById('totalAmount').textContent = `Total Amount: Rs. ${totalAmount.toLocaleString()}`;
         }
 
-        // Update calculation when inputs change
-        document.getElementById('numberOfCameras').addEventListener('input', updateCalculation);
-        document.querySelectorAll('input[name="package"]').forEach(radio => {
-            radio.addEventListener('change', updateCalculation);
-        });
-        document.getElementById('includeGST').addEventListener('change', updateCalculation);
-
-        function updateCalculation() {
-            const cameras = parseInt(document.getElementById('numberOfCameras').value) || 0;
-            const packageType = document.querySelector('input[name="package"]:checked');
-            const includeGST = document.getElementById('includeGST').checked;
-            
-            if (cameras > 0 && packageType) {
-                const rates = {
-                    residential: 800,
-                    commercial: 1300
+        function previewSignature(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('signaturePreview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Signature"><button class="remove-signature" onclick="removeSignature()">×</button>`;
                 };
-                
-                const packageNames = {
-                    residential: 'Residential Package',
-                    commercial: 'Commercial Package'
-                };
-                
-                const rate = rates[packageType.value];
-                const subtotal = cameras * rate;
-                const gst = includeGST ? Math.round(subtotal * 0.18) : 0;
-                const calculatedTotal = subtotal + gst;
-                
-                // Update display
-                document.getElementById('displayCameras').textContent = cameras;
-                document.getElementById('displayPackage').textContent = packageNames[packageType.value];
-                document.getElementById('displayRate').textContent = `Rs.${rate}`;
-                document.getElementById('displaySubtotal').textContent = `Rs.${subtotal.toLocaleString()}`;
-                document.getElementById('displayGST').textContent = `Rs.${gst.toLocaleString()}`;
-                document.getElementById('displayCalculatedTotal').textContent = `Rs.${calculatedTotal.toLocaleString()}`;
-                
-                const finalAmountInput = document.getElementById('finalAmount');
-                if (!finalAmountInput.value) {
-                    finalAmountInput.value = calculatedTotal;
-                }
-                
-                updateFinalAmount();
-                
-                document.getElementById('calculationSection').style.display = 'block';
-            } else {
-                document.getElementById('calculationSection').style.display = 'none';
+                reader.readAsDataURL(file);
             }
         }
 
-        function updateFinalAmount() {
-            const calculatedTotal = parseInt(document.getElementById('displayCalculatedTotal').textContent.replace(/[^\d]/g, '')) || 0;
-            const finalAmount = parseInt(document.getElementById('finalAmount').value) || 0;
-            
-            if (finalAmount > 0) {
-                const discount = calculatedTotal - finalAmount;
-                
-                if (discount > 0) {
-                    document.getElementById('displayDiscount').textContent = `Rs.${discount.toLocaleString()}`;
-                    document.getElementById('discountRow').style.display = 'flex';
-                } else {
-                    document.getElementById('discountRow').style.display = 'none';
-                }
-                
-                document.getElementById('displayTotal').textContent = `Rs.${finalAmount.toLocaleString()}`;
-            } else {
-                document.getElementById('discountRow').style.display = 'none';
-                document.getElementById('displayTotal').textContent = `Rs.${calculatedTotal.toLocaleString()}`;
-            }
+        function removeSignature() {
+            document.getElementById('signatureImage').value = '';
+            document.getElementById('signaturePreview').innerHTML = 'Click to upload signature';
         }
-
-        document.getElementById('finalAmount').addEventListener('input', updateFinalAmount);
 
         function collectFormData() {
-            const formData = new FormData(document.getElementById('quotationForm'));
+            const formData = new FormData(document.getElementById('agreementForm'));
             const data = {};
-            
             for (let [key, value] of formData.entries()) {
                 data[key] = value;
             }
-            
-            // Add calculated values
-            const cameras = parseInt(data.numberOfCameras) || 0;
-            const includeGST = document.getElementById('includeGST').checked;
-            const includeConnector = document.getElementById('includeConnector').checked;
-            const rates = { residential: 800, commercial: 1300 };
-            const rate = rates[data.package];
-            const subtotal = cameras * rate;
-            const gst = includeGST ? Math.round(subtotal * 0.18) : 0;
-            const calculatedTotal = subtotal + gst;
-            
-            const finalAmount = parseInt(document.getElementById('finalAmount').value) || calculatedTotal;
-            const discount = calculatedTotal - finalAmount;
-            
-            data.includeGST = includeGST;
-            data.includeConnector = includeConnector;
-            data.rate = rate;
-            data.subtotal = subtotal;
-            data.gst = gst;
-            data.calculatedTotal = calculatedTotal;
-            data.finalAmount = finalAmount;
-            data.discount = discount > 0 ? discount : 0;
-            data.total = finalAmount;
-            data.packageName = data.package === 'residential' ? 'Residential Package' : 'Commercial Package';
-            
+            data.particulars = [];
+            document.querySelectorAll('#particularsTable tbody tr').forEach(row => {
+                const desc = row.querySelector('.desc-input').value;
+                const qty = row.querySelector('.qty-input').value;
+                const rate = row.querySelector('.rate-input').value;
+                const amount = parseInt(row.querySelector('.amount-cell').textContent.replace(/[^\d]/g, '')) || 0;
+                if (desc) {
+                    data.particulars.push({ desc, qty, rate, amount });
+                }
+            });
+            data.totalAmount = totalAmount;
+            data.includeConnector = document.getElementById('includeConnector').checked;
+            data.signatureDataUrl = document.querySelector('#signaturePreview img') ? document.querySelector('#signaturePreview img').src : null;
             return data;
         }
 
-        function generateQuotationPDF() {
+        function generateAgreementPDF() {
             const data = collectFormData();
-            
-            // Validation
-            if (!data.customerName || !data.customerPhone || !data.customerAddress || 
-                !data.quotationDate || !data.numberOfCameras || !data.package) {
-                alert('Please fill in all required fields and select a package.');
+            if (!data.customerName || !data.customerAddress || !data.customerContact || !data.agreementDate || !data.contractPeriod || data.particulars.length === 0) {
+                alert('Please fill in all required fields and add at least one particular.');
                 return;
             }
-            
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
-            doc.setFillColor(44, 62, 80); // Dark blue background
+
+            // Header
+            doc.setFillColor(44, 62, 80);
             doc.rect(0, 0, 210, 45, 'F');
-            
-            doc.setTextColor(255, 255, 255); // White text
+            doc.setTextColor(255, 255, 255);
             doc.setFontSize(24);
             doc.setFont(undefined, 'bold');
             doc.text('EYE TECH SECURITIES', 105, 15, { align: 'center' });
-            
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
             doc.text('No.56/80, Medavakkam Main Road, Keelkattalai, Chennai-600117', 105, 23, { align: 'center' });
             doc.text('Ph: 9962835944 | Mail: support@eyetechsecurities.in', 105, 29, { align: 'center' });
             doc.text('GST No: 33BCMPA5207N1ZN', 105, 35, { align: 'center' });
-            
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
             doc.text('Professional CCTV Maintenance Services', 105, 41, { align: 'center' });
-            
-            // Reset text color for body
+
+            // Title
             doc.setTextColor(0, 0, 0);
-            
             doc.setFontSize(18);
             doc.setFont(undefined, 'bold');
-            doc.setTextColor(52, 152, 219); // Blue accent
-            doc.text('AMC QUOTATION', 105, 60, { align: 'center' });
-            
-            // Decorative line under title
+            doc.setTextColor(52, 152, 219);
+            doc.text('AMC AGREEMENT', 105, 60, { align: 'center' });
             doc.setDrawColor(52, 152, 219);
             doc.setLineWidth(0.5);
             doc.line(70, 63, 140, 63);
-            
-            // Reset text color
-            doc.setTextColor(0, 0, 0);
-            
-            doc.setFillColor(248, 249, 250); // Light gray background
-            doc.rect(15, 70, 180, 25, 'F');
+
+            // Agreement Details
+            let currentY = 70;
+            doc.setFillColor(248, 249, 250);
+            doc.rect(15, currentY, 180, 25, 'F');
             doc.setDrawColor(224, 230, 237);
-            doc.rect(15, 70, 180, 25);
-            
+            doc.rect(15, currentY, 180, 25);
+            doc.setTextColor(44, 62, 80);
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
-            doc.text('QUOTATION DETAILS', 20, 78);
-            
+            doc.text('AGREEMENT DETAILS', 20, currentY + 8);
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
-            const quotationNo = `QTN/${new Date(data.quotationDate).getFullYear()}/${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
-            doc.text(`Quotation No: ${quotationNo}`, 20, 85);
-            doc.text(`Date: ${new Date(data.quotationDate).toLocaleDateString('en-IN')}`, 20, 91);
-            doc.text('Valid for: 30 days from issue date', 120, 85);
-            doc.text('Payment Terms: 30 days', 120, 91);
-            
-            let currentY = 105;
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Agreement No: AGR/${new Date(data.agreementDate).getFullYear()}/${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`, 20, currentY + 15);
+            doc.text(`Date: ${new Date(data.agreementDate).toLocaleDateString('en-IN')}`, 20, currentY + 22);
+            doc.text(`Contract Period: ${data.contractPeriod} Year${data.contractPeriod > 1 ? 's' : ''}`, 120, currentY + 15);
+            doc.text('Valid from agreement date', 120, currentY + 22);
+            currentY += 35;
+
+            // Customer Details
             doc.setFillColor(44, 62, 80);
             doc.rect(15, currentY, 180, 8, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
             doc.text('CUSTOMER DETAILS', 20, currentY + 5);
-            
-            // Reset colors and add customer info
-            doc.setTextColor(0, 0, 0);
             currentY += 15;
+            doc.setTextColor(0, 0, 0);
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
-            
             doc.text(`Name: ${data.customerName}`, 20, currentY);
-            doc.text(`Phone: ${data.customerPhone}`, 20, currentY + 7);
-            if (data.customerEmail) {
-                doc.text(`Email: ${data.customerEmail}`, 20, currentY + 14);
-                currentY += 7;
-            }
-            
-            // Handle address with better formatting
+            if (data.contactPerson) doc.text(`Contact Person: ${data.contactPerson}`, 20, currentY + 7);
+            doc.text(`Phone: ${data.customerContact}`, 20, currentY + 14);
+            if (data.customerEmail) doc.text(`Email: ${data.customerEmail}`, 20, currentY + 21);
+            currentY += 7;
             const addressLines = doc.splitTextToSize(`Address: ${data.customerAddress}`, 170);
-            currentY += 14;
+            currentY += 7;
             addressLines.forEach(line => {
                 doc.text(line, 20, currentY);
                 currentY += 7;
             });
-            
             if (data.customerGST) {
                 doc.text(`GST Number: ${data.customerGST}`, 20, currentY);
                 currentY += 7;
             }
-            
-            currentY += 15;
+            currentY += 10;
+
+            // Particulars Table
             doc.setFillColor(44, 62, 80);
             doc.rect(15, currentY, 180, 8, 'F');
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text('QUOTATION BREAKDOWN', 20, currentY + 5);
-            
-            // Table header with elegant styling
+            doc.text('PARTICULARS', 20, currentY + 5);
             currentY += 15;
             doc.setFillColor(248, 249, 250);
             doc.rect(15, currentY, 180, 10, 'F');
             doc.setDrawColor(224, 230, 237);
             doc.rect(15, currentY, 180, 10);
-            
             doc.setTextColor(44, 62, 80);
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
@@ -622,85 +550,52 @@
             doc.text('QTY', 110, currentY + 6);
             doc.text('RATE', 135, currentY + 6);
             doc.text('AMOUNT', 165, currentY + 6);
-            
-            // Table content with better spacing
-            currentY += 10;
-            doc.setDrawColor(224, 230, 237);
-            doc.rect(15, currentY, 180, 20); // Increased height to accommodate visit details
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFont(undefined, 'normal');
-            doc.text(`AMC Service - ${data.packageName}`, 20, currentY + 6);
-            doc.text(`${data.numberOfCameras} Cameras`, 20, currentY + 10);
-            
-            const visitDetails = data.package === 'residential' 
-                ? 'Maintenance: 2 visits, Breakdown: 4 visits'
-                : 'Maintenance: 4 visits, Breakdown: 10 visits';
-            doc.text(visitDetails, 20, currentY + 14);
-            
-            doc.text(data.numberOfCameras.toString(), 110, currentY + 10);
-            doc.text(`Rs. ${data.rate}`, 135, currentY + 10);
-            doc.text(`Rs. ${data.subtotal.toLocaleString()}`, 165, currentY + 10);
-            
-            currentY += 35; // Adjusted spacing for larger content area
-            
+            currentY += 12;
+
+            data.particulars.forEach(part => {
+                doc.setDrawColor(224, 230, 237);
+                doc.rect(15, currentY, 180, 8);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont(undefined, 'normal');
+                const descLines = doc.splitTextToSize(part.desc, 80);
+                descLines.forEach((line, idx) => {
+                    doc.text(line, 20, currentY + (idx * 4) + 4);
+                });
+                doc.text(part.qty, 110, currentY + 4);
+                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 135, currentY + 4);
+                doc.text(`Rs. ${part.amount.toLocaleString()}`, 165, currentY + 4);
+                currentY += 12;
+            });
+
+            // Total
             doc.setDrawColor(52, 152, 219);
-            doc.setLineWidth(0.5);
             doc.line(120, currentY, 195, currentY);
-            
-            let summaryStartY = currentY + 5;
-            doc.setFontSize(11);
-            doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 130, summaryStartY);
-            
-            let nextSummaryY = summaryStartY + 8;
-            if (data.includeGST && data.gst > 0) {
-                doc.text(`GST (18%): Rs. ${data.gst.toLocaleString()}`, 130, nextSummaryY);
-                nextSummaryY += 8;
-            }
-            
-            let discountY = nextSummaryY;
-            if (data.discount > 0) {
-                doc.setTextColor(231, 76, 60); // Red color for discount
-                doc.text(`Discount: Rs. ${data.discount.toLocaleString()}`, 130, discountY);
-                discountY += 8;
-                doc.setTextColor(0, 0, 0); // Reset color
-            }
-            
-            let totalY = discountY + 4;
-            // Total with emphasis
-            doc.setFillColor(52, 152, 219);
-            doc.rect(125, totalY, 70, 10, 'F');
-            doc.setTextColor(255, 255, 255);
+            currentY += 5;
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
-            doc.text(`TOTAL: Rs. ${data.total.toLocaleString()}`, 130, totalY + 6);
-            
-            // Reset colors
-            doc.setTextColor(0, 0, 0);
-            
-            currentY = totalY + 15;
+            doc.text(`TOTAL: Rs. ${data.totalAmount.toLocaleString()}`, 130, currentY);
+            currentY += 20;
+
+            // Terms & Conditions
             if (currentY > 250) {
                 doc.addPage();
                 currentY = 20;
             }
-            
             doc.setFillColor(44, 62, 80);
             doc.rect(15, currentY, 180, 8, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
             doc.text('TERMS & CONDITIONS', 20, currentY + 5);
-            
-            // Terms content with better formatting
+
             currentY += 15;
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(9);
             doc.setFont(undefined, 'normal');
-            
+
             const termTexts = [
-                "The contract is applicable for 12 months from the agreement date.",
+                "The contract is applicable for the selected period from the agreement date.",
                 "Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.",
-                "Offer valid for 30 days from issue date.",
                 "Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.",
                 "Customer must provide ladder, water, power supply, and civil support for maintenance.",
                 "Missing/stolen items during the contract are customer's liability, not covered under AMC.",
@@ -723,13 +618,13 @@
                 "Maintenance visits non-transferable and not carried forward.",
                 "18% GST applies on total contract amount per tax regulations."
             ];
-            
-            let terms = termTexts.slice(0, 14); // Terms 1-14
+
+            let terms = termTexts.slice(0, 13); // Terms 1-13
             if (data.includeConnector) {
-                terms.push(termTexts[14]); // Include 15th term
+                terms.push(termTexts[13]); // Include 14th term (original 15th)
             }
-            terms = terms.concat(termTexts.slice(15)); // Terms 16-24
-            
+            terms = terms.concat(termTexts.slice(14)); // Terms 15-24 (adjusted)
+
             terms.forEach((term, index) => {
                 if (currentY > 270) {
                     doc.addPage();
@@ -743,38 +638,43 @@
                 });
                 currentY += 1;
             });
-            
+
+            // Signature Section
             if (currentY > 240) {
                 doc.addPage();
                 currentY = 20;
             }
-            
             currentY += 20;
-            
-            // Signature section with elegant design
             doc.setDrawColor(224, 230, 237);
             doc.setLineWidth(0.5);
             doc.line(20, currentY, 80, currentY);
             doc.line(130, currentY, 190, currentY);
-            
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
             doc.text('Customer Signature', 20, currentY + 8);
             doc.text('Eye Tech Securities', 130, currentY + 8);
-            
             doc.setFont(undefined, 'normal');
             doc.text('Date: ___________', 20, currentY + 15);
             doc.text('Authorized Signatory', 130, currentY + 15);
-            
-            currentY += 25;
+
+            // Add uploaded signature if available
+            if (data.signatureDataUrl) {
+                doc.addImage(data.signatureDataUrl, 'PNG', 25, currentY - 5, 50, 20);
+            }
+
+            currentY += 30;
             doc.setFontSize(8);
             doc.setTextColor(100, 100, 100);
-            doc.text('This is a computer-generated quotation and does not require a physical signature.', 105, currentY, { align: 'center' });
-            doc.text('For queries, contact Eye Tech Securities at your convenience.', 105, currentY + 5, { align: 'center' });
-            
-            // Save PDF with better filename
-            const fileName = `AMC_Quotation_${data.customerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.text('This is a computer-generated agreement.', 105, currentY, { align: 'center' });
+
+            const fileName = `AMC_Agreement_${data.customerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
             doc.save(fileName);
+        }
+
+        function generateAndEmail() {
+            // For now, just generate PDF; email functionality would require backend
+            alert('PDF generated. Email sending requires server-side implementation.');
+            generateAgreementPDF();
         }
     </script>
 </body>
