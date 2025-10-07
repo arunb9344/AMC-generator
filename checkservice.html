@@ -16,15 +16,12 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
+            width: 100%;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            min-height: 100vh;
             overflow: hidden;
         }
 
@@ -60,6 +57,8 @@
 
         .form-container {
             padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .form-section {
@@ -555,19 +554,19 @@
             doc.text('PARTICULARS', 20, currentY + 5);
             currentY += 15;
             doc.setFillColor(248, 249, 250);
-            doc.rect(15, currentY, 180, 10, 'F');
+            doc.rect(15, currentY, 180, 12, 'F');
             doc.setDrawColor(224, 230, 237);
-            doc.rect(15, currentY, 180, 10);
+            doc.rect(15, currentY, 180, 12);
             doc.setTextColor(44, 62, 80);
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
             doc.text('DESCRIPTION', 20, currentY + 6);
-            doc.text('QTY', 90, currentY + 6);
-            doc.text('RATE', 110, currentY + 6);
-            doc.text('MAINTENANCE', 140, currentY + 6);
-            doc.text('BREAKDOWN', 160, currentY + 6);
-            doc.text('AMOUNT', 175, currentY + 6);
-            currentY += 12;
+            doc.text('QTY', 100, currentY + 6);
+            doc.text('RATE', 120, currentY + 6);
+            doc.text('MAINTENANCE', 150, currentY + 6);
+            doc.text('BREAKDOWN', 170, currentY + 6);
+            doc.text('AMOUNT', 185, currentY + 6);
+            currentY += 14;
 
             data.particulars.forEach(part => {
                 if (currentY > 250) {
@@ -575,32 +574,34 @@
                     currentY = 20;
                 }
                 doc.setDrawColor(224, 230, 237);
-                doc.rect(15, currentY, 180, 12);
+                const rowHeight = 18;
+                doc.rect(15, currentY, 180, rowHeight);
                 doc.setTextColor(0, 0, 0);
                 doc.setFont(undefined, 'normal');
                 let fullDesc = part.desc;
                 if (parseInt(part.maintenance) > 0 || parseInt(part.breakdown) > 0) {
                     fullDesc += ` - Maintenance: ${part.maintenance} visits, Breakdown: ${part.breakdown} visits`;
                 }
-                const descLines = doc.splitTextToSize(fullDesc, 70);
+                const descLines = doc.splitTextToSize(fullDesc, 80);
                 descLines.forEach((line, idx) => {
-                    doc.text(line, 20, currentY + (idx * 4) + 4);
+                    doc.text(line, 20, currentY + 4 + idx * 5);
                 });
-                doc.text(part.qty, 90, currentY + 4);
-                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 110, currentY + 4);
-                doc.text(part.maintenance, 140, currentY + 4);
-                doc.text(part.breakdown, 160, currentY + 4);
-                doc.text(`Rs. ${part.amount.toLocaleString()}`, 175, currentY + 4);
-                currentY += 16;
+                const textY = currentY + 14;
+                doc.text(part.qty, 100, textY);
+                doc.text(`Rs. ${parseFloat(part.rate).toLocaleString()}`, 120, textY);
+                doc.text(part.maintenance, 150, textY);
+                doc.text(part.breakdown, 170, textY);
+                doc.text(`Rs. ${part.amount.toLocaleString()}`, 185, textY);
+                currentY += rowHeight + 2;
             });
 
             // Total
             doc.setDrawColor(52, 152, 219);
-            doc.line(120, currentY, 195, currentY);
+            doc.line(160, currentY, 210, currentY);
             currentY += 5;
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
-            doc.text(`TOTAL: Rs. ${data.totalAmount.toLocaleString()}`, 130, currentY);
+            doc.text(`TOTAL: Rs. ${data.totalAmount.toLocaleString()}`, 170, currentY);
             currentY += 20;
 
             // Terms & Conditions
