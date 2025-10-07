@@ -93,6 +93,11 @@
             background: #f8f9fa;
         }
 
+        .form-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
@@ -280,6 +285,18 @@
                             <input type="number" id="numberOfCameras" name="numberOfCameras" min="1" required>
                         </div>
                     </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="includeGST">
+                                <input type="checkbox" id="includeGST" name="includeGST" checked> Include GST (18%)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="includeConnector">
+                                <input type="checkbox" id="includeConnector" name="includeConnector" checked> Include Free Connector Replacement
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Package Selection -->
@@ -383,10 +400,12 @@
         document.querySelectorAll('input[name="package"]').forEach(radio => {
             radio.addEventListener('change', updateCalculation);
         });
+        document.getElementById('includeGST').addEventListener('change', updateCalculation);
 
         function updateCalculation() {
             const cameras = parseInt(document.getElementById('numberOfCameras').value) || 0;
             const packageType = document.querySelector('input[name="package"]:checked');
+            const includeGST = document.getElementById('includeGST').checked;
             
             if (cameras > 0 && packageType) {
                 const rates = {
@@ -401,7 +420,7 @@
                 
                 const rate = rates[packageType.value];
                 const subtotal = cameras * rate;
-                const gst = Math.round(subtotal * 0.18);
+                const gst = includeGST ? Math.round(subtotal * 0.18) : 0;
                 const calculatedTotal = subtotal + gst;
                 
                 // Update display
@@ -458,15 +477,19 @@
             
             // Add calculated values
             const cameras = parseInt(data.numberOfCameras) || 0;
+            const includeGST = document.getElementById('includeGST').checked;
+            const includeConnector = document.getElementById('includeConnector').checked;
             const rates = { residential: 800, commercial: 1300 };
             const rate = rates[data.package];
             const subtotal = cameras * rate;
-            const gst = Math.round(subtotal * 0.18);
+            const gst = includeGST ? Math.round(subtotal * 0.18) : 0;
             const calculatedTotal = subtotal + gst;
             
             const finalAmount = parseInt(document.getElementById('finalAmount').value) || calculatedTotal;
             const discount = calculatedTotal - finalAmount;
             
+            data.includeGST = includeGST;
+            data.includeConnector = includeConnector;
             data.rate = rate;
             data.subtotal = subtotal;
             data.gst = gst;
@@ -625,30 +648,37 @@
             doc.setLineWidth(0.5);
             doc.line(120, currentY, 195, currentY);
             
-            currentY += 5;
+            let summaryStartY = currentY + 5;
             doc.setFontSize(11);
-            doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 130, currentY);
-            doc.text(`GST (18%): Rs. ${data.gst.toLocaleString()}`, 130, currentY + 8);
+            doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 130, summaryStartY);
             
+            let nextSummaryY = summaryStartY + 8;
+            if (data.includeGST && data.gst > 0) {
+                doc.text(`GST (18%): Rs. ${data.gst.toLocaleString()}`, 130, nextSummaryY);
+                nextSummaryY += 8;
+            }
+            
+            let discountY = nextSummaryY;
             if (data.discount > 0) {
                 doc.setTextColor(231, 76, 60); // Red color for discount
-                doc.text(`Discount: Rs. ${data.discount.toLocaleString()}`, 130, currentY + 16);
-                currentY += 8;
+                doc.text(`Discount: Rs. ${data.discount.toLocaleString()}`, 130, discountY);
+                discountY += 8;
                 doc.setTextColor(0, 0, 0); // Reset color
             }
             
+            let totalY = discountY + 4;
             // Total with emphasis
             doc.setFillColor(52, 152, 219);
-            doc.rect(125, currentY + 12, 70, 10, 'F');
+            doc.rect(125, totalY, 70, 10, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
-            doc.text(`TOTAL: Rs. ${data.total.toLocaleString()}`, 130, currentY + 19);
+            doc.text(`TOTAL: Rs. ${data.total.toLocaleString()}`, 130, totalY + 6);
             
             // Reset colors
             doc.setTextColor(0, 0, 0);
             
-            currentY += 35;
+            currentY = totalY + 15;
             if (currentY > 250) {
                 doc.addPage();
                 currentY = 20;
@@ -667,39 +697,46 @@
             doc.setFontSize(9);
             doc.setFont(undefined, 'normal');
             
-            const terms = [
-                '1) The contract is applicable for 12 months from the agreement date.',
-                '2) Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.',
-                '3) Offer valid for 30 days from issue date.',
-                '4) Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.',
-                '5) Customer must provide ladder, water, power supply, and civil support for maintenance.',
-                '6) Missing/stolen items during the contract are customer\'s liability, not covered under AMC.',
-                '7) Technician access required during scheduled visits; no refund for missed appointments due to unavailability.',
-                '8) Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.',
-                '9) Contract is non-transferable and non-terminable before completion.',
-                '10) Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.',
-                '11) Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.',
-                '12) Only registered complaints via proper channels are addressed during breakdown visits.',
-                '13) Warranty-covered items replaced free; out-of-warranty items chargeable.',
-                '14) Material replacements, spare parts, and consumables chargeable unless under warranty.',
-                '15) Connector replacement (Rs. 500/camera) included in first maintenance visit only.',
-                '16) Unauthorized equipment modification voids the AMC contract.',
-                '17) Service visits scheduled with 24-48 hours notice to customer.',
-                '18) Customer responsible for data backup; Eye Tech Securities not liable for data loss.',
-                '19) Additional work beyond AMC scope chargeable per prevailing rates.',
-                '20) Disputes subject to local court jurisdiction.',
-                '21) This contract supersedes prior agreements; modifications require mutual written consent.',
-                '22) Force majeure conditions may temporarily suspend service obligations.',
-                '23) Maintenance visits non-transferable and not carried forward.',
-                '24) 18% GST applies on total contract amount per tax regulations.'
+            const termTexts = [
+                "The contract is applicable for 12 months from the agreement date.",
+                "Contract does not cover damages due to natural disasters, misuse, power surges, lightning, fire, flood, earthquake, or act of God.",
+                "Offer valid for 30 days from issue date.",
+                "Equipment must be in working condition at contract signing; customer bears initial repair cost if faulty.",
+                "Customer must provide ladder, water, power supply, and civil support for maintenance.",
+                "Missing/stolen items during the contract are customer's liability, not covered under AMC.",
+                "Technician access required during scheduled visits; no refund for missed appointments due to unavailability.",
+                "Breakdown visits during working hours (Mon-Sat, 9 AM-6 PM); emergency visits may be charged.",
+                "Contract is non-transferable and non-terminable before completion.",
+                "Payment due within 30 days of invoice; 2% monthly penalty on overdue amounts.",
+                "Maintenance includes cleaning, adjustments, calibration, software updates, and health checks.",
+                "Only registered complaints via proper channels are addressed during breakdown visits.",
+                "Warranty-covered items replaced free; out-of-warranty items chargeable.",
+                "Material replacements, spare parts, and consumables chargeable unless under warranty.",
+                "Connector replacement (Rs. 500/camera) included in first maintenance visit only.",
+                "Unauthorized equipment modification voids the AMC contract.",
+                "Service visits scheduled with 24-48 hours notice to customer.",
+                "Customer responsible for data backup; Eye Tech Securities not liable for data loss.",
+                "Additional work beyond AMC scope chargeable per prevailing rates.",
+                "Disputes subject to local court jurisdiction.",
+                "This contract supersedes prior agreements; modifications require mutual written consent.",
+                "Force majeure conditions may temporarily suspend service obligations.",
+                "Maintenance visits non-transferable and not carried forward.",
+                "18% GST applies on total contract amount per tax regulations."
             ];
+            
+            let terms = termTexts.slice(0, 14); // Terms 1-14
+            if (data.includeConnector) {
+                terms.push(termTexts[14]); // Include 15th term
+            }
+            terms = terms.concat(termTexts.slice(15)); // Terms 16-24
             
             terms.forEach((term, index) => {
                 if (currentY > 270) {
                     doc.addPage();
                     currentY = 20;
                 }
-                const termLines = doc.splitTextToSize(term, 170);
+                const numberedTerm = `${index + 1}) ${term}`;
+                const termLines = doc.splitTextToSize(numberedTerm, 170);
                 termLines.forEach(line => {
                     doc.text(line, 20, currentY);
                     currentY += 4.5;
